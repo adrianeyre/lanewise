@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/adrianeyre/lanewise/main/catalog/models.schema.json",
+  "title": "Lanewise's model catalog",
+  "description": "Describes the models each Model Provider's live model list returns: which family and version each model ID is, and the Effort levels it takes (PRD §8.3). The live lists decide which models exist; this only describes them. See catalog/README.md.",
+  "type": "object",
+  "required": ["format", "providers"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "format": {
+      "description": "The catalog's format. A Lanewise that doesn't know it keeps the copy it was built with.",
+      "const": 1
+    },
+    "providers": {
+      "description": "Each Model Provider's models, by the catalog section its adapter names.",
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/id" },
+      "additionalProperties": { "$ref": "#/$defs/provider" }
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "pattern": {
+      "description": "A regular expression, matched against the whole model ID: it needs no ^ or $.",
+      "type": "string",
+      "minLength": 1,
+      "format": "regex"
+    },
+    "effort": {
+      "description": "An Effort level, as the picker names it: Off, Minimal, Low, Medium, High, Extra high or Maximum.",
+      "enum": ["off", "minimal", "low", "medium", "high", "extraHigh", "maximum"]
+    },
+    "provider": {
+      "type": "object",
+      "required": ["families"],
+      "additionalProperties": false,
+      "properties": {
+        "exclude": {
+          "description": "Model IDs the list returns that can't be chatted with, such as image, speech and embedding models. They aren't offered at all.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/pattern" }
+        },
+        "families": {
+          "description": "The models the picker offers, in the order it offers them.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/family" }
+        }
+      }
+    },
+    "family": {
+      "type": "object",
+      "required": ["id", "name", "versions"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "Kept in Settings as the model chosen, so it must not change. Unique within its Model Provider, and never other-versions.",
+          "allOf": [{ "$ref": "#/$defs/id" }, { "not": { "const": "other-versions" } }]
+        },
+        "name": { "type": "string", "minLength": 1 },
+        "versions": {
+          "description": "Newest first. A model ID is described by the first version, in any family, whose pattern it matches.",
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/version" }
+        }
+      }
+    },
+    "version": {
+      "type": "object",
+      "required": ["match", "examples", "efforts", "defaultEffort"],
+      "additionalProperties": false,
+      "properties": {
+        "match": { "$ref": "#/$defs/pattern" },
+        "examples": {
+          "description": "Model IDs this version describes, which the tests check it matches first.",
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "name": {
+          "description": "The version's name, where the Model Provider's list gives none. Without one, the list's name or the model ID is shown.",
+          "type": "string",
+          "minLength": 1
+        },
+        "efforts": {
+          "description": "The Effort levels it takes, least first. Empty where it takes none. Where the Model Provider's list reports its own levels, as Anthropic's does, those are offered instead.",
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/effort" }
+        },
+        "defaultEffort": {
+          "description": "The Model Provider's own default among efforts, or null where it takes none or its default isn't one of them, such as Gemini 2.5's dynamic thinking.",
+          "anyOf": [{ "$ref": "#/$defs/effort" }, { "type": "null" }]
+        },
+        "budgets": {
+          "description": "For a model that takes a token budget rather than a level, such as Gemini 2.5: the budget each of efforts is sent as, and no other.",
+          "type": "object",
+          "propertyNames": { "$ref": "#/$defs/effort" },
+          "additionalProperties": { "type": "integer", "minimum": 0 },
+          "minProperties": 1
+        }
+      }
+    }
+  }
+}

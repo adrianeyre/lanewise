@@ -1,0 +1,619 @@
+{
+  "$schema": "./models.schema.json",
+  "format": 1,
+  "providers": {
+    "anthropic": {
+      "exclude": [],
+      "families": [
+        {
+          "id": "claude-fable",
+          "name": "Claude Fable",
+          "versions": [
+            {
+              "match": "claude-fable-5-1(-\\d{8})?",
+              "examples": ["claude-fable-5-1"],
+              "name": "Claude Fable 5.1",
+              "efforts": ["low", "medium", "high", "extraHigh", "maximum"],
+              "defaultEffort": "high"
+            },
+            {
+              "match": "claude-fable-5(-\\d{8})?",
+              "examples": ["claude-fable-5"],
+              "name": "Claude Fable 5",
+              "efforts": ["low", "medium", "high", "extraHigh", "maximum"],
+              "defaultEffort": "high"
+            }
+          ]
+        },
+        {
+          "id": "claude-mythos",
+          "name": "Claude Mythos",
+          "versions": [
+            {
+              "match": "claude-mythos-5-1(-\\d{8})?",
+              "examples": ["claude-mythos-5-1"],
+              "name": "Claude Mythos 5.1",
+              "efforts": ["low", "medium", "high", "extraHigh", "maximum"],
+              "defaultEffort": "high"
+            },
+            {
+              "match": "claude-mythos-5(-\\d{8})?",
+              "examples": ["claude-mythos-5"],
+              "name": "Claude Mythos 5",
+              "efforts": ["low", "medium", "high", "extraHigh", "maximum"],
+              "defaultEffort": "high"
+            }
+          ]
+        },
+        {
+          "id": "claude-opus",
+          "name": "Claude Opus",
+          "versions": [
+            {
+              "match": "claude-opus-5-5(-\\d{8})?",
+              "examples": ["claude-opus-5-5"],
+              "name": "Claude Opus 5.5",
+              "efforts": ["low", "medium", "high", "extraHigh", "maximum"],
+              "defaultEffort": "medium"
+            },
+            {
+              "match": "claude-opus-5(-\\d{8})?",
+              "examples": ["claude-opus-5"],
+              "name": "Claude Opus 5",
+              "efforts": ["low", "medium", "high", "extraHigh", "maximum"],
+              "defaultEffort": "high"
+            },
+            {
+              "match": "claude-opus-4-8(-\\d{8})?",
+              "examples": ["claude-opus-4-8"],
+              "name": "Claude Opus 4.8",
+              "efforts": ["low", "medium", "high", "extraHigh", "maximum"],
+              "defaultEffort": "high"
+            },
+            {
+              "match": "claude-opus-4-7(-\\d{8})?",
+              "examples": ["claude-opus-4-7"],
+              "name": "Claude Opus 4.7",
+              "efforts": ["low", "medium", "high", "extraHigh", "maximum"],
+              "defaultEffort": "high"
+            },
+            {
+              "match": "claude-opus-4-6(-\\d{8})?",
+              "examples": ["claude-opus-4-6"],
+              "name": "Claude Opus 4.6",
+              "efforts": ["low", "medium", "high", "maximum"],
+              "defaultEffort": "high"
+            },
+            {
+              "match": "claude-opus-4-5(-0)?(-\\d{8})?",
+              "examples": ["claude-opus-4-5-20251101"],
+              "name": "Claude Opus 4.5",
+              "efforts": ["low", "medium", "high"],
+              "defaultEffort": "high"
+            },
+            {
+              "match": "claude-opus-4-1(-0)?(-\\d{8})?",
+              "examples": ["claude-opus-4-1-20250805"],
+              "name": "Claude Opus 4.1",
+              "efforts": [],
+              "defaultEffort": null
+            },
+            {
+              "match": "claude-opus-4(-0)?(-\\d{8})?",
+              "examples": ["claude-opus-4-20250514"],
+              "name": "Claude Opus 4",
+              "efforts": [],
+              "defaultEffort": null
+            }
+          ]
+        },
+        {
+          "id": "claude-sonnet",
+          "name": "Claude Sonnet",
+          "versions": [
+            {
+              "match": "claude-sonnet-5-5(-\\d{8})?",
+              "examples": ["claude-sonnet-5-5"],
+              "name": "Claude Sonnet 5.5",
+              "efforts": ["low", "medium", "high", "extraHigh", "maximum"],
+              "defaultEffort": "high"
+            },
+            {
+              "match": "claude-sonnet-5(-\\d{8})?",
+              "examples": ["claude-sonnet-5"],
+              "name": "Claude Sonnet 5",
+              "efforts": ["low", "medium", "high", "extraHigh", "maximum"],
+              "defaultEffort": "high"
+            },
+            {
+              "match": "claude-sonnet-4-6(-\\d{8})?",
+              "examples": ["claude-sonnet-4-6"],
+              "name": "Claude Sonnet 4.6",
+              "efforts": ["low", "medium", "high", "maximum"],
+              "defaultEffort": "high"
+            },
+            {
+              "match": "claude-sonnet-4-5(-0)?(-\\d{8})?",
+              "examples": ["claude-sonnet-4-5-20250929"],
+              "name": "Claude Sonnet 4.5",
+              "efforts": [],
+              "defaultEffort": null
+            },
+            {
+              "match": "claude-sonnet-4(-0)?(-\\d{8})?",
+              "examples": ["claude-sonnet-4-20250514"],
+              "name": "Claude Sonnet 4",
+              "efforts": [],
+              "defaultEffort": null
+            }
+          ]
+        },
+        {
+          "id": "claude-haiku",
+          "name": "Claude Haiku",
+          "versions": [
+            {
+              "match": "claude-haiku-4-5(-0)?(-\\d{8})?",
+              "examples": ["claude-haiku-4-5-20251001"],
+              "name": "Claude Haiku 4.5",
+              "efforts": [],
+              "defaultEffort": null
+            }
+          ]
+        }
+      ]
+    },
+    "gemini": {
+      "exclude": [".*-(tts|image|live|native-audio|transcribe|translate|embedding|robotics|computer-use|deep-research|antigravity|omni)(-.*)?", "(gemini-)?embedding-.*", "(veo|lyria|imagen)-.*", "aqa"],
+      "families": [
+        {
+          "id": "gemini-pro",
+          "name": "Gemini Pro",
+          "versions": [
+            {
+              "match": "gemini-3\\.1-pro(-preview)?(-\\d{2}-\\d{4}|-\\d{2}-\\d{2}|-\\d{3})?",
+              "examples": ["gemini-3.1-pro-preview"],
+              "name": "Gemini 3.1 Pro",
+              "efforts": ["low", "medium", "high"],
+              "defaultEffort": "high"
+            },
+            {
+              "match": "gemini-2\\.5-pro(-preview)?(-\\d{2}-\\d{4}|-\\d{2}-\\d{2}|-\\d{3})?",
+              "examples": ["gemini-2.5-pro"],
+              "name": "Gemini 2.5 Pro",
+              "efforts": ["low", "medium", "high"],
+              "defaultEffort": null,
+              "budgets": { "low": 1024, "medium": 8192, "high": 32768 }
+            }
+          ]
+        },
+        {
+          "id": "gemini-flash",
+          "name": "Gemini Flash",
+          "versions": [
+            {
+              "match": "gemini-3\\.8-flash(-preview)?(-\\d{2}-\\d{4}|-\\d{2}-\\d{2}|-\\d{3})?",
+              "examples": ["gemini-3.8-flash"],
+              "name": "Gemini 3.8 Flash",
+              "efforts": ["low", "medium", "high"],
+              "defaultEffort": "medium"
+            },
+            {
+              "match": "gemini-3\\.7-flash(-preview)?(-\\d{2}-\\d{4}|-\\d{2}-\\d{2}|-\\d{3})?",
+              "examples": ["gemini-3.7-flash"],
+              "name": "Gemini 3.7 Flash",
+              "efforts": ["low", "medium", "high"],
+              "defaultEffort": "medium"
+            },
+            {
+              "match": "gemini-3\\.6-flash(-preview)?(-\\d{2}-\\d{4}|-\\d{2}-\\d{2}|-\\d{3})?",
+              "examples": ["gemini-3.6-flash"],
+              "name": "Gemini 3.6 Flash",
+              "efforts": ["minimal", "low", "medium", "high"],
+              "defaultEffort": "medium"
+            },
+            {
+              "match": "gemini-3\\.5-flash(-preview)?(-\\d{2}-\\d{4}|-\\d{2}-\\d{2}|-\\d{3})?",
+              "examples": ["gemini-3.5-flash"],
+              "name": "Gemini 3.5 Flash",
+              "efforts": ["minimal", "low", "medium", "high"],
+              "defaultEffort": "medium"
+            },
+            {
+              "match": "gemini-3-flash(-preview)?(-\\d{2}-\\d{4}|-\\d{2}-\\d{2}|-\\d{3})?",
+              "examples": ["gemini-3-flash-preview"],
+              "name": "Gemini 3 Flash",
+              "efforts": ["minimal", "low", "medium", "high"],
+              "defaultEffort": "high"
+            },
+            {
+              "match": "gemini-2\\.5-flash(-preview)?(-\\d{2}-\\d{4}|-\\d{2}-\\d{2}|-\\d{3})?",
+              "examples": ["gemini-2.5-flash"],
+              "name": "Gemini 2.5 Flash",
+              "efforts": ["off", "low", "medium", "high"],
+              "defaultEffort": null,
+              "budgets": { "off": 0, "low": 1024, "medium": 8192, "high": 24576 }
+            }
+          ]
+        },
+        {
+          "id": "gemini-flash-lite",
+          "name": "Gemini Flash-Lite",
+          "versions": [
+            {
+              "match": "gemini-3\\.5-flash-lite(-preview)?(-\\d{2}-\\d{4}|-\\d{2}-\\d{2}|-\\d{3})?",
+              "examples": ["gemini-3.5-flash-lite"],
+              "name": "Gemini 3.5 Flash-Lite",
+              "efforts": ["minimal", "low", "medium", "high"],
+              "defaultEffort": "minimal"
+            },
+            {
+              "match": "gemini-3\\.1-flash-lite(-preview)?(-\\d{2}-\\d{4}|-\\d{2}-\\d{2}|-\\d{3})?",
+              "examples": ["gemini-3.1-flash-lite"],
+              "name": "Gemini 3.1 Flash-Lite",
+              "efforts": ["minimal", "low", "medium", "high"],
+              "defaultEffort": "minimal"
+            },
+            {
+              "match": "gemini-2\\.5-flash-lite(-preview)?(-\\d{2}-\\d{4}|-\\d{2}-\\d{2}|-\\d{3})?",
+              "examples": ["gemini-2.5-flash-lite"],
+              "name": "Gemini 2.5 Flash-Lite",
+              "efforts": ["off", "low", "medium", "high"],
+              "defaultEffort": "off",
+              "budgets": { "off": 0, "low": 1024, "medium": 8192, "high": 24576 }
+            }
+          ]
+        }
+      ]
+    },
+    "openai": {
+      "exclude": [".*(image|realtime|audio|tts|transcribe|embedding|moderation|search|dall-e|whisper|sora|codex|computer-use|babbage|davinci|instruct).*"],
+      "families": [
+        {
+          "id": "gpt-astra",
+          "name": "GPT Astra",
+          "versions": [
+            {
+              "match": "gpt-6-astra(-\\d{4}-\\d{2}-\\d{2})?",
+              "examples": ["gpt-6-astra"],
+              "name": "GPT-6 Astra",
+              "efforts": ["low", "medium", "high", "extraHigh", "maximum"],
+              "defaultEffort": null
+            }
+          ]
+        },
+        {
+          "id": "gpt-sol",
+          "name": "GPT Sol",
+          "versions": [
+            {
+              "match": "gpt-6-sol(-\\d{4}-\\d{2}-\\d{2})?",
+              "examples": ["gpt-6-sol"],
+              "name": "GPT-6 Sol",
+              "efforts": ["off", "low", "medium", "high", "extraHigh", "maximum"],
+              "defaultEffort": "medium"
+            },
+            {
+              "match": "gpt-5\\.6-sol(-\\d{4}-\\d{2}-\\d{2})?",
+              "examples": ["gpt-5.6-sol"],
+              "name": "GPT-5.6 Sol",
+              "efforts": ["off", "low", "medium", "high", "extraHigh"],
+              "defaultEffort": "medium"
+            }
+          ]
+        },
+        {
+          "id": "gpt-terra",
+          "name": "GPT Terra",
+          "versions": [
+            {
+              "match": "gpt-5\\.6-terra(-\\d{4}-\\d{2}-\\d{2})?",
+              "examples": ["gpt-5.6-terra"],
+              "name": "GPT-5.6 Terra",
+              "efforts": ["off", "low", "medium", "high", "extraHigh"],
+              "defaultEffort": "medium"
+            }
+          ]
+        },
+        {
+          "id": "gpt-luna",
+          "name": "GPT Luna",
+          "versions": [
+            {
+              "match": "gpt-6-luna(-\\d{4}-\\d{2}-\\d{2})?",
+              "examples": ["gpt-6-luna"],
+              "name": "GPT-6 Luna",
+              "efforts": ["off", "low", "medium", "high", "extraHigh", "maximum"],
+              "defaultEffort": "medium"
+            },
+            {
+              "match": "gpt-5\\.6-luna(-\\d{4}-\\d{2}-\\d{2})?",
+              "examples": ["gpt-5.6-luna"],
+              "name": "GPT-5.6 Luna",
+              "efforts": ["off", "low", "medium", "high", "extraHigh"],
+              "defaultEffort": "medium"
+            }
+          ]
+        },
+        {
+          "id": "gpt",
+          "name": "GPT",
+          "versions": [
+            {
+              "match": "gpt-5\\.5(-\\d{4}-\\d{2}-\\d{2})?",
+              "examples": ["gpt-5.5"],
+              "name": "GPT-5.5",
+              "efforts": ["off", "low", "medium", "high", "extraHigh"],
+              "defaultEffort": "medium"
+            },
+            {
+              "match": "gpt-5\\.4(-\\d{4}-\\d{2}-\\d{2})?",
+              "examples": ["gpt-5.4"],
+              "name": "GPT-5.4",
+              "efforts": ["off", "low", "medium", "high", "extraHigh"],
+              "defaultEffort": "off"
+            },
+            {
+              "match": "gpt-5\\.2(-\\d{4}-\\d{2}-\\d{2})?",
+              "examples": ["gpt-5.2"],
+              "name": "GPT-5.2",
+              "efforts": ["off", "low", "medium", "high", "extraHigh"],
+              "defaultEffort": "off"
+            },
+            {
+              "match": "gpt-5\\.1(-\\d{4}-\\d{2}-\\d{2})?",
+              "examples": ["gpt-5.1"],
+              "name": "GPT-5.1",
+              "efforts": ["off", "low", "medium", "high"],
+              "defaultEffort": "off"
+            },
+            {
+              "match": "gpt-5(-\\d{4}-\\d{2}-\\d{2})?",
+              "examples": ["gpt-5", "gpt-5-2025-08-07"],
+              "name": "GPT-5",
+              "efforts": ["minimal", "low", "medium", "high"],
+              "defaultEffort": "medium"
+            }
+          ]
+        },
+        {
+          "id": "gpt-mini",
+          "name": "GPT mini",
+          "versions": [
+            {
+              "match": "gpt-5-mini(-\\d{4}-\\d{2}-\\d{2})?",
+              "examples": ["gpt-5-mini"],
+              "name": "GPT-5 mini",
+              "efforts": ["minimal", "low", "medium", "high"],
+              "defaultEffort": "medium"
+            }
+          ]
+        },
+        {
+          "id": "gpt-nano",
+          "name": "GPT nano",
+          "versions": [
+            {
+              "match": "gpt-5-nano(-\\d{4}-\\d{2}-\\d{2})?",
+              "examples": ["gpt-5-nano"],
+              "name": "GPT-5 nano",
+              "efforts": ["minimal", "low", "medium", "high"],
+              "defaultEffort": "medium"
+            }
+          ]
+        },
+        {
+          "id": "gpt-pro",
+          "name": "GPT Pro",
+          "versions": [
+            {
+              "match": "gpt-5-pro(-\\d{4}-\\d{2}-\\d{2})?",
+              "examples": ["gpt-5-pro"],
+              "name": "GPT-5 pro",
+              "efforts": ["high"],
+              "defaultEffort": "high"
+            }
+          ]
+        },
+        {
+          "id": "o",
+          "name": "OpenAI o",
+          "versions": [
+            {
+              "match": "o3(-\\d{4}-\\d{2}-\\d{2})?",
+              "examples": ["o3"],
+              "name": "o3",
+              "efforts": ["low", "medium", "high"],
+              "defaultEffort": "medium"
+            },
+            {
+              "match": "o4-mini(-\\d{4}-\\d{2}-\\d{2})?",
+              "examples": ["o4-mini"],
+              "name": "o4-mini",
+              "efforts": ["low", "medium", "high"],
+              "defaultEffort": "medium"
+            }
+          ]
+        },
+        {
+          "id": "gpt-4",
+          "name": "GPT-4",
+          "versions": [
+            {
+              "match": "gpt-4\\.1(-\\d{4}-\\d{2}-\\d{2})?",
+              "examples": ["gpt-4.1"],
+              "name": "GPT-4.1",
+              "efforts": [],
+              "defaultEffort": null
+            },
+            {
+              "match": "gpt-4o(-\\d{4}-\\d{2}-\\d{2})?",
+              "examples": ["gpt-4o"],
+              "name": "GPT-4o",
+              "efforts": [],
+              "defaultEffort": null
+            }
+          ]
+        }
+      ]
+    },
+    "xai": {
+      "exclude": ["grok-imagine-.*", "grok-voice-.*"],
+      "families": [
+        {
+          "id": "grok",
+          "name": "Grok",
+          "versions": [
+            {
+              "match": "grok-4\\.7",
+              "examples": ["grok-4.7"],
+              "name": "Grok 4.7",
+              "efforts": ["low", "medium", "high", "extraHigh"],
+              "defaultEffort": "high"
+            },
+            {
+              "match": "grok-4\\.6",
+              "examples": ["grok-4.6"],
+              "name": "Grok 4.6",
+              "efforts": ["low", "medium", "high", "extraHigh"],
+              "defaultEffort": "high"
+            },
+            {
+              "match": "grok-4\\.5",
+              "examples": ["grok-4.5"],
+              "name": "Grok 4.5",
+              "efforts": ["low", "medium", "high"],
+              "defaultEffort": "high"
+            },
+            {
+              "match": "grok-4\\.3",
+              "examples": ["grok-4.3"],
+              "name": "Grok 4.3",
+              "efforts": [],
+              "defaultEffort": null
+            },
+            {
+              "match": "grok-4\\.20-0309-reasoning",
+              "examples": ["grok-4.20-0309-reasoning"],
+              "name": "Grok 4.20 Reasoning",
+              "efforts": [],
+              "defaultEffort": null
+            },
+            {
+              "match": "grok-4\\.20-0309-non-reasoning",
+              "examples": ["grok-4.20-0309-non-reasoning"],
+              "name": "Grok 4.20 Non-reasoning",
+              "efforts": [],
+              "defaultEffort": null
+            },
+            {
+              "match": "grok-4\\.20-multi-agent-0309",
+              "examples": ["grok-4.20-multi-agent-0309"],
+              "name": "Grok 4.20 Multi-agent",
+              "efforts": [],
+              "defaultEffort": null
+            }
+          ]
+        }
+      ]
+    },
+    "meta": {
+      "exclude": ["muse-image(-.*)?", "muse-voice(-.*)?", "sam(-.*)?"],
+      "families": [
+        {
+          "id": "muse-spark",
+          "name": "Muse Spark",
+          "versions": [
+            {
+              "match": "muse-spark-1\\.3",
+              "examples": ["muse-spark-1.3"],
+              "name": "Muse Spark 1.3",
+              "efforts": ["minimal", "low", "medium", "high", "extraHigh", "maximum"],
+              "defaultEffort": null
+            },
+            {
+              "match": "muse-spark-1\\.3-contributor",
+              "examples": ["muse-spark-1.3-contributor"],
+              "name": "Muse Spark 1.3 Contributor",
+              "efforts": ["minimal", "low", "medium", "high", "extraHigh"],
+              "defaultEffort": null
+            },
+            {
+              "match": "muse-spark-1\\.2",
+              "examples": ["muse-spark-1.2"],
+              "name": "Muse Spark 1.2",
+              "efforts": ["minimal", "low", "medium", "high", "extraHigh"],
+              "defaultEffort": null
+            },
+            {
+              "match": "muse-spark-1\\.1",
+              "examples": ["muse-spark-1.1"],
+              "name": "Muse Spark 1.1",
+              "efforts": ["minimal", "low", "medium", "high", "extraHigh"],
+              "defaultEffort": null
+            }
+          ]
+        }
+      ]
+    },
+    "local": {
+      "exclude": [".*embed.*"],
+      "families": [
+        {
+          "id": "gpt-oss",
+          "name": "gpt-oss",
+          "versions": [
+            {
+              "match": "(openai/)?gpt-oss[-:]?120b(:.*)?",
+              "examples": ["gpt-oss:120b", "openai/gpt-oss-120b"],
+              "name": "gpt-oss 120b",
+              "efforts": ["low", "medium", "high"],
+              "defaultEffort": "medium"
+            },
+            {
+              "match": "(openai/)?gpt-oss[-:]?20b(:.*)?",
+              "examples": ["gpt-oss:20b", "openai/gpt-oss-20b"],
+              "name": "gpt-oss 20b",
+              "efforts": ["low", "medium", "high"],
+              "defaultEffort": "medium"
+            }
+          ]
+        },
+        {
+          "id": "llama",
+          "name": "Llama",
+          "versions": [
+            {
+              "match": "(meta-llama/)?llama-?4.*",
+              "examples": ["llama4:scout", "llama-4-scout"],
+              "name": "Llama 4",
+              "efforts": [],
+              "defaultEffort": null
+            },
+            {
+              "match": "(meta-llama/)?llama-?3\\.3.*",
+              "examples": ["llama3.3:70b"],
+              "name": "Llama 3.3",
+              "efforts": [],
+              "defaultEffort": null
+            },
+            {
+              "match": "(meta-llama/)?llama-?3\\.2.*",
+              "examples": ["llama3.2:3b"],
+              "name": "Llama 3.2",
+              "efforts": [],
+              "defaultEffort": null
+            },
+            {
+              "match": "(meta-llama/)?llama-?3\\.1.*",
+              "examples": ["llama3.1:8b"],
+              "name": "Llama 3.1",
+              "efforts": [],
+              "defaultEffort": null
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

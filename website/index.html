@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Each theme's page background, `--background` in the app's `styles.css`, which `site.test.ts` holds them to. -->
+    <meta name="theme-color" content="#f6f7f9" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#121418" media="(prefers-color-scheme: dark)" />
+    <meta name="color-scheme" content="light dark" />
+
+    <title>Lanewise: a free Git client with a visual commit graph</title>
+    <meta
+      name="description"
+      content="Lanewise is a free, open-source desktop Git client for Windows and macOS, with a visual commit graph, staging by file or hunk, and AI-assisted merge conflict resolution with your own API key."
+    />
+    <meta
+      name="keywords"
+      content="Lanewise, Git client, Git GUI, commit graph, merge conflicts, conflict resolution, AI, open source, free, Windows, macOS, GitHub, GitHub Enterprise"
+    />
+    <meta name="author" content="Adrian Eyre" />
+    <meta name="application-name" content="Lanewise" />
+    <meta name="apple-mobile-web-app-title" content="Lanewise" />
+    <link rel="canonical" href="https://adrianeyre.github.io/lanewise/" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+
+    <!-- Open Graph: the preview Slack, Teams, LinkedIn, Facebook and iMessage show for a shared link. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_GB" />
+    <meta property="og:site_name" content="Lanewise" />
+    <meta property="og:title" content="Lanewise: a free Git client with a visual commit graph" />
+    <meta
+      property="og:description"
+      content="A free, open-source desktop Git client for Windows and macOS, with a visual commit graph and AI-assisted merge conflict resolution."
+    />
+    <meta property="og:url" content="https://adrianeyre.github.io/lanewise/" />
+    <meta property="og:image" content="https://adrianeyre.github.io/lanewise/og-image.png" />
+    <meta property="og:image:secure_url" content="https://adrianeyre.github.io/lanewise/og-image.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="The Lanewise logo and name, with the words: a free Git client with a visual commit graph and AI-assisted merge conflict resolution."
+    />
+
+    <!-- X / Twitter card; Slack also reads these. -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Lanewise: a free Git client with a visual commit graph" />
+    <meta
+      name="twitter:description"
+      content="A free, open-source desktop Git client for Windows and macOS, with a visual commit graph and AI-assisted merge conflict resolution."
+    />
+    <meta name="twitter:image" content="https://adrianeyre.github.io/lanewise/og-image.png" />
+    <meta
+      name="twitter:image:alt"
+      content="The Lanewise logo and name, with the words: a free Git client with a visual commit graph and AI-assisted merge conflict resolution."
+    />
+
+    <!-- Favicons and device icons, drawn from the logo (`website/README.md`). -->
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
+    <link rel="icon" href="/favicon-16.png" type="image/png" sizes="16x16" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Lanewise",
+        "description": "A free, open-source desktop Git client with a visual commit graph and AI-assisted merge conflict resolution.",
+        "applicationCategory": "DeveloperApplication",
+        "applicationSubCategory": "Git client",
+        "operatingSystem": "Windows 10, Windows 11, macOS 14 or later",
+        "url": "https://adrianeyre.github.io/lanewise/",
+        "downloadUrl": "https://github.com/adrianeyre/lanewise/releases/latest",
+        "image": "https://adrianeyre.github.io/lanewise/og-image.png",
+        "screenshot": "https://adrianeyre.github.io/lanewise/screenshots/repository.webp",
+        "license": "https://opensource.org/license/mit",
+        "isAccessibleForFree": true,
+        "codeRepository": "https://github.com/adrianeyre/lanewise",
+        "author": { "@type": "Person", "name": "Adrian Eyre" },
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "GBP" }
+      }
+    </script>
+
+    <!-- The OS's light or dark setting, before first paint and as it changes, as the app's System Theme does
+         (`app/src/settings/theme.ts`). The website follows only the OS, since it stores nothing. -->
+    <script>
+      (function () {
+        if (typeof matchMedia !== "function") return;
+        var dark = matchMedia("(prefers-color-scheme: dark)");
+        function follow() {
+          var theme = dark.matches ? "dark" : "light";
+          document.documentElement.setAttribute("data-theme", theme);
+          document.documentElement.style.colorScheme = theme;
+        }
+        follow();
+        dark.addEventListener("change", follow);
+      })();
+    </script>
+  </head>
+  <body>
+    <!-- The page, drawn when it is built (`src/prerender.tsx`), so it is all there without JavaScript. -->
+    <div id="root"><!--site--></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

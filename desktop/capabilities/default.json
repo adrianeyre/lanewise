@@ -1,0 +1,32 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "The main window: Tauri's core APIs, drawing the title bar in the chosen Theme, zooming with Ctrl or Cmd and + or -, the native folder dialog, opening https links in the user's browser, copying text to the clipboard for Copy diagnostics, and HTTP requests to the Model Providers' APIs and TypeSafe's, for Jev (ADR 0036) and to a Model Provider on this computer (ADR 0020), for the model catalog from the repository (ADR 0021), and for the repository's package.json, whose version Help's version check compares with the one running. The app's own commands, `call` and the Update commands (`update_status`, `update_check`, `update_install` and `update_progress`), are allowed by default; the updater plugin's own are not, so the page can't point the updater anywhere else (ADR 0030), and the Host page commands (`host_page_open`, `host_page_bounds`, `host_page_visible`, `host_page_go` and `host_page_close`). It names the main webview alone, not its window, so the Host pages laid over it, remote pages each in a child webview of their own, have no capability and reach none of Lanewise's commands (ADR 0042).",
+  "webviews": ["main"],
+  "permissions": [
+    "core:default",
+    "core:window:allow-set-theme",
+    "core:webview:allow-set-webview-zoom",
+    "clipboard-manager:allow-write-text",
+    "dialog:allow-open",
+    {
+      "identifier": "http:default",
+      "allow": [
+        { "url": "https://api.anthropic.com" },
+        { "url": "https://api.openai.com" },
+        { "url": "https://api.x.ai" },
+        { "url": "https://generativelanguage.googleapis.com" },
+        { "url": "https://api.meta.ai" },
+        { "url": "https://api.typesafe.ai" },
+        { "url": "https://raw.githubusercontent.com/adrianeyre/lanewise/main/catalog/models.json" },
+        { "url": "https://raw.githubusercontent.com/adrianeyre/lanewise/main/package.json" },
+        { "url": "http://localhost:*" },
+        { "url": "http://127.0.0.1:*" }
+      ]
+    },
+    {
+      "identifier": "opener:allow-open-url",
+      "allow": [{ "url": "https://*" }]
+    }
+  ]
+}

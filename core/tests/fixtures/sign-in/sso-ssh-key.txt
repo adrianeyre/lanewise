@@ -1,0 +1,10 @@
+ERROR: The `example-org' organization has enabled or enforced SAML SSO. To access
+this repository, you must use the HTTPS remote with a personal access token
+or SSH with an SSH key and passphrase
+that has been authorized for this organization. Visit
+https://docs.github.com/articles/authenticating-to-a-github-organization-with-saml-single-sign-on/ for more information.
+
+fatal: Could not read from remote repository.
+
+Please make sure you have the correct access rights
+and the repository exists.

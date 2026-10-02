@@ -1,0 +1,29 @@
+name: Feature request
+description: Something you'd like Lanewise, the Desktop App or Web Mode, to do that it doesn't yet.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for the idea. The product requirements document, `docs/product-requirements-document/git-client.md`, says what Lanewise is building and what it isn't, so it's worth a look first. Something you can't use, or can only use with difficulty, is an accessibility barrier: there's a form of its own for that.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What you're trying to do
+      description: The task, and what gets in the way of doing it in Lanewise today.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would help
+      description: What you'd like Lanewise to do, and where: the page, Widget or dialog, if you know.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What you do now
+      description: How you get it done today, in Lanewise, the git command line or another tool, if you do.
+    validations:
+      required: false

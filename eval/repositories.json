@@ -1,0 +1,52 @@
+{
+  "repositories": [
+    {
+      "name": "flask",
+      "url": "https://github.com/pallets/flask",
+      "licence": "BSD-3-Clause",
+      "licenceFile": "LICENSE.txt",
+      "at": "d73fa1cdcbd8b1465c151db8924ba58b1dd14e35",
+      "merges": 300
+    },
+    {
+      "name": "click",
+      "url": "https://github.com/pallets/click",
+      "licence": "BSD-3-Clause",
+      "licenceFile": "LICENSE.txt",
+      "at": "06b2a678741131fd577ce170e23e5ca0aeba0309",
+      "merges": 300
+    },
+    {
+      "name": "werkzeug",
+      "url": "https://github.com/pallets/werkzeug",
+      "licence": "BSD-3-Clause",
+      "licenceFile": "LICENSE.txt",
+      "at": "f7e37f0bf510fa355fdac3e922cc2078916b021f",
+      "merges": 300
+    },
+    {
+      "name": "sphinx",
+      "url": "https://github.com/sphinx-doc/sphinx",
+      "licence": "BSD-2-Clause",
+      "licenceFile": "LICENSE.rst",
+      "at": "b04a2101295ac3fb725b16111eda0284b6da4cca",
+      "merges": 300
+    },
+    {
+      "name": "express",
+      "url": "https://github.com/expressjs/express",
+      "licence": "MIT",
+      "licenceFile": "LICENSE",
+      "at": "7ef98448f8b38099ab1ded55e458538ad47a51e7",
+      "merges": 300
+    },
+    {
+      "name": "tokio",
+      "url": "https://github.com/tokio-rs/tokio",
+      "licence": "MIT",
+      "licenceFile": "LICENSE",
+      "at": "e133b6fec055d5cab447c06f953d330ce34f1517",
+      "merges": 300
+    }
+  ]
+}

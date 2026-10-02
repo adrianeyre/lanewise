@@ -1,0 +1,29 @@
+[package]
+name = "lanewise-commands"
+version = "0.1.0"
+description = "The transport-agnostic command API both shells carry, credential store access and Host Integrations"
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[dependencies]
+# Model Provider API keys, in the OS credential store: Keychain on macOS,
+# Credential Manager on Windows and the Secret Service on Linux.
+keyring = "4.2.0"
+lanewise-core = { version = "0.1.0", path = "../core" }
+lanewise-graph = { version = "0.1.0", path = "../graph" }
+# Lanewise's own logs, kept in rolling files on this machine (`logs`).
+log = { version = "0.4.34", features = ["std"] }
+# The operating system's name and version, for Copy diagnostics.
+os_info = "3.15.0"
+# Finding what looks like a key or a token in a log line, to hide it.
+regex = "1.13.1"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.151"
+# The Host Integrations' API calls, trusting the OS's certificates, as a
+# GitHub Enterprise Server behind a company's own authority needs.
+ureq = { version = "3.4.2", features = ["platform-verifier"] }
+
+[dev-dependencies]
+tempfile = "3.27.0"

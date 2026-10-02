@@ -1,0 +1,4373 @@
+/*
+ * The Theme's colours: the tokens below, one set for each theme, and nothing
+ * else. `data-theme` on the root says which is shown. `index.html` sets it
+ * before first paint, from the saved Theme or the OS's setting, and
+ * `settings/theme.ts` keeps it up to date; `:root` alone is the light theme.
+ * Every other rule takes its colours from these tokens, or from the OS's own
+ * under forced colours, which `contrast.test.ts` checks.
+ *
+ * `contrast.test.ts` also computes WCAG 2.2 AA contrast from the tokens, in
+ * both themes: 4.5:1 for text and 3:1 for borders, icons and the focus
+ * outline, on every background they are drawn on. `diff/contrast.test.ts`
+ * does the same for the Diff Widget's line backgrounds and `--syntax-`
+ * colours, and the Conflicts page's `--conflict-` line backgrounds. Nothing is told by its colour alone: a change has a label and an
+ * icon too, an added or removed line is marked `+` or `-` in its text, and
+ * links are underlined, and a lane in the Commit graph is named by its
+ * Labels and, for screen readers, in words.
+ */
+:root,
+:root[data-theme="light"] {
+  color-scheme: light;
+  --background: #f6f7f9;
+  --text: #16181d;
+  --muted: #4f5664;
+  --focus: #1f5fd1;
+  --link: #1f5fd1;
+  --surface: #ffffff;
+  --chrome-start: #ffffff;
+  --chrome-end: #ffffff;
+  --border: #7d8492;
+  --problem: #c4212b;
+  --added: #1a7f37;
+  --modified: #8a5a00;
+  --deleted: #c4212b;
+  --renamed: #6f42c1;
+  --untracked: #4f5664;
+  --conflicted: #b33b00;
+  --diff-added-background: #e6f6ea;
+  --diff-removed-background: #fdecee;
+  --diff-hunk-background: #eef2fa;
+  --conflict-marker-background: #e8eaee;
+  --conflict-ours-background: #e2effd;
+  --conflict-base-background: #f6f0de;
+  --conflict-theirs-background: #f2e8fc;
+  --syntax-keyword: #a3207a;
+  --syntax-string: #0b6130;
+  --syntax-comment: #5c6370;
+  --syntax-literal: #0a5ba8;
+  --syntax-type: #8a4a00;
+  --syntax-definition: #6134b0;
+  --syntax-property: #1d5c87;
+  --syntax-meta: #6b4f00;
+  --syntax-invalid: #b0151f;
+  --lane-0: #0969da;
+  --lane-1: #cf222e;
+  --lane-2: #1a7f37;
+  --lane-3: #8250df;
+  --lane-4: #bc4c00;
+  --lane-5: #0e7c86;
+  --lane-6: #bf3989;
+  --lane-7: #7d6608;
+  --shadow: #000000;
+  --backdrop: #000000;
+  --swatch-default-page: #f6f7f9;
+  --swatch-default-accent: #1f5fd1;
+  --swatch-ocean-page: #e3eef5;
+  --swatch-ocean-accent: #0b5a9e;
+  --swatch-forest-page: #e3efe6;
+  --swatch-forest-accent: #1b6a38;
+  --swatch-plum-page: #efe7f6;
+  --swatch-plum-accent: #9048c4;
+  --swatch-ember-page: #f6e9e0;
+  --swatch-ember-accent: #a3400e;
+  --swatch-midnight-page: #e6e8f3;
+  --swatch-midnight-accent: #5664c8;
+  --swatch-rose-page: #f7e7ed;
+  --swatch-rose-accent: #c23a66;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --background: #121418;
+  --text: #e8eaef;
+  --muted: #a5acba;
+  --focus: #7aa7ff;
+  --link: #7aa7ff;
+  --surface: #1b1e24;
+  --chrome-start: #1b1e24;
+  --chrome-end: #1b1e24;
+  --border: #6b7280;
+  --problem: #ff7b72;
+  --added: #4ac26b;
+  --modified: #d8a634;
+  --deleted: #ff7b72;
+  --renamed: #b392f0;
+  --untracked: #a5acba;
+  --conflicted: #f0883e;
+  --diff-added-background: #1d3325;
+  --diff-removed-background: #3b2126;
+  --diff-hunk-background: #232a38;
+  --conflict-marker-background: #2b2f37;
+  --conflict-ours-background: #1b2d44;
+  --conflict-base-background: #33301e;
+  --conflict-theirs-background: #2f2342;
+  --syntax-keyword: #ff8fd0;
+  --syntax-string: #7ee29a;
+  --syntax-comment: #a5acba;
+  --syntax-literal: #79c0ff;
+  --syntax-type: #f0b86e;
+  --syntax-definition: #c8a8ff;
+  --syntax-property: #8fd3ff;
+  --syntax-meta: #e3c46b;
+  --syntax-invalid: #ff9a92;
+  --lane-0: #58a6ff;
+  --lane-1: #ff7b72;
+  --lane-2: #56d364;
+  --lane-3: #bc8cff;
+  --lane-4: #f0883e;
+  --lane-5: #39c5cf;
+  --lane-6: #f778ba;
+  --lane-7: #d4b33c;
+  --shadow: #000000;
+  --backdrop: #000000;
+  --swatch-default-page: #121418;
+  --swatch-default-accent: #7aa7ff;
+  --swatch-ocean-page: #10263a;
+  --swatch-ocean-accent: #6cb4ff;
+  --swatch-forest-page: #10281a;
+  --swatch-forest-accent: #6fd08f;
+  --swatch-plum-page: #2a1a3a;
+  --swatch-plum-accent: #c9a0ff;
+  --swatch-ember-page: #3a2016;
+  --swatch-ember-accent: #ff9e6b;
+  --swatch-midnight-page: #1a1f45;
+  --swatch-midnight-accent: #949fff;
+  --swatch-rose-page: #3c1827;
+  --swatch-rose-accent: #ff8fb3;
+}
+
+/*
+ * The palettes (`settings/palette.ts`): each Theme's page and panel colours,
+ * its accent and the gradient behind the title bar, the Tabs and the Welcome
+ * screen. `data-palette` on the root picks one; with none, the Theme's own
+ * are shown. `contrast.test.ts` holds each, in both themes, to the same
+ * WCAG 2.2 AA pairs as the Theme's own tokens.
+ */
+:root {
+  --chrome-image: linear-gradient(to right, var(--chrome-start), var(--chrome-end));
+}
+:root[data-theme="light"][data-palette="ocean"] {
+  --background: #eaf2f7;
+  --surface: #fbfdfe;
+  --focus: #0b5a9e;
+  --link: #0b5a9e;
+  --chrome-start: #e3eef5;
+  --chrome-end: #eaf2f7;
+}
+
+:root[data-theme="dark"][data-palette="ocean"] {
+  --background: #0c1620;
+  --surface: #13212d;
+  --focus: #6cb4ff;
+  --link: #6cb4ff;
+  --chrome-start: #10263a;
+  --chrome-end: #0c1620;
+}
+
+:root[data-theme="light"][data-palette="forest"] {
+  --background: #ebf4ed;
+  --surface: #fbfdfb;
+  --focus: #1b6a38;
+  --link: #1b6a38;
+  --chrome-start: #e3efe6;
+  --chrome-end: #ebf4ed;
+}
+
+:root[data-theme="dark"][data-palette="forest"] {
+  --background: #0d1712;
+  --surface: #14231a;
+  --focus: #6fd08f;
+  --link: #6fd08f;
+  --chrome-start: #10281a;
+  --chrome-end: #0d1712;
+}
+
+:root[data-theme="light"][data-palette="plum"] {
+  --background: #f3edf8;
+  --surface: #fdfbfe;
+  --focus: #9048c4;
+  --link: #7a2fb0;
+  --chrome-start: #efe7f6;
+  --chrome-end: #f3edf8;
+}
+
+:root[data-theme="dark"][data-palette="plum"] {
+  --background: #16101c;
+  --surface: #211829;
+  --focus: #c9a0ff;
+  --link: #c9a0ff;
+  --chrome-start: #2a1a3a;
+  --chrome-end: #16101c;
+}
+
+:root[data-theme="light"][data-palette="ember"] {
+  --background: #f8efe9;
+  --surface: #fffcfa;
+  --focus: #a3400e;
+  --link: #a3400e;
+  --chrome-start: #f6e9e0;
+  --chrome-end: #f8efe9;
+}
+
+:root[data-theme="dark"][data-palette="ember"] {
+  --background: #1b1310;
+  --surface: #271b15;
+  --focus: #ff9e6b;
+  --link: #ff9e6b;
+  --chrome-start: #3a2016;
+  --chrome-end: #1b1310;
+}
+
+:root[data-theme="light"][data-palette="midnight"] {
+  --background: #ebedf5;
+  --surface: #f9fafd;
+  --focus: #5664c8;
+  --link: #3a47a8;
+  --chrome-start: #e6e8f3;
+  --chrome-end: #ebedf5;
+}
+
+:root[data-theme="dark"][data-palette="midnight"] {
+  --background: #0a0c17;
+  --surface: #121628;
+  --focus: #949fff;
+  --link: #949fff;
+  --chrome-start: #1a1f45;
+  --chrome-end: #0a0c17;
+}
+
+:root[data-theme="light"][data-palette="rose"] {
+  --background: #f9eef2;
+  --surface: #fffbfc;
+  --focus: #c23a66;
+  --link: #ad1f4c;
+  --chrome-start: #f7e7ed;
+  --chrome-end: #f9eef2;
+}
+
+:root[data-theme="dark"][data-palette="rose"] {
+  --background: #1c1015;
+  --surface: #29171f;
+  --focus: #ff8fb3;
+  --link: #ff8fb3;
+  --chrome-start: #3c1827;
+  --chrome-end: #1c1015;
+}
+
+.app-header,
+.tab-strip,
+.repository-bar,
+.toolbar-buttons,
+.tab-panel > .welcome {
+  background-image: var(--chrome-image);
+}
+
+/* Sizes are in rem and em, and the root keeps the font size the OS and the
+   webview give it, so the UI scales with the OS's text size. */
+:root {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--background);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+/* Read by screen readers, but not drawn. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* The window: the title bar, the Tabs, the page and the footer, with only the
+   page's own panels scrolling, as GitKraken's do (ADR 0032). */
+.app-window {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  /* As dense as GitKraken's, and still in rem, so it grows with the OS's text size. */
+  font-size: 0.875rem;
+}
+
+.app {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* The app's menu at the left, its name in the middle, Settings at the right. */
+.app-header {
+  display: grid;
+  flex: none;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.5rem;
+  padding: 0.25rem 0.5rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.app-header-start {
+  display: flex;
+  align-items: center;
+}
+
+.app-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.25rem;
+}
+
+.app > .problem {
+  flex: none;
+  margin: 0.5rem;
+}
+
+.app-page {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  overflow: auto;
+}
+
+.tab-panel {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* What is read, line by line, stays a readable width; the Repository page takes the window's. */
+.app-page > :is(.app-intro, .setup, .welcome),
+.tab-panel > .welcome {
+  width: 100%;
+  max-width: 60rem;
+  margin-inline: auto;
+  padding: 1rem;
+}
+
+.app-name {
+  display: flex;
+  align-items: center;
+  gap: 0.375em;
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+/* The logo, whole: a block, so no line box clips its top. */
+.app-name-icon {
+  display: block;
+  flex: none;
+  width: 1.375em;
+  height: 1.375em;
+}
+
+.app-intro {
+  margin: 0;
+  color: var(--muted);
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  min-height: 2rem;
+  padding: 0.25rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  font: inherit;
+  color: var(--text);
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.button:hover {
+  border-color: var(--text);
+}
+
+.button[aria-disabled="true"] {
+  color: var(--muted);
+  cursor: progress;
+}
+
+/* What can't be undone, such as deleting a branch on its remote: in the problem colour, and said in words too. */
+.button-danger:not([aria-disabled="true"]) {
+  border-color: var(--problem);
+  color: var(--problem);
+}
+
+.button-icon {
+  width: 1.25em;
+  height: 1.25em;
+  flex: none;
+}
+
+/* A button that is only its icon, named for screen readers: still at least 24 by 24 CSS pixels (WCAG 2.5.8). */
+.icon-button {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  min-height: 2rem;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+  font: inherit;
+  color: var(--text);
+  background: transparent;
+  cursor: pointer;
+}
+
+.icon-button:hover {
+  border-color: var(--border);
+}
+
+.icon-button[aria-pressed="true"],
+.icon-button[aria-expanded="true"] {
+  border-color: var(--border);
+  background: color-mix(in srgb, var(--focus) 14%, var(--surface));
+}
+
+.button-primary {
+  border-color: var(--focus);
+  background: color-mix(in srgb, var(--focus) 14%, var(--surface));
+}
+
+.problem {
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--problem);
+  border-left-width: 0.375rem;
+  border-radius: 0.375rem;
+  background: var(--surface);
+}
+
+/* ---------- The Repository page, laid out as GitKraken's is (ADR 0032) ---------- */
+
+.repository {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* The repository's name and folder, then the Toolbar, on one row: wrapping only when the window is too narrow. */
+.repository-bar {
+  display: flex;
+  flex: none;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.25rem 1rem;
+  padding: 0.25rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.repository-bar > .toolbar-status {
+  flex: 1;
+  min-width: 0;
+}
+
+.repository-heading {
+  display: flex;
+  flex: 0 1 auto;
+  flex-wrap: nowrap;
+  align-items: baseline;
+  gap: 0 0.5rem;
+  min-width: 0;
+  max-width: 40%;
+}
+
+.repository-name {
+  flex: none;
+  margin: 0;
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+/* Branches and stashes down the left, the Commit graph or a diff in the middle, the Working tree or Commit details down the right. */
+.repository-layout {
+  display: grid;
+  flex: 1;
+  /* A window too narrow for the widths chosen narrows the side columns first, never the Commit graph below its narrowest. */
+  grid-template-columns:
+    minmax(12rem, var(--sidebar-width, 16rem)) auto minmax(16rem, 1fr) auto
+    minmax(17rem, var(--detail-width, 24rem));
+  min-height: 0;
+}
+
+/* The edge between two columns, which drags, or moves from the keyboard, to resize them (`ColumnResizer`). */
+.column-resizer {
+  position: relative;
+  z-index: 1;
+  width: 0.375rem;
+  margin-inline: -0.1875rem;
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.column-resizer::after {
+  position: absolute;
+  inset: 0 calc(50% - 1px);
+  content: "";
+  transition: background-color 150ms ease-out;
+}
+
+.column-resizer:hover::after,
+.column-resizer:focus-visible::after {
+  inset-inline: calc(50% - 2px);
+  background: var(--focus);
+}
+
+.column-resizer:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 0;
+}
+
+.repository-sidebar,
+.repository-detail {
+  min-height: 0;
+  overflow: auto;
+  background: var(--surface);
+}
+
+.repository-sidebar {
+  border-right: 1px solid var(--border);
+}
+
+.repository-detail {
+  border-left: 1px solid var(--border);
+}
+
+.repository-sidebar > .surface + .surface {
+  border-top: 1px solid var(--border);
+}
+
+.repository-centre,
+.repository-graph {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.repository-centre {
+  background: var(--surface);
+}
+
+.repository-graph {
+  flex: 1;
+}
+
+.repository-graph > .commit-history {
+  flex: 1;
+}
+
+.repository-layout [hidden],
+.conflicts-layout [hidden] {
+  display: none !important;
+}
+
+/* Too narrow for three columns: each panel in turn, the page scrolling. */
+@media (width < 768px) {
+  .app-page:has(.repository-layout) {
+    overflow: auto;
+  }
+
+  /* As tall as their content, one after another, the page scrolling. */
+  .tab-panel:has(.repository-layout),
+  .repository,
+  .repository-layout {
+    flex: none;
+    min-height: auto;
+  }
+
+  .repository-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* One column after another: there are no edges to resize. */
+  .column-resizer {
+    display: none;
+  }
+
+  .repository-bar,
+  .toolbar-row,
+  .repository-heading {
+    flex-wrap: wrap;
+  }
+
+  .repository-heading {
+    max-width: none;
+  }
+
+  .repository-bar > .toolbar-status {
+    flex-basis: 100%;
+  }
+
+  .repository-centre {
+    min-height: 28rem;
+  }
+
+  .repository-sidebar,
+  .repository-detail {
+    border: 0;
+    border-top: 1px solid var(--border);
+    overflow: visible;
+  }
+}
+
+.repository-root,
+.file-status-path {
+  overflow-wrap: anywhere;
+}
+
+.repository-root {
+  max-width: 28rem;
+  margin: 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-family: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
+  font-size: 0.8125rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* The Toolbar: the current branch and its Upstream, and Fetch, Pull and Push. Not a Widget. */
+/* Two rows under the Tabs: the buttons, as GitKraken's are, then the repository, its branch and a fetch, pull or push running. */
+.toolbar {
+  display: grid;
+  flex: none;
+}
+
+.toolbar-status,
+.toolbar-failed {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.toolbar-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.75rem;
+  padding: 0.25rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+/* Undo and Redo, Fetch, Pull and Push, then Branch, Stash and Pop, each group apart. */
+.toolbar-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding-inline-end: 0.75rem;
+  border-inline-end: 1px solid var(--border);
+}
+
+/* What the last of them did, at the row's end, in full on hover. */
+.toolbar-done {
+  flex: 1 1 12rem;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  color: var(--muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.toolbar-problem {
+  margin: 0.25rem 0.75rem;
+}
+
+/* The branch and its Upstream, what the last fetch, pull or push did or the one running, and the buttons, on one row. */
+.toolbar-row {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+}
+
+.toolbar-branch {
+  display: flex;
+  flex: none;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.toolbar-middle {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.toolbar-branch-name {
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.toolbar-offers {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Pull, and beside it the menu of Pull Modes, as one. */
+.split-button {
+  display: flex;
+}
+
+.split-button > .button {
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+}
+
+.split-button .menu > .button {
+  padding-inline: 0.5rem;
+  border-inline-start-width: 0;
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+}
+
+/* The fetch, pull or push running: what it's doing, its bar and its Cancel, in the row. */
+.toolbar-progress {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.toolbar-progress .git-progress-bar {
+  flex: 0 1 8rem;
+  min-width: 4rem;
+}
+
+.toolbar-phase,
+.toolbar-said {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  color: var(--muted);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+
+/* How far a branch is ahead of and behind its Upstream. */
+.upstream,
+.upstream-shown {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.upstream-name {
+  color: var(--muted);
+}
+
+.upstream-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.125rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.upstream-icon {
+  width: 1em;
+  height: 1em;
+}
+
+/* What a Widget draws: one panel with its own heading, set in small capitals as GitKraken's are. */
+.surface {
+  display: grid;
+  /* As wide as its panel, never its widest line: long names shorten in place. */
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.5rem;
+  align-content: start;
+  padding: 0.5rem 0.75rem;
+  background: var(--surface);
+}
+
+.surface-heading,
+.surface-note {
+  margin: 0;
+}
+
+.surface-heading {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.surface-count {
+  margin: 0 auto 0 0;
+  color: var(--muted);
+  font-size: 0.8125rem;
+}
+
+.surface-count:empty {
+  display: none;
+}
+
+.surface-note {
+  color: var(--muted);
+}
+
+.file-status-section-heading,
+.file-status-summary {
+  margin: 0;
+}
+
+.file-status-summary {
+  color: var(--muted);
+}
+
+.file-status-summary:empty {
+  display: none;
+}
+
+.file-status-section-heading {
+  font-size: 1rem;
+}
+
+.file-status-entries {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0.25rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* A path keeps room for a few characters a line, however narrow its panel: never one letter a line. */
+.file-status-entry {
+  display: grid;
+  grid-template-columns: auto minmax(5rem, 1fr) auto;
+  align-items: start;
+  gap: 0.5rem;
+}
+
+.file-status-path {
+  font-family: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
+}
+
+/* A changed file in Commit details: a button that shows its diff in the Diff Widget. */
+.changed-file {
+  width: 100%;
+  padding: 0.125rem 0.25rem 0.125rem 0.5rem;
+  border: 0;
+  border-radius: 0.25rem;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.changed-file:hover,
+.changed-file[aria-current="true"] {
+  background: color-mix(in srgb, var(--focus) 6%, var(--surface));
+}
+
+.changed-file[aria-current="true"] {
+  box-shadow: inset 0.25rem 0 0 var(--focus);
+}
+
+@media (forced-colors: active) {
+  .changed-file[aria-current="true"] {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+}
+
+.change-icon {
+  width: 1.25em;
+  height: 1.25em;
+  margin-top: 0.125em;
+}
+
+.change-label {
+  text-align: end;
+}
+
+.change-icon,
+.change-label {
+  color: var(--change);
+}
+
+.change-added {
+  --change: var(--added);
+}
+
+.change-modified {
+  --change: var(--modified);
+}
+
+.change-deleted {
+  --change: var(--deleted);
+}
+
+.change-renamed {
+  --change: var(--renamed);
+}
+
+.change-untracked {
+  --change: var(--untracked);
+}
+
+.change-conflicted {
+  --change: var(--conflicted);
+}
+
+.change-copied {
+  --change: var(--renamed);
+}
+
+/* ---------- The Working tree Widget ---------- */
+
+.working-tree,
+.file-status,
+.commit-form {
+  display: grid;
+  gap: 0.75rem;
+  align-content: start;
+}
+
+.surface-subheading {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+/* A group a Widget draws only once it's opened, such as the Branches & remotes Widget's tags. */
+.group-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-height: 1.5rem;
+  padding: 0;
+  border: 0;
+  font: inherit;
+  /* As its heading has it: a Widget's is in small capitals, which a button's own style would undo. */
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+
+.group-count {
+  color: var(--muted);
+  font-weight: normal;
+  font-variant-numeric: tabular-nums;
+}
+
+/* A Widget's heading, with its own buttons beside it. */
+.surface-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem 0.5rem;
+  min-height: 2rem;
+}
+
+/* The Branches & remotes Widget's local branches, remotes and tags. */
+.branch-group,
+.branch-remote {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.375rem;
+}
+
+.branch-remote-name {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+/* A remote's name, with its menu beside it, and its URLs under it. */
+.branch-remote-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2rem;
+}
+
+.branch-remote-header .branch-remote-name {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.branch-remote-url {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+}
+
+.branch-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.branch-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2rem;
+}
+
+.branch-icon {
+  flex: none;
+  color: var(--muted);
+}
+
+.branch-name {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.branch-row[aria-current="true"] .branch-name {
+  font-weight: 700;
+}
+
+/* A name that selects its commit in the Commit graph: the row's width, as GitKraken's are, on one line. */
+.branch-select {
+  flex: 1 1 auto;
+  min-width: 4.5rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  min-height: 1.5rem;
+  padding: 0 0.25rem;
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  text-align: start;
+  cursor: pointer;
+}
+
+.branch-select:hover {
+  background: color-mix(in srgb, var(--focus) 8%, transparent);
+}
+
+.branch-select[aria-pressed="true"] {
+  border-color: var(--focus);
+  background: color-mix(in srgb, var(--focus) 14%, transparent);
+}
+
+.branch-current {
+  padding: 0 0.375rem;
+  border: 1px solid var(--added);
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+}
+
+/* The Stashes Widget's stashes, each a button that selects it, with its menu beside it. */
+.stash-list {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stash-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2rem;
+}
+
+.stash-select {
+  display: flex;
+  flex: 1;
+  align-items: start;
+  gap: 0.5rem;
+  min-width: 0;
+  padding: 0.25rem 0.25rem 0.25rem 0.5rem;
+  border: 0;
+  border-radius: 0.25rem;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.stash-select:hover,
+.stash-select[aria-current="true"] {
+  background: color-mix(in srgb, var(--focus) 6%, var(--surface));
+}
+
+.stash-select[aria-current="true"] {
+  box-shadow: inset 0.25rem 0 0 var(--focus);
+}
+
+@media (forced-colors: active) {
+  .stash-select[aria-current="true"] {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+}
+
+.stash-icon {
+  flex: none;
+  margin-top: 0.125em;
+  color: var(--muted);
+}
+
+.stash-words {
+  display: grid;
+  min-width: 0;
+}
+
+.stash-message {
+  overflow-wrap: anywhere;
+}
+
+.stash-facts {
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+/* The selected stash: where it was made, and the files it changed. */
+.stash-selected {
+  display: grid;
+  gap: 0.375rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.stash-selected .surface-note {
+  margin: 0;
+}
+
+/* The new stash dialog's "Include untracked files". */
+.stash-untracked {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stash-untracked input {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin: 0;
+}
+
+/* The dialogs that make, rename, delete and check out branches. */
+.branch-form {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.branch-form p {
+  margin: 0;
+}
+
+.branch-field {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.branch-field :is(input, select, textarea) {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+
+.branch-start,
+.whole-file-choices {
+  display: grid;
+  gap: 0.375rem;
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+}
+
+.branch-start label,
+.whole-file-choices label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.branch-start input,
+.whole-file-choices input {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin: 0;
+}
+
+.branch-lost,
+.branch-overwritten {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0;
+  padding-inline-start: 1.25rem;
+}
+
+.dialog-body .branch-form :is(ul, p) {
+  margin: 0;
+}
+
+.branch-lost-author {
+  color: var(--muted);
+}
+
+.commit-id {
+  font-family: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
+}
+
+.dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.file-status-section-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+/* A change, which shows its diff, beside the button that stages or unstages it. */
+.file-status-row {
+  display: grid;
+  grid-template-columns: minmax(9rem, 1fr) auto;
+  align-items: start;
+  gap: 0.5rem;
+}
+
+/* Still a target of at least 24 by 24 CSS pixels (WCAG 2.5.8). */
+.button-small {
+  min-height: 1.5rem;
+  padding: 0 0.5rem;
+  gap: 0.25em;
+  font-size: 0.8125rem;
+}
+
+.commit-form {
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+
+.commit-field {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.commit-field :is(input, textarea) {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+
+.commit-field textarea {
+  resize: vertical;
+}
+
+.commit-field .problem {
+  margin-top: 0.25rem;
+}
+
+.commit-amend,
+.commit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.commit-amend input {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin: 0;
+}
+
+.commit-problem {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.commit-problem p {
+  margin: 0;
+}
+
+/* Something to know before going on, such as amending a pushed commit. */
+.warning {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--conflicted);
+  border-left-width: 0.375rem;
+  border-radius: 0.375rem;
+  background: var(--surface);
+}
+
+/* The In-Progress Operation Widget, Pinned to the top of the Conflicts page to begin with. */
+.operation-standing {
+  margin: 0;
+  font-weight: 600;
+}
+
+/* The page shown in the repository heading's place: "lanewise: Conflicts". */
+.repository-page-name {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+/* Git's own words keep their lines. */
+.problem-output {
+  white-space: pre-wrap;
+}
+
+.git-output {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0;
+}
+
+.git-output figcaption {
+  color: var(--muted);
+}
+
+.git-output pre {
+  max-height: 12rem;
+  margin: 0;
+  padding: 0.5rem;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  background: var(--surface);
+  color: var(--text);
+  font-family: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* ---------- The Commit graph's history ---------- */
+
+.history-grid {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/*
+ * Only the rows in view are drawn, each placed at its own offset in a list as
+ * tall as all of them. The viewport and each row are contained, so the rows a
+ * scroll brings in are laid out and painted without the rest of the page:
+ * that keeps a fast scroll at 60 fps (bench/README.md).
+ */
+.history-viewport {
+  position: relative;
+  overflow: auto;
+  scrollbar-gutter: stable;
+  contain: strict;
+  overscroll-behavior: contain;
+  border-top: 1px solid var(--border);
+}
+
+/* The columns' headers, above the rows, lined up with them: its gutter is as wide as the rows' scrollbar. */
+.history-header {
+  order: -1;
+  overflow: hidden;
+  scrollbar-gutter: stable;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.history-header-row {
+  position: relative;
+}
+
+.history-heading {
+  position: relative;
+  min-width: 0;
+}
+
+.history-heading-name {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.history-heading-labels,
+.history-heading-graph {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  padding-inline: 0.375rem;
+}
+
+.history-heading-labels {
+  left: 0;
+  width: var(--labels-width, 0px);
+}
+
+.history-heading-graph {
+  left: var(--labels-width, 0px);
+  width: var(--graph-width, 0px);
+}
+
+/* Each column's edge in the header, which resizes it: the Labels' and the graph's at their right, the rest at their left. */
+.history-resizer {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  bottom: 0;
+  width: 0.5rem;
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.history-resizer-end {
+  right: -0.25rem;
+}
+
+.history-resizer-start {
+  left: -0.625rem;
+}
+
+.history-resizer::after {
+  position: absolute;
+  inset: 0.25rem calc(50% - 0.5px);
+  content: "";
+  background: var(--border);
+}
+
+.history-resizer:hover::after,
+.history-resizer:focus-visible::after {
+  inset-inline: calc(50% - 1px);
+  background: var(--focus);
+}
+
+.history-resizer:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 0;
+}
+
+/* The history fills the middle of the Repository page, edge to edge. */
+.commit-history {
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-height: 0;
+  padding: 0;
+}
+
+.commit-history > .surface-header {
+  padding: 0.25rem 0.75rem;
+}
+
+:is(.history-grid, .history-viewport) {
+  flex: 1 1 0;
+}
+
+.history-viewport {
+  min-height: calc(3 * var(--history-row));
+}
+
+.history-rows {
+  position: relative;
+}
+
+/*
+ * The graph's canvas, as big as what shows: it stays at the top of the
+ * viewport as the rows scroll under it, and takes no room of its own. The
+ * rows leave `--graph-width` for it at their start.
+ */
+.history-graph {
+  position: sticky;
+  z-index: 1;
+  top: 0;
+  height: 0;
+}
+
+.history-canvas {
+  position: absolute;
+  top: 0;
+  left: var(--labels-width, 0px);
+  cursor: pointer;
+}
+
+/* The branch and tag Labels, in their own column at the left of the graph, as GitKraken's are. */
+.history-row > .history-labels {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  width: var(--labels-width, 0px);
+  padding-inline: 0.375rem;
+  overflow: hidden;
+  border-right: 1px solid color-mix(in srgb, var(--border) 40%, transparent);
+}
+
+.history-labels .commit-label {
+  flex: 0 1 auto;
+  min-width: 0;
+  margin: 0;
+}
+
+.history-labels .label-more {
+  flex: none;
+  cursor: pointer;
+  --label: var(--muted);
+}
+
+.history-labels .commit-label:not(.label-more, .label-head, .label-pull-request) {
+  cursor: copy;
+}
+
+.history-labels .label-pull-request {
+  flex: none;
+  --label: var(--link);
+}
+
+.history-labels .label-more:hover,
+.history-labels .label-more[data-expanded] {
+  background: color-mix(in srgb, var(--focus) 12%, var(--surface));
+}
+
+/* Every Label a commit has, its "+N" clicked: over the rows below it, the column's width or wider. */
+.history-labels-all {
+  position: absolute;
+  z-index: 2;
+  left: 0.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  min-width: var(--labels-width, 0px);
+  max-width: min(32rem, 90%);
+  padding: 0.375rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  background: var(--surface);
+  box-shadow: 0 0.25rem 0.75rem color-mix(in srgb, var(--text) 18%, transparent);
+}
+
+.history-labels-all .commit-label {
+  max-width: none;
+  margin: 0;
+  cursor: copy;
+}
+
+.history-row > .history-id {
+  cursor: copy;
+}
+
+/* A commit ID or a name a click copies, drawn as the text it is. */
+.copyable {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
+  cursor: copy;
+}
+
+code.copyable,
+.copyable.commit-id,
+.commit-parents .copyable {
+  font-family: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
+}
+
+.copyable:hover {
+  text-decoration: underline;
+}
+
+/* A branch just made: highlighted a moment, and at once for reduced motion. */
+.label-fresh {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+  animation: label-fresh 600ms ease-out 3;
+}
+
+@keyframes label-fresh {
+  50% {
+    outline-offset: 3px;
+  }
+}
+
+.history-row,
+.history-header-row {
+  display: grid;
+  grid-template-areas: "subject author date id";
+  grid-template-columns: minmax(0, 1fr) var(--author-width, 10rem) var(--date-width, 6.5rem) var(--id-width, 4.5rem);
+  align-items: center;
+  column-gap: 0.75rem;
+  height: var(--history-row);
+  padding: 0 0.75rem 0 calc(0.5rem + var(--labels-width, 0px) + var(--graph-width, 0px));
+  line-height: var(--history-row);
+}
+
+.history-row {
+  position: absolute;
+  right: 0;
+  left: 0;
+  contain: strict;
+  cursor: pointer;
+}
+
+.history-row:hover {
+  background: color-mix(in srgb, var(--focus) 6%, var(--surface));
+}
+
+.history-row[aria-selected="true"] {
+  background: color-mix(in srgb, var(--focus) 14%, var(--surface));
+  box-shadow: inset 0.25rem 0 0 var(--focus);
+}
+
+.history-row:focus-visible {
+  outline-offset: -2px;
+}
+
+.history-row > * {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.history-subject {
+  display: flex;
+  grid-area: subject;
+  align-items: center;
+  min-width: 0;
+}
+
+.history-summary {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.history-author {
+  grid-area: author;
+}
+
+.history-date {
+  grid-area: date;
+}
+
+.history-id {
+  grid-area: id;
+}
+
+.history-author,
+.history-date,
+.history-id {
+  color: var(--muted);
+}
+
+.history-reading {
+  grid-area: subject;
+  color: var(--muted);
+}
+
+.history-id code {
+  font-family: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
+}
+
+/* A Label: a plain chip before the commit's subject. */
+.commit-label {
+  display: inline-block;
+  max-width: 12rem;
+  margin-inline-end: 0.375rem;
+  padding: 0 0.375rem;
+  overflow: hidden;
+  border: 1px solid var(--label);
+  border-radius: 0.25rem;
+  background: var(--surface);
+  color: var(--label);
+  font-size: 0.75rem;
+  line-height: 1.125rem;
+  text-overflow: ellipsis;
+  flex: none;
+}
+
+.label-head {
+  --label: var(--conflicted);
+}
+
+.label-currentBranch {
+  --label: var(--added);
+
+  font-weight: 700;
+}
+
+.label-branch {
+  --label: var(--link);
+}
+
+.label-remoteBranch {
+  --label: var(--renamed);
+}
+
+.label-tag {
+  --label: var(--modified);
+}
+
+@media (forced-colors: active) {
+  /* The canvas isn't recoloured with the page, so it's drawn in the OS's colours. */
+  .history-graph {
+    --lane-0: CanvasText;
+    --lane-1: CanvasText;
+    --lane-2: CanvasText;
+    --lane-3: CanvasText;
+    --lane-4: CanvasText;
+    --lane-5: CanvasText;
+    --lane-6: CanvasText;
+    --lane-7: CanvasText;
+    --surface: Canvas;
+    --text: CanvasText;
+    --focus: Highlight;
+  }
+
+  .history-row[aria-selected="true"] {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+
+  .history-row[aria-selected="true"]:focus-visible {
+    outline-style: double;
+    outline-width: 4px;
+  }
+}
+
+/* ---------- Commit details ---------- */
+
+.commit-message {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.commit-summary,
+.commit-body {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.commit-summary {
+  font-weight: 600;
+}
+
+.commit-body {
+  white-space: pre-wrap;
+}
+
+.commit-facts {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.375rem 0.75rem;
+  margin: 0;
+}
+
+.commit-facts dt {
+  font-weight: 600;
+}
+
+.commit-facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.commit-facts code {
+  font-family: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
+}
+
+.commit-email,
+.commit-when {
+  color: var(--muted);
+}
+
+.commit-parents {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.commit-changes {
+  display: grid;
+  gap: 0.5rem;
+  align-content: start;
+}
+
+.setup {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--surface);
+}
+
+.setup :is(h2, h3, p, ul, ol) {
+  margin: 0;
+}
+
+.setup-heading {
+  font-size: 1.5rem;
+}
+
+.setup-subheading {
+  font-size: 1.125rem;
+}
+
+.setup-guidance {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.setup-findings {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.setup-finding {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 0.5rem;
+}
+
+.setup-finding-text {
+  display: grid;
+  gap: 0.125rem;
+}
+
+.setup-finding-icon {
+  width: 1.25em;
+  height: 1.25em;
+  margin-top: 0.125em;
+}
+
+.setup-ready .setup-finding-icon {
+  color: var(--added);
+}
+
+.setup-missing .setup-finding-icon {
+  color: var(--problem);
+}
+
+.setup-unknown .setup-finding-icon {
+  color: var(--muted);
+}
+
+.setup-detail,
+.setup-command {
+  overflow-wrap: anywhere;
+  font-family: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
+}
+
+.setup-detail {
+  color: var(--muted);
+}
+
+.setup-steps {
+  display: grid;
+  gap: 0.75rem;
+  padding-left: 1.5rem;
+}
+
+/* A command to type, on a line of its own; one click selects all of it. */
+.setup-command {
+  display: block;
+  margin: 0.25rem 0;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  background: var(--background);
+  user-select: all;
+}
+
+.setup-link {
+  color: var(--link);
+  text-decoration: underline;
+}
+
+.setup-link-icon {
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.125em;
+}
+
+.setup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+}
+
+.setup-continue {
+  display: grid;
+  justify-items: start;
+  gap: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.setup-consequence {
+  color: var(--muted);
+}
+
+/* ---------- The Diff Widget (PRD §7.4) ---------- */
+
+.diff-path {
+  margin: 0;
+  font-family: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
+  overflow-wrap: anywhere;
+}
+
+.diff-facts {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.diff-prompt {
+  display: grid;
+  gap: 0.5rem;
+  justify-items: start;
+}
+
+.diff-prompt p {
+  margin: 0;
+}
+
+.diff-limit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.diff-limit input {
+  width: 8rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+
+/* The editor scrolls on its own, so CodeMirror draws only the lines in view. */
+.diff-editor {
+  height: 24rem;
+  min-height: 0;
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  overflow: hidden;
+}
+
+/* In the middle of the Repository page, the diff fills it. */
+.repository-centre .diff {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.repository-centre :is(.diff-editor, .split-diff) {
+  flex: 1 1 0;
+  height: auto;
+  min-height: 8rem;
+}
+
+.diff-editor .cm-editor {
+  height: 100%;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.diff-editor .cm-editor .cm-scroller {
+  font-family: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+/* The editor is the focused box, drawn round all of it. */
+.diff-editor .cm-editor .cm-content:focus-visible {
+  outline: none;
+}
+
+.diff-editor .cm-editor.cm-focused {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+.diff-editor .cm-editor .cm-gutters {
+  border-right: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+}
+
+.diff-editor .cm-editor .diff-gutter .cm-gutterElement {
+  padding: 0 0.5rem;
+  text-align: right;
+}
+
+.diff-editor .cm-editor .diff-line-added {
+  background: var(--diff-added-background);
+}
+
+.diff-editor .cm-editor .diff-line-removed {
+  background: var(--diff-removed-background);
+}
+
+.diff-editor .cm-editor .diff-line-hunk {
+  background: var(--diff-hunk-background);
+  color: var(--muted);
+}
+
+/* Stage hunk or Unstage hunk, at the end of each hunk's header: at least 24px, as WCAG 2.5.8 asks. */
+.diff-editor .cm-editor .diff-hunk-action {
+  min-height: 1.5rem;
+  margin-left: 1rem;
+  padding: 0 0.5rem;
+  font-family: system-ui, sans-serif;
+  font-size: 0.8125rem;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+.diff-editor .cm-editor .diff-line-no-newline {
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* Each line's `+` or `-`, in its text, drawn in the change's colour too. */
+.diff-line-added .diff-mark {
+  color: var(--added);
+  font-weight: 700;
+}
+
+.diff-line-removed .diff-mark {
+  color: var(--deleted);
+  font-weight: 700;
+}
+
+/* Syntax, from @lezer/highlight's `classHighlighter`. */
+.diff-editor :is(.tok-keyword, .tok-operator.tok-keyword) {
+  color: var(--syntax-keyword);
+}
+
+.diff-editor :is(.tok-string, .tok-string2, .tok-url, .tok-link) {
+  color: var(--syntax-string);
+}
+
+.diff-editor .tok-comment {
+  color: var(--syntax-comment);
+  font-style: italic;
+}
+
+.diff-editor :is(.tok-number, .tok-literal, .tok-bool, .tok-atom) {
+  color: var(--syntax-literal);
+}
+
+.diff-editor :is(.tok-typeName, .tok-className, .tok-namespace) {
+  color: var(--syntax-type);
+}
+
+.diff-editor :is(.tok-variableName.tok-definition, .tok-labelName, .tok-macroName, .tok-heading) {
+  color: var(--syntax-definition);
+}
+
+.diff-editor .tok-propertyName {
+  color: var(--syntax-property);
+}
+
+.diff-editor :is(.tok-meta, .tok-variableName2) {
+  color: var(--syntax-meta);
+}
+
+.diff-editor .tok-invalid {
+  color: var(--syntax-invalid);
+}
+
+.diff-editor .tok-heading,
+.diff-editor .tok-strong {
+  font-weight: 700;
+}
+
+.diff-editor .tok-emphasis {
+  font-style: italic;
+}
+
+.diff-editor .tok-link {
+  text-decoration: underline;
+}
+
+@media (forced-colors: active) {
+  .diff-editor .cm-editor.cm-focused {
+    outline-color: Highlight;
+  }
+}
+
+/* ---------- The Three-way view and the Resolution (PRD §7.7) ---------- */
+
+/* Base, Ours and Theirs side by side, as many as fit, and one above another when they don't. */
+.three-way-sides {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 0.75rem;
+}
+
+.three-way-side {
+  display: grid;
+  grid-template-rows: auto auto auto 1fr;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.three-way-side .surface-note {
+  margin: 0;
+}
+
+.conflict-editor {
+  height: 18rem;
+}
+
+.conflicts-layout :is(.three-way, .resolution, .resolution-body) {
+  display: flex;
+  flex-direction: column;
+}
+
+/*
+ * Never shorter than what's in them, so Base, Ours and Theirs can't spill
+ * under the Resolution in a short window: the middle scrolls instead.
+ */
+.conflicts-layout :is(.three-way-sides, .resolution-body) {
+  flex: 1 0 auto;
+}
+
+.conflicts-layout .conflict-editor {
+  height: auto;
+  min-height: 8rem;
+}
+
+.resolution-body {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.resolution-body > p {
+  margin: 0;
+}
+
+.conflicts-layout .resolution-editor {
+  flex: 1 1 0;
+}
+
+.resolution-position {
+  font-weight: 600;
+}
+
+.resolution-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.resolution-controls .button-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.resolution-override {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+/* What Git reports about a conflicted file, and what Ours and Theirs are, for a file resolved as a whole. */
+.conflict-reports {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.conflict-reports ul,
+.whole-file-sides {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.whole-file-choices legend {
+  padding: 0 0.25rem;
+  font-weight: 600;
+}
+
+/* The AI Suggestion Widget. A Suggestion says in words that it's AI-generated, and a low Confidence says so in words too, bold, with an icon and the problem border. */
+.suggestion-body,
+.suggestion-shown,
+.suggestion-low,
+.suggestion-progress,
+.suggestion-problems {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.suggestion-body p,
+.suggestion-shown p {
+  margin: 0;
+}
+
+/* Each Suggestion of several is set off from the one before it. */
+.suggestion-shown + .suggestion-shown {
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+
+
+.suggestion-sent summary {
+  cursor: pointer;
+}
+
+.suggestion-sent ul,
+.suggestion-low ul {
+  margin: 0.25rem 0 0;
+  padding-left: 1.25rem;
+}
+
+.suggestion-label {
+  display: inline-block;
+  margin-right: 0.25rem;
+  padding: 0 0.375rem;
+  border: 1px solid var(--link);
+  border-radius: 0.25rem;
+  color: var(--link);
+  font-size: 0.875rem;
+}
+
+.suggestion-confidence {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-weight: 600;
+}
+
+.suggestion-confidence-low {
+  color: var(--problem);
+  font-weight: 700;
+}
+
+.suggestion-resolution {
+  max-height: 16rem;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  background: var(--surface);
+}
+
+.suggestion-resolution pre {
+  margin: 0;
+  padding: 0.5rem;
+  font-family: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
+}
+
+.suggestion-low code {
+  font-family: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
+  white-space: pre-wrap;
+}
+
+/*
+ * As a diff is coloured: Ours' and Theirs' lines added or changed from the
+ * Base green, and the Base's lines they removed or changed red, each with a
+ * `+` or `−` in its own gutter, so not by colour alone.
+ */
+.conflict-editor .cm-editor .conflict-line-added {
+  background: var(--diff-added-background);
+}
+
+.conflict-editor .cm-editor .conflict-line-removed {
+  background: var(--diff-removed-background);
+}
+
+.conflict-editor .cm-editor .conflict-marks .cm-gutterElement {
+  padding: 0 0.25rem;
+  text-align: center;
+}
+
+.conflict-mark-added {
+  color: var(--added);
+  font-weight: 700;
+}
+
+.conflict-mark-removed {
+  color: var(--deleted);
+  font-weight: 700;
+}
+
+.conflict-editor .cm-editor .cm-lineNumbers .cm-gutterElement {
+  padding: 0 0.5rem;
+}
+
+/* Each Conflict Hunk's lines, between its Conflict Markers, which say in text which side is which. */
+.conflict-editor .cm-editor .conflict-line-marker {
+  background: var(--conflict-marker-background);
+  font-weight: 700;
+}
+
+.conflict-editor .cm-editor .conflict-line-ours {
+  background: var(--conflict-ours-background);
+}
+
+.conflict-editor .cm-editor .conflict-line-base {
+  background: var(--conflict-base-background);
+}
+
+.conflict-editor .cm-editor .conflict-line-theirs {
+  background: var(--conflict-theirs-background);
+}
+
+@media (forced-colors: active) {
+  .conflict-editor .cm-editor :is(.conflict-line-added, .conflict-line-removed) {
+    box-shadow: inset 0.25rem 0 0 Highlight;
+  }
+}
+
+/* ---------- Tabs (PRD §7.1) ---------- */
+
+.tab-strip {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0 0.5rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--background);
+}
+
+/* Scrolls sideways when the Tabs don't fit, with room inside for their focus outlines. */
+.tab-list {
+  display: flex;
+  flex: 1;
+  gap: 0;
+  min-width: 0;
+  padding: 3px 3px 0;
+  overflow-x: auto;
+}
+
+/* The selected Tab is told by its surface, its weight and the bar under it, never its colour alone. */
+.tab {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: 16rem;
+  min-height: 2rem;
+  padding: 0 0.25rem 0 0.75rem;
+  border: 1px solid transparent;
+  border-bottom: 0;
+  border-radius: 0.375rem 0.375rem 0 0;
+  font: inherit;
+  color: var(--text);
+  background: var(--background);
+  cursor: pointer;
+  user-select: none;
+}
+
+.tab:hover {
+  border-color: var(--text);
+}
+
+.tab[aria-selected="true"] {
+  border-color: var(--border);
+  font-weight: 600;
+  background: var(--surface);
+  box-shadow: inset 0 2px 0 var(--focus);
+}
+
+@media (forced-colors: active) {
+  .tab[aria-selected="true"] {
+    border-width: 3px;
+    border-color: Highlight;
+  }
+}
+
+.tab-icon {
+  flex: none;
+  width: 1.125em;
+  height: 1.125em;
+  color: var(--muted);
+}
+
+.tab-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* At least 24 px square, the smallest pointer target WCAG 2.5.8 allows. */
+.tab-close {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 0.25rem;
+  color: var(--muted);
+}
+
+.tab-close:hover {
+  color: var(--text);
+  background: color-mix(in srgb, var(--text) 10%, transparent);
+}
+
+.tab-close-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.tab-new {
+  flex: none;
+  min-height: 1.75rem;
+  padding-inline: 0.375rem;
+}
+
+.tab-strip .button {
+  min-height: 1.75rem;
+  padding-block: 0;
+}
+
+
+/* ---------- The Welcome screen (PRD §7.1) ---------- */
+
+.welcome,
+.recent {
+  display: grid;
+  align-content: start;
+}
+
+.welcome {
+  gap: 1.5rem;
+}
+
+.recent {
+  gap: 0.75rem;
+}
+
+.recent-heading {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.recent-list {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.recent-entry {
+  display: grid;
+  grid-template-areas:
+    "open host remove"
+    "mark mark remove";
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  column-gap: 0.5rem;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--surface);
+}
+
+.recent-open {
+  display: grid;
+  grid-area: open;
+  grid-template-areas:
+    "icon name"
+    "icon root";
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: 0.75rem;
+  min-height: 2.75rem;
+  padding: 0.25rem 0.5rem;
+  border: 0;
+  border-radius: 0.25rem;
+  font: inherit;
+  text-align: start;
+  color: inherit;
+  background: none;
+  cursor: pointer;
+}
+
+.recent-open:hover {
+  background: color-mix(in srgb, var(--focus) 6%, var(--surface));
+}
+
+.recent-icon {
+  grid-area: icon;
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--muted);
+}
+
+.recent-name {
+  grid-area: name;
+  font-weight: 600;
+}
+
+.recent-root {
+  grid-area: root;
+  overflow-wrap: anywhere;
+  color: var(--muted);
+  font-family: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
+}
+
+/* A Recent Repository that won't open: said in words, with an icon, not by colour alone. */
+.recent-mark {
+  display: flex;
+  grid-area: mark;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.25rem 0.5rem 0;
+  color: var(--problem);
+}
+
+.recent-mark-icon {
+  flex: none;
+  width: 1.25em;
+  height: 1.25em;
+}
+
+.recent-remove {
+  grid-area: remove;
+  padding-inline: 0.625rem;
+}
+
+/* Clone: a form, and while it clones, Git's progress and Cancel. */
+.clone,
+.clone-form,
+.clone-progress {
+  display: grid;
+  align-content: start;
+  gap: 0.75rem;
+}
+
+.clone-heading {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.clone p {
+  margin: 0;
+}
+
+.clone-folder {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.clone-folder input {
+  flex: 1;
+  min-width: 0;
+}
+
+.branch-field :is(input, select)[aria-invalid="true"] {
+  border-color: var(--problem);
+}
+
+.clone-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.clone-progress {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--surface);
+}
+
+.clone-destination {
+  overflow-wrap: anywhere;
+  color: var(--muted);
+  font-family: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
+}
+
+/* Git's progress, in a clone and in the Toolbar: filled in as Git reports, still. It never moves on its own. So is how many Suggestions have been asked for, of every Conflict Hunk in a file. */
+.git-progress-bar,
+.suggestion-progress-bar {
+  height: 0.75rem;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  background: var(--surface);
+}
+
+.git-progress-bar-done,
+.suggestion-progress-bar-done {
+  height: 100%;
+  background: var(--focus);
+}
+
+@media (forced-colors: active) {
+  .git-progress-bar,
+  .suggestion-progress-bar {
+    border-color: CanvasText;
+  }
+
+  .git-progress-bar-done,
+  .suggestion-progress-bar-done {
+    background: Highlight;
+    forced-color-adjust: none;
+  }
+}
+
+/* ---------- A repository's page on its Host: "Open repository", with the Host's logo ---------- */
+
+.open-on-host {
+  display: inline-flex;
+  flex: none;
+  gap: 0.375rem;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.recent-entry .open-on-host {
+  grid-area: host;
+}
+
+.host-repository-note {
+  grid-column: 1 / -1;
+}
+
+.repository-heading .open-on-host {
+  align-self: center;
+}
+
+.host-logo {
+  flex: none;
+  inline-size: 1rem;
+  block-size: 1rem;
+}
+
+/* ---------- The Pull requests Widget, and each Pull Request's mark in the Commit graph ---------- */
+
+.pull-request-list {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pull-request {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.pull-request-open {
+  display: grid;
+  flex: 1;
+  gap: 0.125rem;
+  min-inline-size: 0;
+  min-block-size: 2.75rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid transparent;
+  border-radius: 0.375rem;
+  font: inherit;
+  text-align: start;
+  color: var(--text);
+  background: transparent;
+  cursor: pointer;
+}
+
+.pull-request-open:hover {
+  border-color: var(--border);
+  background: color-mix(in srgb, var(--text) 6%, transparent);
+}
+
+.pull-request-title {
+  display: flex;
+  gap: 0.375rem;
+  align-items: baseline;
+  overflow-wrap: anywhere;
+}
+
+.pull-request-title .host-logo {
+  align-self: center;
+}
+
+.pull-request-number {
+  flex: none;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.pull-request-note {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.75rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+  overflow-wrap: anywhere;
+}
+
+.pull-request-draft {
+  font-weight: 700;
+}
+
+.label-pull-request {
+  display: inline-flex;
+  gap: 0.125rem;
+  align-items: center;
+  border-style: dashed;
+  cursor: pointer;
+}
+
+.label-pull-request-icon {
+  inline-size: 0.75rem;
+  block-size: 0.75rem;
+}
+
+/* ---------- A Host page's Tab: its toolbar, over the place the shell draws the page in (ADR 0042) ---------- */
+
+.host-page {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.host-page-toolbar {
+  display: flex;
+  flex: none;
+  gap: 0.375rem;
+  align-items: center;
+  padding: 0.375rem 0.5rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.host-page-address {
+  display: flex;
+  flex: 1;
+  gap: 0.375rem;
+  align-items: center;
+  min-width: 0;
+  margin: 0;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  color: var(--muted);
+  background: var(--background);
+}
+
+.host-page-url {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.host-page-toolbar kbd {
+  font: inherit;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+/* Empty: the Host page is drawn over it, in its place. */
+.host-page-view {
+  flex: 1;
+  min-height: 0;
+  background: var(--background);
+}
+
+span.tab-icon {
+  display: inline-flex;
+}
+
+.tab-icon .host-logo {
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+/* ---------- The Activity indicator: whatever takes time, at the bottom of the window ---------- */
+
+.activity-layer {
+  position: fixed;
+  inset-inline-end: 1rem;
+  inset-block-end: 2.25rem;
+  z-index: 30;
+  pointer-events: none;
+}
+
+.activity {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  inline-size: min(22rem, calc(100vw - 2rem));
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  color: var(--text);
+  background: var(--surface);
+  box-shadow: 0 0.25rem 1rem color-mix(in srgb, var(--text) 18%, transparent);
+  pointer-events: auto;
+}
+
+.activity-spinner {
+  flex: none;
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  color: var(--focus);
+}
+
+.activity-body {
+  display: grid;
+  flex: 1;
+  gap: 0.375rem;
+  min-inline-size: 0;
+}
+
+.activity-words {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.activity-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.75rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.activity-percent {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.activity-bar {
+  position: relative;
+  block-size: 0.5rem;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  background: var(--background);
+}
+
+.activity-bar-done {
+  block-size: 100%;
+  background: var(--focus);
+  transition: inline-size 200ms ease-out;
+}
+
+/* How far isn't known: paler, still, across the whole bar, and with motion a stretch of it moves along it. */
+.activity-bar[data-indeterminate] .activity-bar-done {
+  position: absolute;
+  inset-block: 0;
+  inline-size: 100%;
+  opacity: 0.55;
+  animation: activity-along 1.4s ease-in-out infinite;
+}
+
+.activity-spinner {
+  animation: activity-spin 0.9s linear infinite;
+}
+
+@keyframes activity-spin {
+  to {
+    rotate: 1turn;
+  }
+}
+
+/* Where reduced motion is asked for, it's cut to nothing, leaving the still, paler bar. */
+@keyframes activity-along {
+  from {
+    inline-size: 35%;
+    opacity: 1;
+    translate: -100% 0;
+  }
+
+  to {
+    inline-size: 35%;
+    opacity: 1;
+    translate: 290% 0;
+  }
+}
+
+@media (forced-colors: active) {
+  .activity,
+  .activity-bar {
+    border-color: CanvasText;
+  }
+
+  .activity-bar-done {
+    background: Highlight;
+    forced-color-adjust: none;
+  }
+}
+
+/* ---------- Menus: the title bar's, the Branch menu and a commit's context menu ---------- */
+
+.menu {
+  position: relative;
+}
+
+.menu-chevron {
+  transition: transform 150ms ease-out;
+}
+
+.button[aria-expanded="true"] .menu-chevron {
+  transform: rotate(180deg);
+}
+
+.menu-list {
+  position: absolute;
+  top: calc(100% + 0.25rem);
+  right: 0;
+  z-index: 10;
+  display: grid;
+  min-width: 13rem;
+  padding: 0.25rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  background: var(--surface);
+  box-shadow: 0 0.5rem 1.5rem color-mix(in srgb, var(--shadow) 20%, transparent);
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 2rem;
+  padding: 0.125rem 0.5rem;
+  border: 0;
+  border-radius: 0.25rem;
+  font: inherit;
+  white-space: nowrap;
+  color: var(--text);
+  background: transparent;
+  cursor: pointer;
+}
+
+.menu-item:hover {
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+}
+
+.menu-item:focus-visible {
+  outline-offset: -2px;
+}
+
+/* Says something, such as the version, and does nothing when chosen. */
+.menu-item-note {
+  color: var(--muted);
+  cursor: default;
+}
+
+.menu-item-note:hover {
+  background: transparent;
+}
+
+/* Kept for every item, so the labels line up whether or not an item is ticked. */
+.menu-icon {
+  display: inline-flex;
+  width: 1.25rem;
+}
+
+.menu-icon-glyph {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+/* A menu button's list, drawn over the page under its button (`Menu`), lined up with the button's end or start. */
+.menu-layer {
+  position: fixed;
+  z-index: 20;
+}
+
+.menu-layer > .menu-list {
+  top: 0;
+}
+
+.menu-layer-start > .menu-list {
+  right: auto;
+  left: 0;
+}
+
+.menu-entry {
+  position: relative;
+}
+
+/* A submenu opens to the right of its item. */
+.menu-entry > .menu-list {
+  top: -0.3125rem;
+  right: auto;
+  left: calc(100% + 0.25rem);
+}
+
+/* A submenu with no room at the right opens at the left of its item instead. */
+.menu-entry > .menu-list.menu-list-flipped {
+  right: calc(100% + 0.25rem);
+  left: auto;
+}
+
+/* A shortcut at the end of its item, as the OS's own menus show them. */
+.menu-shortcut {
+  margin-inline-start: 1.5rem;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.8125rem;
+}
+
+.menu-submenu-chevron {
+  color: var(--muted);
+}
+
+.menu-item[aria-expanded="true"] {
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+}
+
+/* A commit's context menu, where the pointer was. */
+.context-menu {
+  position: fixed;
+  z-index: 20;
+}
+
+.context-menu > .menu-list {
+  top: 0;
+  right: auto;
+  left: 0;
+}
+
+.menu-label {
+  flex: 1;
+  text-align: start;
+}
+
+.menu-note {
+  color: var(--muted);
+}
+
+.menu-separator {
+  height: 1px;
+  margin: 0.25rem 0.5rem;
+  background: var(--border);
+}
+
+/* ---------- The footer and its dialogs (PRD §7.11) ---------- */
+
+.app-footer {
+  flex: none;
+  padding: 0 1rem;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.footer-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem 1.25rem;
+}
+
+/* Links and buttons alike: text at least 24 px high to hit (WCAG 2.5.8). */
+.footer-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: 1.5rem;
+  padding: 0;
+  border: 0;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+
+.footer-item:hover {
+  color: var(--text);
+}
+
+.footer-mark {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.footer-version {
+  font-variant-numeric: tabular-nums;
+}
+
+.dialog {
+  width: min(45rem, calc(100vw - 2rem));
+  max-height: min(86dvh, 56rem);
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  color: var(--text);
+  background: var(--surface);
+  box-shadow: 0 0.5rem 1.5rem color-mix(in srgb, var(--shadow) 30%, transparent);
+}
+
+/* Only the body scrolls: the dialog itself never does, sideways or down. */
+.dialog[open] {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.dialog::backdrop {
+  background: color-mix(in srgb, var(--backdrop) 60%, transparent);
+}
+
+.dialog-head {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.375rem 0.5rem 0.375rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.dialog-title {
+  margin: 0 auto 0 0;
+  font-size: 1.0625rem;
+}
+
+.dialog-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  min-height: 2rem;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 0.375rem;
+  color: var(--text);
+  background: transparent;
+  cursor: pointer;
+}
+
+.dialog-close:hover {
+  border-color: var(--border);
+}
+
+/* Only the body scrolls, so the title and close button stay in view. */
+/*
+ * The containing block of what's visually hidden inside it, so hidden text
+ * stays where its content is, rather than stretching the dialog below it.
+ */
+.dialog-body {
+  position: relative;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 0.75rem 1rem 1rem;
+}
+
+/*
+ * A status or alert with nothing to say yet takes no room, so a dialog ends
+ * where its content does, not a gap or two below it. It stays in the
+ * accessibility tree, to announce what it says once it says it.
+ */
+.dialog-body :is([role="status"], [role="alert"]):empty {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.dialog-body > :last-child,
+.dialog-body > * > :last-child {
+  margin-bottom: 0;
+}
+
+.dialog-body :is(h3, h4, p, ul) {
+  margin: 0;
+}
+
+.dialog-body h3 {
+  margin-top: 1rem;
+  font-size: 1rem;
+}
+
+.dialog-body > h3:first-child,
+.dialog-body > section:first-child > h3:first-child {
+  margin-top: 0;
+}
+
+.dialog-body :is(h3, section) + :is(p, ul, div) {
+  margin-top: 0.5rem;
+}
+
+/* The Changelog's sections, such as Features, under each Release's heading. */
+.dialog-body h4 {
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+}
+
+.dialog-body h4 + ul {
+  margin-top: 0.375rem;
+}
+
+.dialog-body :is(p, li) code {
+  font-family: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
+  font-size: 0.875em;
+}
+
+.dialog-body p + p {
+  margin-top: 0.5rem;
+}
+
+.dialog-body ul {
+  padding-left: 1.25rem;
+}
+
+.dialog-body li + li {
+  margin-top: 0.375rem;
+}
+
+.dialog-body a {
+  color: var(--link);
+}
+
+.policy-updated {
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.status-box {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  margin-top: 0.75rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-left: 0.375rem solid var(--added);
+  border-radius: 0.375rem;
+  background: var(--background);
+}
+
+.status-box-icon {
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-top: 0.125rem;
+  color: var(--added);
+}
+
+/* ---------- Settings (PRD §7.9) ---------- */
+
+.settings-group {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.settings-legend {
+  margin-bottom: 0.25rem;
+  padding: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* The whole row picks it, and the chosen one is told by its radio button and its border's weight, not by colour alone. */
+.settings-choice {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.settings-choice:hover {
+  background: color-mix(in srgb, var(--focus) 6%, var(--surface));
+}
+
+.settings-choice:has(:checked) {
+  border-color: var(--focus);
+  box-shadow: inset 0 0 0 1px var(--focus);
+}
+
+.settings-choice input {
+  flex: none;
+  width: 1.25em;
+  height: 1.25em;
+  margin: 0;
+  accent-color: var(--focus);
+}
+
+.settings-choice-text {
+  display: grid;
+}
+
+.settings-choice-label {
+  font-weight: 600;
+}
+
+.settings-choice-note {
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+@media (forced-colors: active) {
+  .settings-choice:has(:checked) {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+}
+
+/* A wide table scrolls on its own, focusable so the keyboard can scroll it, and the page never does. */
+.table-scroll {
+  overflow-x: auto;
+  margin-top: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+}
+
+.table-scroll table {
+  width: 100%;
+  min-width: 32rem;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.table-scroll caption {
+  padding: 0.5rem 0.75rem;
+  text-align: start;
+  color: var(--muted);
+}
+
+.table-scroll :is(td, th) {
+  padding: 0.5rem 0.75rem;
+  text-align: start;
+  vertical-align: top;
+}
+
+.table-scroll tr + tr,
+.table-scroll tbody tr:first-child {
+  border-top: 1px solid var(--border);
+}
+
+.credit-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.dialog-body .credit-list li + li {
+  margin-top: 0.125rem;
+}
+
+.credit summary {
+  min-height: 1.5rem;
+  cursor: pointer;
+}
+
+.credit-name {
+  font-weight: 600;
+}
+
+/* Licence texts are wrapped, so a long line never makes the dialog scroll sideways. */
+.credit-text {
+  margin: 0.5rem 0 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  background: var(--background);
+  font-size: 0.8125rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.sign-in-failure {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.sign-in-failure p,
+.sign-in-steps,
+.sign-in-links {
+  margin: 0;
+}
+
+.sign-in-steps,
+.sign-in-links {
+  display: grid;
+  gap: 0.25rem;
+  padding-left: 1.5rem;
+}
+
+.sign-in-said pre {
+  margin: 0.5rem 0 0;
+  font-size: 0.875rem;
+  overflow-x: auto;
+}
+
+/* ---------- Host Integrations (PRD §9.1) ---------- */
+
+.settings {
+  display: grid;
+  gap: 1.25rem;
+}
+
+/* A group's heading sits at its top: the gap between groups is the settings' own. */
+.dialog-body .settings-group > h3.settings-legend {
+  margin-top: 0;
+}
+
+.dialog-body .settings-hosts {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.settings-host {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.375rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  background: var(--surface);
+}
+
+.settings-host-name {
+  overflow-wrap: anywhere;
+  font-family: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
+}
+
+/* ---------- AI in Settings (PRD §8.2) ---------- */
+
+.settings-check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  font-weight: 600;
+}
+
+.settings-check input {
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin: 0;
+  accent-color: var(--focus);
+}
+
+/* A choice of Model Provider, model, version and effort, set in from the rest. */
+.settings-ai-choice {
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+}
+
+/* The first-use disclosure stands out by its border's weight, not by colour alone. */
+.settings-disclosure {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 2px solid var(--focus);
+  border-radius: 0.375rem;
+  background: var(--surface);
+}
+
+.settings-disclosure :is(p, ul) {
+  margin: 0;
+}
+
+.settings-disclosure ul,
+.dialog-body .settings-links {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.settings-host-form,
+.host-browse,
+.host-sign-in,
+.host-signed-in,
+.host-search {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.host-search {
+  gap: 0.25rem;
+}
+
+.host-note {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  background: var(--surface);
+}
+
+/* The user and their organizations, to list only the repositories one owns. */
+.host-owners {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.host-owners-label {
+  margin-inline-end: 0.25rem;
+  font-weight: 600;
+}
+
+.host-owner {
+  padding: 0.125rem 0.625rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.host-owner:hover {
+  border-color: var(--focus);
+}
+
+.host-owner[aria-pressed="true"] {
+  border-color: var(--focus);
+  background: color-mix(in srgb, var(--focus) 16%, var(--surface));
+  font-weight: 600;
+}
+
+.host-owner:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.host-over {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+}
+
+.host-over label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.host-over input {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin: 0;
+}
+
+.dialog-body .host-repositories {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.host-repository {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.125rem 0.5rem;
+  padding: 0.25rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--surface);
+}
+
+.host-repository-choose {
+  min-height: 2.75rem;
+  padding: 0.25rem 0.5rem;
+  border: 0;
+  border-radius: 0.25rem;
+  overflow-wrap: anywhere;
+  font: inherit;
+  font-weight: 600;
+  text-align: start;
+  color: inherit;
+  background: none;
+  cursor: pointer;
+}
+
+.host-repository-choose:hover {
+  background: color-mix(in srgb, var(--focus) 6%, var(--surface));
+}
+
+.dialog-body .host-repository-note {
+  margin: 0 0.5rem 0.25rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+/* ---------- Updates ---------- */
+
+.update-notice {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin: 0 1rem 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--focus);
+  border-left-width: 0.375rem;
+  border-radius: 0.375rem;
+  background: var(--surface);
+}
+
+.update-notice-icon {
+  flex: none;
+}
+
+.update-notice-heading {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.update-notice-body {
+  display: flex;
+  flex: 1 1 20rem;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+
+.update-notice-text {
+  flex: 1 1 16rem;
+  margin: 0;
+}
+
+.update-notice-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.update-progress {
+  flex: 1 1 12rem;
+  min-inline-size: 8rem;
+}
+
+.update-found {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.update-found p,
+.update-notes-heading {
+  margin: 0;
+}
+
+.update-notes-heading {
+  font-size: 0.9375rem;
+}
+
+.update-notes {
+  max-height: 12rem;
+  overflow-y: auto;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  white-space: pre-line;
+}
+
+@media (forced-colors: active) {
+  .update-notice {
+    border-color: CanvasText;
+  }
+}
+
+/* ---------- The Commit graph's Working tree row, and its stashes ---------- */
+
+.history-wip {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: var(--history-row);
+  padding-block: 0;
+  padding-inline-end: 0.75rem;
+  border: 0;
+  border-top: 1px solid var(--border);
+  font: inherit;
+  font-style: italic;
+  color: var(--muted);
+  background: transparent;
+  text-align: start;
+  cursor: pointer;
+}
+
+.history-wip:hover {
+  background: color-mix(in srgb, var(--focus) 6%, var(--surface));
+}
+
+.history-wip[aria-pressed="true"] {
+  color: var(--text);
+  background: color-mix(in srgb, var(--focus) 14%, var(--surface));
+  box-shadow: inset 0.25rem 0 0 var(--focus);
+}
+
+.history-wip:focus-visible {
+  outline-offset: -2px;
+}
+
+.history-wip-icon {
+  width: 1.125rem;
+  height: 1.125rem;
+  padding: 0.125rem;
+  border: 1px dashed currentColor;
+  border-radius: 50%;
+}
+
+/* ---------- The split diff (ADR 0033) ---------- */
+
+.diff-views {
+  display: flex;
+  gap: 0.125rem;
+}
+
+.diff .surface-header .diff-path {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.8125rem;
+}
+
+.split-diff {
+  height: 24rem;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+}
+
+.split-diff:focus-visible {
+  outline-offset: -2px;
+}
+
+.split-diff-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-family: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+.split-diff-number {
+  width: 3.5rem;
+}
+
+.split-diff-table td {
+  padding: 0 0.5rem;
+  vertical-align: top;
+}
+
+.split-diff-line-number {
+  color: var(--muted);
+  text-align: end;
+  user-select: none;
+}
+
+/* Long lines wrap, so a line and the one beside it stay on one row. */
+.split-diff-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.split-diff-text + .split-diff-line-number,
+.split-diff-gap + .split-diff-gap + .split-diff-line-number,
+.split-diff-text + .split-diff-gap {
+  border-left: 1px solid var(--border);
+}
+
+.split-diff-sign {
+  display: inline-block;
+  width: 1.25ch;
+  vertical-align: top;
+  user-select: none;
+}
+
+.split-diff-removed {
+  color: var(--deleted);
+  background: var(--diff-removed-background);
+}
+
+.split-diff-added {
+  color: var(--added);
+  background: var(--diff-added-background);
+}
+
+.split-diff-gap {
+  background: color-mix(in srgb, var(--muted) 10%, var(--surface));
+}
+
+.split-diff-no-newline {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.split-diff-hunk th {
+  padding: 0.125rem 0.5rem;
+  border-block: 1px solid var(--border);
+  background: var(--diff-hunk-background);
+  font-weight: 400;
+  text-align: start;
+}
+
+.split-diff-hunk-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  color: var(--muted);
+}
+
+/* ---------- The Conflicts page, laid out as GitKraken's is (ADR 0032) ---------- */
+
+.conflicts-layout {
+  display: grid;
+  flex: 1;
+  grid-template-areas:
+    "operation operation operation"
+    "files centre suggestion";
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-columns: minmax(13rem, 17rem) minmax(0, 1fr) minmax(16rem, 24rem);
+  min-height: 0;
+}
+
+.conflicts-operation {
+  grid-area: operation;
+  border-bottom: 1px solid var(--border);
+}
+
+.conflicts-files {
+  grid-area: files;
+  overflow: auto;
+  border-right: 1px solid var(--border);
+}
+
+.conflicts-centre {
+  display: flex;
+  grid-area: centre;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+}
+
+.conflicts-three-way,
+.conflicts-resolution {
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+  min-height: 16rem;
+}
+
+.conflicts-three-way > .surface,
+.conflicts-resolution > .surface {
+  flex: 1;
+}
+
+.conflicts-resolution {
+  border-top: 1px solid var(--border);
+}
+
+.conflicts-suggestion {
+  grid-area: suggestion;
+  overflow: auto;
+  border-left: 1px solid var(--border);
+}
+
+.conflicts-choose {
+  padding: 1rem;
+}
+
+@media (width < 768px) {
+  .conflicts-layout {
+    grid-template-areas: "operation" "files" "centre" "suggestion";
+    grid-template-rows: none;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .conflicts-files,
+  .conflicts-suggestion {
+    border: 0;
+    border-top: 1px solid var(--border);
+  }
+}
+
+/* The sidebar's rows, each with its menu as a small button beside it. */
+.repository-sidebar .menu > .button {
+  min-height: 1.5rem;
+  padding: 0 0.25rem;
+  border-color: transparent;
+}
+
+.repository-sidebar .menu > .button:hover,
+.repository-sidebar .menu > .button[aria-expanded="true"] {
+  border-color: var(--border);
+}
+
+.repository-sidebar .menu-chevron {
+  display: none;
+}
+
+/* A narrow Commit graph gives its room to the subjects: the IDs go first, then the dates. Still read out with each row. */
+@container (width < 46rem) {
+  :is(.history-row, .history-header-row) {
+    grid-template-columns: minmax(0, 1fr) var(--author-width, 8rem) var(--date-width, 6rem) 0;
+  }
+
+  .history-id {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+}
+
+@container (width < 34rem) {
+  :is(.history-row, .history-header-row) {
+    grid-template-columns: minmax(0, 1fr) min(var(--author-width, 6rem), 6rem) 0 0;
+  }
+
+  .history-date {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+}
+
+/* ---------- The palette swatches in Settings ---------- */
+
+.palette-choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr));
+  gap: 0.5rem;
+}
+
+.palette-choice {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.375rem;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  cursor: pointer;
+}
+
+.palette-choice:has(:checked) {
+  border-color: var(--focus);
+  box-shadow: inset 0 0 0 1px var(--focus);
+}
+
+.palette-choice:has(:focus-visible) {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.palette-choice-top {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-weight: 600;
+}
+
+.palette-choice input {
+  width: 1.125em;
+  height: 1.125em;
+  margin: 0;
+  accent-color: var(--focus);
+}
+
+/* What the palette looks like: its page, with its accent across it. */
+.palette-swatch {
+  display: block;
+  width: 100%;
+  height: 1.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  background: linear-gradient(to bottom, var(--swatch-page) 60%, var(--swatch-accent) 60%);
+}
+
+.palette-swatch[data-swatch="default"] {
+  --swatch-page: var(--swatch-default-page);
+  --swatch-accent: var(--swatch-default-accent);
+}
+
+.palette-swatch[data-swatch="ocean"] {
+  --swatch-page: var(--swatch-ocean-page);
+  --swatch-accent: var(--swatch-ocean-accent);
+}
+
+.palette-swatch[data-swatch="forest"] {
+  --swatch-page: var(--swatch-forest-page);
+  --swatch-accent: var(--swatch-forest-accent);
+}
+
+.palette-swatch[data-swatch="plum"] {
+  --swatch-page: var(--swatch-plum-page);
+  --swatch-accent: var(--swatch-plum-accent);
+}
+
+.palette-swatch[data-swatch="ember"] {
+  --swatch-page: var(--swatch-ember-page);
+  --swatch-accent: var(--swatch-ember-accent);
+}
+
+.palette-swatch[data-swatch="midnight"] {
+  --swatch-page: var(--swatch-midnight-page);
+  --swatch-accent: var(--swatch-midnight-accent);
+}
+
+.palette-swatch[data-swatch="rose"] {
+  --swatch-page: var(--swatch-rose-page);
+  --swatch-accent: var(--swatch-rose-accent);
+}
+
+.palette-choice-note {
+  color: var(--muted);
+  font-size: 0.8125rem;
+}
+
+/* ---------- Keyboard shortcuts and the version check ---------- */
+
+.shortcut-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.shortcut-table :is(th, td) {
+  padding: 0.375rem 0.5rem;
+  border-bottom: 1px solid var(--border);
+  text-align: start;
+  vertical-align: top;
+}
+
+.shortcut-table kbd {
+  font-family: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+
+.version-check {
+  display: grid;
+  gap: 0.5rem;
+}
+
+/* ---------- Authors' avatars beside their names (ADR 0035) ---------- */
+
+.avatar {
+  display: inline-block;
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  vertical-align: middle;
+  object-fit: cover;
+}
+
+/* Initials, in the Theme's surface colour on a lane colour: at least 4.5:1 in both Themes. */
+.avatar-initials {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--surface);
+  font-size: 0.5625rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.avatar-0 { background: var(--lane-0); }
+.avatar-1 { background: var(--lane-1); }
+.avatar-2 { background: var(--lane-2); }
+.avatar-3 { background: var(--lane-3); }
+.avatar-4 { background: var(--lane-4); }
+.avatar-5 { background: var(--lane-5); }
+.avatar-6 { background: var(--lane-6); }
+.avatar-7 { background: var(--lane-7); }
+
+.history-author {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.history-author-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---------- A Model Provider's gateway (ADR 0035) ---------- */
+
+.gateway-form,
+.gateway-headers {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.gateway-headers {
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+}
+
+.gateway-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  gap: 0.375rem;
+}
+
+.gateway-form input {
+  width: 100%;
+  min-width: 0;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+
+/* The context a Suggestion would send, and the tokens taken in this run. */
+.suggestion-context {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+}
+
+.suggestion-context p {
+  margin: 0;
+}
+
+/* ---------- What Jev found (ADR 0036) ---------- */
+
+.jev-findings {
+  display: grid;
+  gap: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-left: 0.25rem solid var(--focus);
+  border-radius: 0.375rem;
+}
+
+.jev-findings p {
+  margin: 0;
+}
+
+/* Conflicted files is narrow: each file's Mark resolved goes under it, so its path and state have the row. */
+.conflicts-files .file-status-row {
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: start;
+}
+
+.conflicts-files .file-status-row > .changed-file {
+  justify-self: stretch;
+}
+
+/* The Issues Widget (ADR 0038): the Issue Tracker chosen, a search, and the open Issues, each a button that opens its menu, with its "…" beside it. */
+.issues-tracker,
+.issues-search {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0;
+}
+
+.issues-tracker label,
+.issues-search label {
+  color: var(--muted);
+  font-size: 0.8125rem;
+}
+
+.issues-problem {
+  display: grid;
+  gap: 0.375rem;
+  justify-items: start;
+}
+
+/* Its own scroll, as each Widget has (ADR 0032): a long list doesn't push the Widget away. */
+.issues-list {
+  display: grid;
+  gap: 0.25rem;
+  max-height: 24rem;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  list-style: none;
+}
+
+.issue-row {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-height: 2rem;
+}
+
+.issue-select {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.5rem;
+  min-width: 0;
+  padding: 0.25rem 0.25rem 0.25rem 0.5rem;
+  border: 0;
+  border-radius: 0.25rem;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.issue-select:hover,
+.issue-select[aria-expanded="true"] {
+  background: color-mix(in srgb, var(--focus) 6%, var(--surface));
+}
+
+.issue-words {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.issue-key {
+  color: var(--muted);
+  font-family: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
+  font-size: 0.8125rem;
+}
+
+.issue-status {
+  color: var(--muted);
+  font-size: 0.8125rem;
+}
+
+/* An Issue Tracker's account in Settings: who is signed in, or the fields that sign in. */
+.issue-tracker-account,
+.issue-tracker-form,
+.issue-tracker-signed-in {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.issue-tracker-account h4 {
+  margin: 0;
+}

@@ -1,0 +1,146 @@
+{
+  "config": {
+    "repository": "/home/agent/git-git",
+    "order": "topo",
+    "style": "straight-cut100",
+    "format": "segments",
+    "mode": "bench",
+    "row": 0
+  },
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/60.5 Safari/605.1.15",
+  "devicePixelRatio": 2,
+  "viewport": [
+    1280,
+    762
+  ],
+  "opened": {
+    "rows": 85826,
+    "loadMs": 64.088395,
+    "orderMs": 2.140457,
+    "layoutMs": 17.664716000000002,
+    "openMs": 86
+  },
+  "firstScreen": {
+    "sinceNavigationMs": 229,
+    "rows": 33
+  },
+  "scenarios": {
+    "idle": {
+      "frameIntervalMs": {
+        "n": 120,
+        "p50": 16,
+        "p95": 17,
+        "p99": 22,
+        "max": 23
+      }
+    },
+    "steady, 5 rows a frame": {
+      "frameIntervalMs": {
+        "n": 599,
+        "p50": 23,
+        "p95": 26,
+        "p99": 29,
+        "max": 35
+      },
+      "over25ms": 30,
+      "over50ms": 0,
+      "drawMs": {
+        "n": 600,
+        "p50": 2,
+        "p95": 3,
+        "p99": 3,
+        "max": 4
+      },
+      "framesWithBlankRows": 0,
+      "pageFetchMs": {
+        "n": 14,
+        "p50": 122,
+        "p95": 433,
+        "p99": 433,
+        "max": 433
+      },
+      "pageKiB": 29.8
+    },
+    "fast, 25 rows a frame": {
+      "frameIntervalMs": {
+        "n": 599,
+        "p50": 23,
+        "p95": 26,
+        "p99": 29,
+        "max": 34
+      },
+      "over25ms": 43,
+      "over50ms": 0,
+      "drawMs": {
+        "n": 600,
+        "p50": 2,
+        "p95": 3,
+        "p99": 4,
+        "max": 4
+      },
+      "framesWithBlankRows": 128,
+      "pageFetchMs": {
+        "n": 74,
+        "p50": 128,
+        "p95": 475,
+        "p99": 672,
+        "max": 672
+      },
+      "pageKiB": 33.9
+    },
+    "fling, 100 rows a frame": {
+      "frameIntervalMs": {
+        "n": 299,
+        "p50": 23,
+        "p95": 26,
+        "p99": 29,
+        "max": 31
+      },
+      "over25ms": 18,
+      "over50ms": 0,
+      "drawMs": {
+        "n": 300,
+        "p50": 0,
+        "p95": 2,
+        "p99": 3,
+        "max": 3
+      },
+      "framesWithBlankRows": 246,
+      "pageFetchMs": {
+        "n": 148,
+        "p50": 147,
+        "p95": 425,
+        "p99": 601,
+        "max": 647
+      },
+      "pageKiB": 34.4
+    },
+    "scrollbar jumps, every 10 frames": {
+      "frameIntervalMs": {
+        "n": 299,
+        "p50": 23,
+        "p95": 25,
+        "p99": 27,
+        "max": 38
+      },
+      "over25ms": 13,
+      "over50ms": 0,
+      "drawMs": {
+        "n": 300,
+        "p50": 0,
+        "p95": 3,
+        "p99": 4,
+        "max": 5
+      },
+      "framesWithBlankRows": 197,
+      "pageFetchMs": {
+        "n": 89,
+        "p50": 172,
+        "p95": 404,
+        "p99": 525,
+        "max": 525
+      },
+      "pageKiB": 35
+    }
+  }
+}

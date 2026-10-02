@@ -1,0 +1,133 @@
+name: CI
+
+# Every pull request. A push to main, which includes a merged one, runs these
+# same checks through `release.yml`, which calls this workflow and releases
+# after it (ADR 0029); a `push` trigger here as well would run them twice.
+on:
+  pull_request:
+  workflow_dispatch:
+  workflow_call:
+
+# A new push to a pull request makes the run for the previous one worthless.
+# Runs on main are never cancelled, so each commit there keeps its result.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+# Nothing here is packaged or published: `release.yml` makes the installers
+# and the Release, with the permissions that needs.
+permissions:
+  contents: read
+
+# No debug info: nothing reads it in CI, and linking it (PDBs on Windows) is a
+# large share of a debug build. Incremental builds don't survive the cache.
+env:
+  CARGO_INCREMENTAL: 0
+  CARGO_PROFILE_DEV_DEBUG: 0
+  CARGO_PROFILE_TEST_DEBUG: 0
+  CARGO_TERM_COLOR: always
+
+jobs:
+  # The three checks CLAUDE.md asks for before a commit, on every operating
+  # system Lanewise is built on (PRD §11): Windows and macOS, which it ships
+  # for, and Linux, which it is developed and tested on.
+  check:
+    name: Lint, typecheck and test (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        # macos-latest is Apple Silicon.
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # What `desktop/` links against on Linux, as the Sandcastle image has
+      # it: Tauri 2's webview (WebKitGTK 4.1) and GTK, librsvg, OpenSSL, libxdo
+      # and pkg-config to find them. Windows and macOS need nothing extra.
+      - if: runner.os == 'Linux'
+        run: >-
+          sudo apt-get update && sudo apt-get install -y --no-install-recommends
+          pkg-config libwebkit2gtk-4.1-dev libgtk-3-dev librsvg2-dev libssl-dev libxdo-dev
+
+      # Reads pnpm's version from `packageManager` in package.json.
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+      # Caches pnpm's store, keyed on pnpm-lock.yaml.
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 26
+          cache: pnpm
+
+      # Every runner has rustup. It installs the current stable Rust directly
+      # rather than through an action, since the usual one, dtolnay/rust-toolchain,
+      # is versioned by branch and has no release to pin.
+      - run: rustup toolchain install stable --profile minimal --component clippy,rustfmt && rustup default stable
+
+      # Caches ~/.cargo's registry and git checkouts and the dependencies built
+      # in target/, keyed on the OS, the Rust version and Cargo.lock. After the
+      # toolchain, so its key has the version that was installed.
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+
+      # Tests that need Git run the runner's own `git` and fail, naming it, if
+      # it is older than the 2.40 Lanewise requires (ADR 0002). Printed here
+      # so every run's log says which one it was.
+      - run: git --version
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      # The Rust tests, then Vitest, whose axe checks fail the run too.
+      - run: pnpm test
+      # The project website builds, drawing its page into index.html, as
+      # `release.yml` builds it for GitHub Pages (ADR 0031).
+      - run: pnpm website:build
+
+  # The Commit graph's performance targets on git/git (PRD §11), measured by
+  # bench/ in the release build under Xvfb. It fails the run if the first
+  # screen takes 2 s or more, or a frame is held up while the history is laid
+  # out. The shared runners are too noisy to judge frame rates or memory on,
+  # so those are only reported, in the results it uploads (bench/README.md).
+  graph-benchmark:
+    name: Commit graph benchmark (ubuntu-latest)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # As for the check job, and WebKitGTK's WebDriver and Xvfb to drive it.
+      - run: >-
+          sudo apt-get update && sudo apt-get install -y --no-install-recommends
+          pkg-config libwebkit2gtk-4.1-dev libgtk-3-dev librsvg2-dev libssl-dev libxdo-dev
+          webkit2gtk-driver xvfb
+
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 26
+          cache: pnpm
+      - run: rustup toolchain install stable --profile minimal && rustup default stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+
+      # The latest release of tauri-driver, which carries WebDriver to the app.
+      - run: cargo install tauri-driver --locked
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec tauri build --no-bundle
+
+      # Commits and trees, and only the blobs of the checkout. It has no
+      # commit-graph file, the slow case the target is held to.
+      - run: git clone --filter=blob:none https://github.com/git/git "$RUNNER_TEMP/git"
+
+      # A runner is a fresh machine drawing in software, whose first launch
+      # compiles Mesa's shaders, as a user's machine does only once, so a
+      # launch that isn't measured opens the repository first (ADR 0043).
+      - run: xvfb-run -a -s "-screen 0 1280x800x24" pnpm bench:graph --repository "$RUNNER_TEMP/git" --warm-up --check
+
+      - if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: graph-benchmark
+          path: bench/results/
+          if-no-files-found: ignore

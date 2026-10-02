@@ -1,0 +1,11 @@
+# The graph spike (issue #7): throwaway code, measured once and recorded in
+# ADR 0005. It is a workspace of its own, so nothing here is built, linted or
+# tested with Lanewise, and none of it ships.
+[workspace]
+resolver = "3"
+members = ["layout", "canvas"]
+
+[workspace.package]
+edition = "2024"
+license = "MIT"
+publish = false

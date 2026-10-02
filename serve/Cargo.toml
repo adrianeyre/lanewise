@@ -1,0 +1,11 @@
+[package]
+name = "lanewise-serve"
+version = "0.1.0"
+description = "Web Mode: the Lanewise core as a local server, serving the UI and the command API to a browser"
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[dependencies]
+lanewise-commands = { version = "0.1.0", path = "../commands" }

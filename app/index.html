@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <!-- Each theme's page background, `--background` in `src/styles.css`. -->
+    <meta name="theme-color" content="#f6f7f9" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#121418" media="(prefers-color-scheme: dark)" />
+    <!-- The app itself, in the Desktop App and Web Mode, is never indexed; the project website is (PRD §12.1). -->
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Lanewise</title>
+    <meta
+      name="description"
+      content="Lanewise is a free, open-source desktop Git client with a visual commit graph and AI-assisted merge conflict resolution."
+    />
+    <meta name="application-name" content="Lanewise" />
+    <meta name="apple-mobile-web-app-title" content="Lanewise" />
+    <meta name="author" content="Adrian Eyre" />
+
+    <!-- Favicons and device icons, the website's own (`website/public/`), for the UI in a browser and Web Mode. -->
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
+    <link rel="icon" href="/favicon-16.png" type="image/png" sizes="16x16" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+    <link rel="manifest" href="/app.webmanifest" />
+
+    <!-- The saved Theme and palette, or the OS's Theme, before first paint, so there is no flash of the wrong one (`settings/theme.ts`).
+         A Content-Security-Policy would have to allow this script by its hash. -->
+    <script>
+      (function () {
+        var theme = null;
+        try {
+          theme = localStorage.getItem("lanewise.theme");
+        } catch (e) {}
+        if (theme !== "light" && theme !== "dark") {
+          var dark = typeof matchMedia === "function" && matchMedia("(prefers-color-scheme: dark)").matches;
+          theme = dark ? "dark" : "light";
+        }
+        document.documentElement.setAttribute("data-theme", theme);
+        document.documentElement.style.colorScheme = theme;
+        // The palette too (`settings/palette.ts`), so it doesn't flash in after the page.
+        var palette = null;
+        try {
+          palette = localStorage.getItem("lanewise.palette");
+        } catch (e) {}
+        if (palette && palette !== "default" && /^[a-z]+$/.test(palette)) {
+          document.documentElement.setAttribute("data-palette", palette);
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <noscript>Lanewise needs JavaScript to run.</noscript>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

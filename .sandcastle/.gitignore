@@ -1,0 +1,5 @@
+.env
+logs/
+worktrees/
+prompt*.md
+!prompt.md

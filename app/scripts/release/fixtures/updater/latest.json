@@ -1,0 +1,31 @@
+{
+  "version": "1.2.3",
+  "notes": "Features\n\n• graph: show tags on the Commit graph",
+  "pub_date": "2026-09-29T12:00:00Z",
+  "platforms": {
+    "darwin-aarch64-app": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTMVlWSVBnMzhJYklSRUtqUHpreGV6dWVlYVZYUzdYZ29CUmdvZmtjMWVWNEpNK1FrUVk2cWEwL0xIc3FwM2VjcDZXTGhxVXMwTzduaU0zRUtiV1hZdElxaE5uRTJDc0FrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkwNjk5ODM1CWZpbGU6TGFuZXdpc2VfMS4yLjNfdW5pdmVyc2FsLmFwcC50YXIuZ3oJdmVyc2lvbjoxLjIuMwpKbW9UZWQ1aUl2TlUzL1lmVFpSZ293Q3FIaUNhVUpNbzVKQ0tRYUU0Tk1lWWh6OFk4UThpb0hadjA4bkJtU0piK1JKRmtGNWgrZDRPSzFaMjB6bE5DZz09Cg==",
+      "url": "https://github.com/adrianeyre/lanewise/releases/download/v1.2.3/Lanewise_1.2.3_universal.app.tar.gz"
+    },
+    "darwin-aarch64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTMVlWSVBnMzhJYklSRUtqUHpreGV6dWVlYVZYUzdYZ29CUmdvZmtjMWVWNEpNK1FrUVk2cWEwL0xIc3FwM2VjcDZXTGhxVXMwTzduaU0zRUtiV1hZdElxaE5uRTJDc0FrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkwNjk5ODM1CWZpbGU6TGFuZXdpc2VfMS4yLjNfdW5pdmVyc2FsLmFwcC50YXIuZ3oJdmVyc2lvbjoxLjIuMwpKbW9UZWQ1aUl2TlUzL1lmVFpSZ293Q3FIaUNhVUpNbzVKQ0tRYUU0Tk1lWWh6OFk4UThpb0hadjA4bkJtU0piK1JKRmtGNWgrZDRPSzFaMjB6bE5DZz09Cg==",
+      "url": "https://github.com/adrianeyre/lanewise/releases/download/v1.2.3/Lanewise_1.2.3_universal.app.tar.gz"
+    },
+    "darwin-x86_64-app": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTMVlWSVBnMzhJYklSRUtqUHpreGV6dWVlYVZYUzdYZ29CUmdvZmtjMWVWNEpNK1FrUVk2cWEwL0xIc3FwM2VjcDZXTGhxVXMwTzduaU0zRUtiV1hZdElxaE5uRTJDc0FrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkwNjk5ODM1CWZpbGU6TGFuZXdpc2VfMS4yLjNfdW5pdmVyc2FsLmFwcC50YXIuZ3oJdmVyc2lvbjoxLjIuMwpKbW9UZWQ1aUl2TlUzL1lmVFpSZ293Q3FIaUNhVUpNbzVKQ0tRYUU0Tk1lWWh6OFk4UThpb0hadjA4bkJtU0piK1JKRmtGNWgrZDRPSzFaMjB6bE5DZz09Cg==",
+      "url": "https://github.com/adrianeyre/lanewise/releases/download/v1.2.3/Lanewise_1.2.3_universal.app.tar.gz"
+    },
+    "darwin-x86_64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTMVlWSVBnMzhJYklSRUtqUHpreGV6dWVlYVZYUzdYZ29CUmdvZmtjMWVWNEpNK1FrUVk2cWEwL0xIc3FwM2VjcDZXTGhxVXMwTzduaU0zRUtiV1hZdElxaE5uRTJDc0FrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkwNjk5ODM1CWZpbGU6TGFuZXdpc2VfMS4yLjNfdW5pdmVyc2FsLmFwcC50YXIuZ3oJdmVyc2lvbjoxLjIuMwpKbW9UZWQ1aUl2TlUzL1lmVFpSZ293Q3FIaUNhVUpNbzVKQ0tRYUU0Tk1lWWh6OFk4UThpb0hadjA4bkJtU0piK1JKRmtGNWgrZDRPSzFaMjB6bE5DZz09Cg==",
+      "url": "https://github.com/adrianeyre/lanewise/releases/download/v1.2.3/Lanewise_1.2.3_universal.app.tar.gz"
+    },
+    "windows-x86_64-nsis": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTMVlWSVBnMzhJYklpZjVNOTVWRktNMnQzblgyL2NZRlVhb05UZzNVbHB3SGR2aHVsTXNDemRRSXFRTUpJbEVIREkwNzk0ZXM0QmU0YUYyaFN2dStKSzM1RUw0UHMwZmdFPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkwNjk5ODI4CWZpbGU6TGFuZXdpc2VfMS4yLjNfeDY0LXNldHVwLmV4ZQl2ZXJzaW9uOjEuMi4zCll5VldwbzZNT2hXblZPUEZNOFloQ3MyT0JkSU4yQk0zdjdxV0FCaTZLaVVKT243ZktxdmdGUk42aVBma1dtVU1zV0hDWlRYTkRQSTIrbW90MkFEQkNBPT0K",
+      "url": "https://github.com/adrianeyre/lanewise/releases/download/v1.2.3/Lanewise_1.2.3_x64-setup.exe"
+    },
+    "windows-x86_64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTMVlWSVBnMzhJYklpZjVNOTVWRktNMnQzblgyL2NZRlVhb05UZzNVbHB3SGR2aHVsTXNDemRRSXFRTUpJbEVIREkwNzk0ZXM0QmU0YUYyaFN2dStKSzM1RUw0UHMwZmdFPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkwNjk5ODI4CWZpbGU6TGFuZXdpc2VfMS4yLjNfeDY0LXNldHVwLmV4ZQl2ZXJzaW9uOjEuMi4zCll5VldwbzZNT2hXblZPUEZNOFloQ3MyT0JkSU4yQk0zdjdxV0FCaTZLaVVKT243ZktxdmdGUk42aVBma1dtVU1zV0hDWlRYTkRQSTIrbW90MkFEQkNBPT0K",
+      "url": "https://github.com/adrianeyre/lanewise/releases/download/v1.2.3/Lanewise_1.2.3_x64-setup.exe"
+    }
+  }
+}

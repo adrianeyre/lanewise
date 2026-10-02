@@ -1,0 +1,29 @@
+name: Accessibility barrier
+description: Something in Lanewise, in the Desktop App, in Web Mode or on the website, that you can't use, or can only use with difficulty.
+labels: ["accessibility"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Lanewise aims to meet WCAG 2.2 at Level AA. Thank you for telling us where it falls short.
+  - type: textarea
+    id: barrier
+    attributes:
+      label: What got in your way
+      description: What you were trying to do, and what happened instead.
+    validations:
+      required: true
+  - type: input
+    id: where
+    attributes:
+      label: Where
+      description: The Desktop App, Web Mode or the website, and the page, Widget or dialog.
+    validations:
+      required: true
+  - type: textarea
+    id: setup
+    attributes:
+      label: Your setup
+      description: Your operating system, the Lanewise version from the footer, and any assistive technology, such as a screen reader, magnifier or voice control, with its version.
+    validations:
+      required: false

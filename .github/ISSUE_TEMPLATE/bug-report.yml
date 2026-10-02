@@ -1,0 +1,30 @@
+name: Bug report
+description: Something in Lanewise, in the Desktop App or in Web Mode, that doesn't work as it should.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for telling us. Settings' Copy diagnostics fills in the diagnostics below, and puts them on your clipboard too. Lanewise sends nothing itself: read them, and take out anything you'd rather not share, before you submit.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you were doing, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: How to make it happen again
+      description: The steps, one at a time, if you know them.
+    validations:
+      required: false
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostics
+      description: From Settings, Copy diagnostics. The Lanewise version, your operating system, your Git and Git Credential Manager versions, and the latest lines of Lanewise's logs, which never hold credentials, API keys, file contents or prompts.
+      render: text
+    validations:
+      required: false

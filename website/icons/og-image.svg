@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  The Open Graph and Twitter card image, 1200 by 630: the logo, the name and
+  what Lanewise is, as index.html's og:image:alt describes it.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="back" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1e1b4b"/>
+      <stop offset="1" stop-color="#0f3a47"/>
+    </linearGradient>
+    <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4338ca"/>
+      <stop offset="1" stop-color="#0e7490"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#back)"/>
+  <g transform="translate(96 155) scale(0.3125)">
+
+  <rect x="64" y="64" width="896" height="896" rx="208" fill="url(#tile)"/>
+  <path d="M360 280 V744" fill="none" stroke="#ffffff" stroke-width="64" stroke-linecap="round"/>
+  <path d="M360 640 C360 520 664 560 664 420 V300" fill="none" stroke="#67e8f9" stroke-width="64" stroke-linecap="round"/>
+  <circle cx="360" cy="276" r="76" fill="#ffffff"/>
+  <circle cx="360" cy="748" r="76" fill="#ffffff"/>
+  <circle cx="664" cy="296" r="76" fill="#67e8f9"/>
+  </g>
+  <text x="456" y="268" fill="#ffffff" font-family="DejaVu Sans, Segoe UI, Helvetica, Arial, sans-serif" font-size="104" font-weight="700">Lanewise</text>
+  <text fill="#cffafe" font-family="DejaVu Sans, Segoe UI, Helvetica, Arial, sans-serif" font-size="34">
+    <tspan x="460" y="340">A free Git client with a visual</tspan>
+    <tspan x="460" y="386">commit graph and AI-assisted</tspan>
+    <tspan x="460" y="432">merge conflict resolution</tspan>
+  </text>
+</svg>

@@ -1,0 +1,8 @@
+[package]
+name = "lanewise-graph"
+version = "0.1.0"
+description = "The commit graph: lane assignment and layout. UI-free"
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true

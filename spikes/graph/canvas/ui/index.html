@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Lanewise graph spike</title>
+    <link rel="stylesheet" href="spike.css" />
+  </head>
+  <body>
+    <header>
+      <label>Order <select id="order"><option>topo</option><option>date</option></select></label>
+      <label>Style
+        <select id="style">
+          <option>straight-cut100</option>
+          <option>straight-cut50</option>
+          <option>straight-cut500</option>
+          <option>straight</option>
+          <option>compact</option>
+          <option>compact-cut100</option>
+        </select>
+      </label>
+      <label>Format <select id="format"><option>segments</option><option>bands</option></select></label>
+      <button id="bench" type="button">Run the benchmark</button>
+      <output id="status" aria-live="polite"></output>
+    </header>
+    <main id="viewport" tabindex="0" aria-label="Commit graph">
+      <canvas id="canvas"></canvas>
+      <div id="spacer"></div>
+    </main>
+    <pre id="results" hidden></pre>
+    <script type="module" src="graph.js"></script>
+  </body>
+</html>

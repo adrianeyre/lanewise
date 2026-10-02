@@ -1,0 +1,2 @@
+# Byte for byte as signed: a checkout that turned LF into CRLF would break the signatures.
+* -text

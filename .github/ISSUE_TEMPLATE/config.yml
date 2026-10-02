@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/adrianeyre/lanewise/security/advisories/new
+    about: Privately, as SECURITY.md says. Never in a public issue.
+  - name: Install Lanewise, or build it from source
+    url: https://github.com/adrianeyre/lanewise#readme
+    about: The README, and the install steps, local setup and common setup problems it links to.

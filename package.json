@@ -1,0 +1,57 @@
+{
+  "name": "lanewise",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A free, open-source desktop Git client with a visual commit graph and AI-assisted merge conflict resolution",
+  "license": "MIT",
+  "author": "Adrian Eyre",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/adrianeyre/lanewise.git"
+  },
+  "bugs": {
+    "url": "https://github.com/adrianeyre/lanewise/issues"
+  },
+  "homepage": "https://github.com/adrianeyre/lanewise#readme",
+  "type": "module",
+  "scripts": {
+    "test": "cargo test --workspace && pnpm --filter @lanewise/app test && pnpm --filter @lanewise/bench test && pnpm --filter @lanewise/website test",
+    "lint": "cargo fmt --all --check && cargo clippy --workspace --all-targets -- -D warnings && oxlint --deny-warnings",
+    "typecheck": "pnpm --filter @lanewise/app typecheck && pnpm --filter @lanewise/bench typecheck && pnpm --filter @lanewise/website typecheck",
+    "dev": "pnpm --filter @lanewise/app dev",
+    "build": "pnpm --filter @lanewise/app build",
+    "website:dev": "pnpm --filter @lanewise/website dev",
+    "website:build": "pnpm --filter @lanewise/website build",
+    "website:screenshots": "node website/scripts/screenshots.ts",
+    "desktop:dev": "tauri dev",
+    "desktop:build": "node app/scripts/release/updater.ts build",
+    "bench:graph": "pnpm --filter @lanewise/bench graph",
+    "try:anthropic": "tsx app/scripts/trySuggestion.ts anthropic",
+    "try:gemini": "tsx app/scripts/trySuggestion.ts gemini",
+    "try:openai": "tsx app/scripts/trySuggestion.ts openai",
+    "try:xai": "tsx app/scripts/trySuggestion.ts xai",
+    "try:meta": "tsx app/scripts/trySuggestion.ts meta",
+    "try:local": "tsx app/scripts/trySuggestion.ts local",
+    "eval:corpus": "tsx app/scripts/eval/buildCorpus.ts",
+    "eval:suggestions": "tsx app/scripts/eval/evaluate.ts",
+    "sandcastle": "tsx .sandcastle/main.ts"
+  },
+  "engines": {
+    "node": ">=26"
+  },
+  "packageManager": "pnpm@12.8.1",
+  "devDependencies": {
+    "@ai-hero/sandcastle": "^0.12.0",
+    "@semantic-release/changelog": "^7.0.0",
+    "@semantic-release/commit-analyzer": "^13.0.1",
+    "@semantic-release/git": "^11.0.1",
+    "@semantic-release/github": "^12.0.10",
+    "@semantic-release/npm": "^13.2.0",
+    "@semantic-release/release-notes-generator": "^14.1.1",
+    "@tauri-apps/cli": "^2.12.0",
+    "conventional-changelog-conventionalcommits": "^10.4.0",
+    "oxlint": "^1.86.0",
+    "semantic-release": "^25.0.9",
+    "tsx": "^4.23.15"
+  }
+}

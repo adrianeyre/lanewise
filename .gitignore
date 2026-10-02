@@ -1,0 +1,64 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Rust build output, for the Cargo workspace and any crate built on its own
+target/
+
+# Vite's build of the UI, which `desktop/` bundles and `serve` serves
+dist/
+app/dist/
+# The project website's page drawn to HTML, which its build puts in index.html
+website/.prerender/
+*.tsbuildinfo
+vite.config.*.timestamp-*
+.vite/
+
+# Tauri's generated files: the capability and ACL schemas `tauri build` and
+# `tauri dev` write to `desktop/gen/schemas/`. The bundles land under `target/`.
+**/gen/schemas/
+
+# The benchmarks' results, which docs quote rather than keep
+bench/results/
+
+# The Suggestion evaluation's results, and the clones its corpus is replayed from
+eval/results/
+eval/.repositories/
+
+# Test and coverage output
+coverage/
+*.lcov
+.vitest/
+
+# Environment files. Tokens and keys never go in git; the examples, which name
+# the keys with nothing filled in, do.
+.env
+.env.*
+!.env.example
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Editors
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+
+# Operating systems
+.DS_Store
+._*
+Thumbs.db
+Desktop.ini
+
+# Claude Code's own worktrees
+/.claude/worktrees/
+
+# The Update key's private half, which `tauri signer generate` writes and only
+# the TAURI_SIGNING_PRIVATE_KEY secret holds (the README's "Updates")
+*.key

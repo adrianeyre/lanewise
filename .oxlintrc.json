@@ -1,0 +1,49 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "react", "unicorn", "oxc", "import", "vitest"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn"
+  },
+  "ignorePatterns": ["**/dist/**", "target/**", "desktop/gen/**"],
+  "rules": {
+    "react/react-in-jsx-scope": "off",
+    "import/no-unassigned-import": [
+      "warn",
+      {
+        "allow": ["**/*.css", "@testing-library/jest-dom/vitest"]
+      }
+    ],
+    "vitest/expect-expect": [
+      "error",
+      {
+        "assertFunctionNames": ["expect", "expectTypeOf", "assert", "expectNoAxeViolations"]
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["app/**"],
+      "excludeFiles": ["app/src/platform/tauri.ts", "app/src/platform/tauri.test.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["@tauri-apps/**"],
+                "message": "Only app/src/platform/tauri.ts imports Tauri, so Web Mode can supply its own Platform (ADR 0003)."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["spikes/graph/canvas/ui/**"],
+      "rules": {
+        "no-underscore-dangle": ["warn", { "allow": ["__TAURI__"] }]
+      }
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+[workspace]
+resolver = "3"
+members = ["core", "graph", "commands", "desktop", "serve"]
+
+[workspace.package]
+edition = "2024"
+license = "MIT"
+authors = ["Adrian Eyre"]
+repository = "https://github.com/adrianeyre/lanewise"

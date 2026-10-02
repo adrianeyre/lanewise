@@ -1,0 +1,4 @@
+# Text is checked out with LF on every platform, as it's committed. Tests read
+# files from the tree (styles.css, the issue forms) and expect LF; a Windows
+# checkout's CRLF would fail them.
+* text=auto eol=lf

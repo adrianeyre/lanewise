@@ -69,7 +69,7 @@ application asks for. As of 2026-09-29:
    | Type | Program. Libraries are only for things developers use and nobody runs. |
    | Licence | MIT, `https://opensource.org/license/mit` |
    | Repository URL | `https://github.com/adrianeyre/lanewise`, the URL CI builds from. SignPath checks it on every build. |
-   | Homepage URL | `https://adrianeyre.github.io/lanewise/` once the website is live (PRD §12.1), or the repository until then |
+   | Homepage URL | `https://lanewise.adrianeyre.co.uk/` once the website is live (PRD §12.1), or the repository until then |
    | Tagline | A short line, such as "A visual Git client with AI-assisted merge conflict resolution" |
    | Description | One paragraph that won't go out of date with a new version: no feature lists, no OS versions. `CONTEXT.md`'s first line is a good start. |
    | Download URL | `https://github.com/adrianeyre/lanewise/releases` |

@@ -277,7 +277,7 @@ Support is layered so that every Host works, and popular Hosts get deeper integr
 - **Community:** README, CONTRIBUTING guide, issue templates, code of conduct.
 
 ### 12.1 Project website and SEO
-- A static project website on GitHub Pages at `https://adrianeyre.github.io/lanewise/`, deployed from CI on pushes to `main`, as soundcheck's is. It is a landing and download page, not the app (ADR 0003 stands).
+- A static project website on GitHub Pages at `https://lanewise.adrianeyre.co.uk/`, deployed from CI on pushes to `main`, as soundcheck's is. It is a landing and download page, not the app (ADR 0003 stands).
 - Content: the logo, a description, screenshots, download buttons for the latest release, a link to the docs, and the shared footer.
 - Full SEO, as soundcheck's `index.html` has: title, description, keywords, author, canonical URL, robots, Open Graph (with a 1200×630 image and alt text), a Twitter card, favicons (ICO, SVG, PNG sizes), an Apple touch icon, a web app manifest, `theme-color` and `color-scheme` for both themes, and `SoftwareApplication` JSON-LD. Also `sitemap.xml` and `robots.txt`.
 - The app's own `index.html` (Desktop App and Web Mode) has the title, description, icons and manifest, and is marked `noindex`.

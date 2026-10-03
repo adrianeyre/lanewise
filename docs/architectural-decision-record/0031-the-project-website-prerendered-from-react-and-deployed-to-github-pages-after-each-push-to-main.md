@@ -1,6 +1,6 @@
 # The project website, prerendered from React and deployed to GitHub Pages after each push to main
 
-PRD §12.1 asks for a static project website on GitHub Pages at `https://adrianeyre.github.io/lanewise/`, deployed from CI on pushes to `main` as soundcheck's is, with full SEO. It is a landing and download page, not the app: ADR 0003 stands, and Web Mode is still a local server. PRD §7.11 asks for the same footer on it as on every page, and PRD §11 for WCAG 2.2 AA. This ADR records how `website/` is built, what its head holds, where its download buttons come from and how `release.yml` deploys it.
+PRD §12.1 asks for a static project website on GitHub Pages at `https://lanewise.adrianeyre.co.uk/`, deployed from CI on pushes to `main` as soundcheck's is, with full SEO. It is a landing and download page, not the app: ADR 0003 stands, and Web Mode is still a local server. PRD §7.11 asks for the same footer on it as on every page, and PRD §11 for WCAG 2.2 AA. This ADR records how `website/` is built, what its head holds, where its download buttons come from and how `release.yml` deploys it.
 
 ## A package of its own, drawn from the app's components and stylesheet
 
@@ -24,7 +24,7 @@ Search engines, link previews and anyone without JavaScript should get the whole
 
 `src/main.tsx` then hydrates the same tree, which only the footer's dialogs need. The dev server hasn't drawn it, so there `main.tsx` renders it instead. A dedicated static-site generator would do the same with more to learn and another set of dependencies. Two builds of a page this size take about two seconds.
 
-`base` is `/lanewise/`, where GitHub Pages serves a repository's site, so Vite puts the icons and assets under it.
+`base` is `/`: GitHub Pages serves the site at the root of its custom domain, `lanewise.adrianeyre.co.uk` (Settings → Pages → Custom domain), so Vite puts the icons and assets there. It was `/lanewise/`, where Pages serves a repository's site without one, until the custom domain was set; on the custom domain those paths were not found, and the page showed only its prerendered text, unstyled.
 
 ## The head holds soundcheck's SEO, and tests hold the head
 

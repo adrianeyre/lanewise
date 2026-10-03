@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://adrianeyre.github.io/lanewise/sitemap.xml
+Sitemap: https://lanewise.adrianeyre.co.uk/sitemap.xml

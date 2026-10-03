@@ -4,13 +4,14 @@ import { JSDOM } from "jsdom";
 import { describe, expect, test } from "vitest";
 
 import { THEMES } from "../../app/src/test/styles";
+import config from "../vite.config";
 import { SCREENSHOTS } from "./screenshots";
 
 // The page's head, and the files it names: what search engines, link
 // previews, browsers and devices read of the website (PRD §12.1).
 
-/** Where GitHub Pages serves the website: this repository's, under its name. */
-const SITE = "https://adrianeyre.github.io/lanewise/";
+/** Where GitHub Pages serves the website: this repository's custom domain, at its root. */
+const SITE = "https://lanewise.adrianeyre.co.uk/";
 
 const HTML = readFileSync(new URL("../index.html", import.meta.url), "utf8");
 const head = new JSDOM(HTML).window.document;
@@ -62,6 +63,11 @@ test("the page has a title, a description, keywords and its author", () => {
 test("search engines may index it, at its one canonical URL", () => {
   expect(head.querySelector('link[rel="canonical"]')?.getAttribute("href")).toBe(SITE);
   expect(meta("robots")).toMatch(/^index, follow\b/);
+});
+
+test("its assets are built for the path GitHub Pages serves it at", () => {
+  // Built anywhere else, the stylesheet and script aren't found there, and the page is only its text.
+  expect(config.base).toBe(new URL(SITE).pathname);
 });
 
 test("a shared link previews with Open Graph and a Twitter card, and a 1200 by 630 image described in words", () => {
@@ -183,7 +189,7 @@ test("every link to Lanewise is to this repository or its Pages", () => {
   const files = [HTML, read("site.webmanifest").toString("utf8"), read("robots.txt").toString("utf8")];
   const urls = files.flatMap((text) => text.match(/https:\/\/[^\s"'<>)]*(github|lanewise)[^\s"'<>)]*/gi) ?? []);
   expect(urls.length).toBeGreaterThan(0);
-  expect(urls.filter((url) => !/^https:\/\/(github\.com\/adrianeyre\/lanewise|adrianeyre\.github\.io\/lanewise\/)/.test(url))).toEqual(
+  expect(urls.filter((url) => !/^https:\/\/(github\.com\/adrianeyre\/lanewise|lanewise\.adrianeyre\.co\.uk\/)/.test(url))).toEqual(
     [],
   );
 });

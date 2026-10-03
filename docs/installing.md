@@ -2,7 +2,7 @@
 
 [Back to the README](../README.md)
 
-Download the latest [Release](https://github.com/adrianeyre/lanewise/releases/latest), or get it from [the project website](https://adrianeyre.github.io/lanewise/). The installed Desktop App updates itself from then on ([Updates](#updates)).
+Download the latest [Release](https://github.com/adrianeyre/lanewise/releases/latest), or get it from [the project website](https://lanewise.adrianeyre.co.uk/). The installed Desktop App updates itself from then on ([Updates](#updates)).
 
 **macOS 14 or later**, on Apple Silicon or Intel: open `Lanewise_<version>_universal.dmg` and drag Lanewise to Applications. Lanewise is signed ad hoc and not notarized by Apple, as it has no Apple Developer account, so the first time you open a downloaded copy, macOS says it can't check it and won't open it. To open it anyway, either:
 

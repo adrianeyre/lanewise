@@ -98,7 +98,7 @@ This is only the UI, at `http://localhost:5150`, in your browser. It has no core
 pnpm website:dev
 ```
 
-This is the project website at `http://localhost:5160/lanewise/` (`website/README.md`).
+This is the project website at `http://localhost:5160/` (`website/README.md`).
 
 ## 5. Lint, typecheck and test
 

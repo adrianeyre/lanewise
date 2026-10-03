@@ -135,7 +135,7 @@ test("every link to a heading goes to one that's there", () => {
 
 test("the README and its guides cover installing and building Lanewise, and what it needs (PRD §12)", () => {
   const readme = read("README.md");
-  expect(readme).toContain("(https://adrianeyre.github.io/lanewise/)");
+  expect(readme).toContain("(https://lanewise.adrianeyre.co.uk/)");
   expect(readme).toContain("(docs/product-requirements-document/git-client.md)");
   expect(readme).toMatch(/!\[[^\]]+\]\(website\/public\/screenshots\/\w+\.webp\)/);
   expect(read("docs/installing.md")).toContain("2.40 or later");

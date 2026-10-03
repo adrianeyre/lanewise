@@ -533,7 +533,7 @@ whether it restarts itself.
 ## 10. The website
 
 TODO(#44): the project website hasn't landed. What to check when it has,
-from PRD §12.1, at <https://adrianeyre.github.io/lanewise/>:
+from PRD §12.1, at <https://lanewise.adrianeyre.co.uk/>:
 
 1. **Download buttons.** In Safari on the Mac, the macOS button downloads the
    `.dmg` from the latest release, the same file §1 did, and its version
@@ -550,7 +550,7 @@ from PRD §12.1, at <https://adrianeyre.github.io/lanewise/>:
 4. Check the tags behind it in Terminal:
 
    ```sh
-   curl -s https://adrianeyre.github.io/lanewise/ | grep -E 'og:|twitter:|canonical|robots|theme-color'
+   curl -s https://lanewise.adrianeyre.co.uk/ | grep -E 'og:|twitter:|canonical|robots|theme-color'
    curl -s -o og.png "<the og:image URL it printed>" && sips -g pixelWidth -g pixelHeight og.png
    ```
 
@@ -558,7 +558,7 @@ from PRD §12.1, at <https://adrianeyre.github.io/lanewise/>:
    and the image is 1200 by 630. `sitemap.xml` and `robots.txt` load from the
    site's root.
 5. The website stores nothing: Safari's **Settings → Privacy → Manage Website
-   Data…** lists nothing for `adrianeyre.github.io` after a visit.
+   Data…** lists nothing for `lanewise.adrianeyre.co.uk` after a visit.
 
 ## 11. Publish the beta
 

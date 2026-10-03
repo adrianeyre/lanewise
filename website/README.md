@@ -1,11 +1,11 @@
 # The project website
 
-Lanewise's page on GitHub Pages, `https://adrianeyre.github.io/lanewise/` (PRD §12.1, ADR 0031): what Lanewise is, screenshots, the latest Release's downloads, the documentation and the footer. It is not the app (ADR 0003).
+Lanewise's page on GitHub Pages, `https://lanewise.adrianeyre.co.uk/` (PRD §12.1, ADR 0031): what Lanewise is, screenshots, the latest Release's downloads, the documentation and the footer. It is not the app (ADR 0003).
 
 ```bash
-pnpm website:dev    # the page, drawn in the browser, at http://localhost:5160/lanewise/
+pnpm website:dev    # the page, drawn in the browser, at http://localhost:5160/
 pnpm website:build  # website/dist, with the page drawn into index.html
-pnpm --filter @lanewise/website preview  # serves website/dist at http://localhost:5160/lanewise/
+pnpm --filter @lanewise/website preview  # serves website/dist at http://localhost:5160/
 ```
 
 `pnpm test` and `pnpm typecheck` include it. `release.yml` deploys it after each push to `main` (`docs/releases.md`, "The project website").

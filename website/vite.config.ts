@@ -54,8 +54,8 @@ function prerender(): Plugin {
 const PORT = 5160;
 
 export default defineConfig({
-  // GitHub Pages serves the repository's site under its name (ADR 0031).
-  base: "/lanewise/",
+  // GitHub Pages serves the site at the root of its custom domain, lanewise.adrianeyre.co.uk (ADR 0031).
+  base: "/",
   define: {
     "import.meta.env.VITE_APP_VERSION": JSON.stringify(version),
     "import.meta.env.VITE_APP_AUTHOR": JSON.stringify(author),

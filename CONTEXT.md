@@ -211,7 +211,7 @@ The minisign key pair every Update's package is signed with, for its version: th
 _Avoid_: Updater key, signing key, code signing certificate
 
 **Project website**:
-Lanewise's page on GitHub Pages, `https://adrianeyre.github.io/lanewise/`: what Lanewise is, screenshots, download buttons for the latest Release, a link to the documentation and the footer. It is not the app and not Web Mode, stores nothing on your device, and follows the OS's light or dark setting.
+Lanewise's page on GitHub Pages, `https://lanewise.adrianeyre.co.uk/`: what Lanewise is, screenshots, download buttons for the latest Release, a link to the documentation and the footer. It is not the app and not Web Mode, stores nothing on your device, and follows the OS's light or dark setting.
 _Avoid_: Homepage, marketing site, web app
 
 ### Layout

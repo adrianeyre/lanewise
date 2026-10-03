@@ -5,7 +5,7 @@
 
 A free, open-source desktop Git client for Windows and macOS, with a visual commit graph and AI-assisted merge conflict resolution. Its source is at [`adrianeyre/lanewise`](https://github.com/adrianeyre/lanewise), under the MIT licence.
 
-- **The project website:** [adrianeyre.github.io/lanewise](https://adrianeyre.github.io/lanewise/), with the latest downloads.
+- **The project website:** [lanewise.adrianeyre.co.uk](https://lanewise.adrianeyre.co.uk/), with the latest downloads.
 - **What is being built, and why:** the [product requirements document](docs/product-requirements-document/git-client.md) and the [architectural decision records](docs/architectural-decision-record/).
 - **Releases:** [every Release](https://github.com/adrianeyre/lanewise/releases), with its notes.
 

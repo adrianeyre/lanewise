@@ -225,7 +225,7 @@ A page on a Host, such as a repository or a Pull Request on GitHub, shown in a T
 _Avoid_: Web tab, browser tab, embedded page, web view
 
 **Toolbar**:
-The two rows across the top of a Repository page, under the Tabs. The first has its buttons, as GitKraken's has: Undo and Redo; Fetch, Pull and Push; and Branch, Stash and Pop, which pops the newest stash. The second has the repository's name, the current branch, its Upstream's ahead and behind counts, and what the last fetch, pull or push did or the progress of the one running. It fetches as its Tab is shown, once the Commit graph has its first window, and as the window is focused again, at most every 30 seconds, unless Settings says not to. It is not a Widget, and doesn't move.
+The two rows across the top of a Repository page, under the Tabs. The first has its buttons, as GitKraken's has: Undo and Redo; Fetch, Pull and Push; and Branch, Stash and Pop, which pops the newest stash. The second has the repository's name, the current branch, its Upstream's ahead and behind counts, and what the last fetch, pull or push did or the progress of the one running, with Cancel, or for a fetch Skip, which leaves it running in the background, and Close, which stops it. It fetches as its Tab is shown, once the Commit graph has its first window, and as the window is focused again, at most every 30 seconds, unless Settings says not to. It is not a Widget, and doesn't move.
 _Avoid_: Action bar, header, ribbon, command bar
 
 **Undo**:

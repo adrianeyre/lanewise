@@ -51,12 +51,20 @@ export interface RemoteOperationState {
   start(operation: RemoteOperationKind, mode?: PullMode | null, setUpstream?: NewUpstream | null): void;
   /** Asks the one running to stop. `status` says it was cancelled once Git has stopped. */
   cancel(): void;
+  /**
+   * Stops showing a fetch while it runs on in the background: `status` is
+   * idle until it finishes, and then says what it did. Starting anything
+   * shows it again, as it has to finish first.
+   */
+  skip(): void;
 }
 
 /** The operation running, once its start command has named it. */
 interface Running {
   started: RemoteStarted | null;
   cancelled: boolean;
+  /** Skipped: running on, but not shown. */
+  skipped: boolean;
 }
 
 /** What starting an operation, or looking for the one running, gave. */
@@ -114,7 +122,7 @@ export function useRemoteOperation(
         seen = outcome.value.generation;
         switch (state.kind) {
           case "running": {
-            if (!mounted.current) continue;
+            if (!mounted.current || running.current?.skipped === true) continue;
             whileRunning((previous) => ({ ...previous, progress: state.progress }));
             const next = announcementOf(state.progress, announced.current);
             if (next !== null) {
@@ -170,7 +178,7 @@ export function useRemoteOperation(
       begin: () => Promise<Begun>,
     ): void => {
       if (running.current !== null) return;
-      const thisOne: Running = { started: null, cancelled: false };
+      const thisOne: Running = { started: null, cancelled: false, skipped: false };
       running.current = thisOne;
       announced.current = null;
       void (async (): Promise<RemoteStatus> => {
@@ -178,7 +186,7 @@ export function useRemoteOperation(
         if (begun.kind === "finished") return begun.finished;
         const { started } = begun;
         thisOne.started = started;
-        if (mounted.current) {
+        if (mounted.current && !thisOne.skipped) {
           setStatus((previous) =>
             previous.kind === "running"
               ? { ...previous, operation: started.kind }
@@ -276,8 +284,28 @@ export function useRemoteOperation(
     return () => window.removeEventListener("focus", focused);
   }, [followOrFetch]);
 
+  /** Shows a skipped fetch again, with where it has got to, until it finishes. */
+  const unskip = useCallback((thisOne: Running) => {
+    thisOne.skipped = false;
+    setStatus({
+      kind: "running",
+      operation: thisOne.started?.kind ?? "fetch",
+      mode: null,
+      setUpstream: null,
+      progress: null,
+      cancelling: false,
+      problem: null,
+    });
+    setAnnouncement(`A ${operationName[thisOne.started?.kind ?? "fetch"]} is running. It has to finish first.`);
+  }, []);
+
   const start = useCallback(
     (kind: RemoteOperationKind, mode: PullMode | null = null, setUpstream: NewUpstream | null = null) => {
+      // One skipped is shown again: anything else has to wait for it.
+      if (running.current?.skipped === true) {
+        unskip(running.current);
+        return;
+      }
       if (running.current !== null) return;
       setStatus({
         kind: "running",
@@ -300,7 +328,7 @@ export function useRemoteOperation(
         return { kind: "finished", finished: failed(kind, outcome.error) };
       });
     },
-    [commands, repository.root, run],
+    [commands, repository.root, run, unskip],
   );
 
   const cancel = useCallback(() => {
@@ -312,7 +340,15 @@ export function useRemoteOperation(
     if (thisOne.started !== null) cancelRunning(thisOne.started.operation, thisOne.started.kind);
   }, [cancelRunning, whileRunning]);
 
-  return { status, announcement, start, cancel };
+  const skip = useCallback(() => {
+    const thisOne = running.current;
+    if (thisOne === null || thisOne.skipped) return;
+    thisOne.skipped = true;
+    setStatus((previous) => (previous.kind === "running" ? { kind: "idle" } : previous));
+    setAnnouncement("");
+  }, []);
+
+  return { status, announcement, start, cancel, skip };
 }
 
 function failed(operation: RemoteOperationKind, error: RemoteError): RemoteStatus {

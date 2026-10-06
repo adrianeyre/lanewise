@@ -6,7 +6,7 @@ The Repository page's Toolbar fetches, pulls and pushes (PRD §7.6), with their 
 
 Fetch, pull and push are network operations, so they run the system `git` (ADR 0002), with `--progress`, `GIT_TERMINAL_PROMPT=0` and the user's own configuration, as a clone does (ADR 0012). Signing in goes through the user's credential helpers and SSH agent. Lanewise never asks for a password.
 
-- **Fetch** is `git fetch --all --progress`: every remote, as the Toolbar's one Fetch button promises. A repository with no remotes is refused as `noRemotes` before Git runs.
+- **Fetch** is `git fetch --all --progress`: every remote, as the Toolbar's one Fetch button promises. ADR 0046 adds `--prune`. A repository with no remotes is refused as `noRemotes` before Git runs.
 - **Pull** is `git pull --progress --no-edit`, into the current branch from its Upstream. Git decides, from `pull.rebase`, `branch.<name>.rebase` and `pull.ff`, whether to merge, rebase or only fast-forward, so Lanewise follows the config exactly by not deciding. `--no-edit` keeps Git from opening an editor for a merge commit's message, which has no terminal to open in.
 - **Push** is `git push --progress --porcelain -- <remote> refs/heads/<branch>:<the Upstream's branch>`. It always pushes the current branch to its Upstream, whatever `push.default` says, because that's what the Toolbar's Push shows the counts for. Nothing forces a push. Force push with lease is P1 (PRD §7.6).
 

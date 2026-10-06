@@ -8,6 +8,11 @@ export const LATEST_PACKAGE_URL = "https://raw.githubusercontent.com/adrianeyre/
 /** Where the latest version is downloaded. */
 export const LATEST_RELEASE_URL = "https://github.com/adrianeyre/lanewise/releases/latest";
 
+/** `version`'s Release page on GitHub, which semantic-release tags `v<version>` (ADR 0029). */
+export function releasePageOf(version: string): string {
+  return `https://github.com/adrianeyre/lanewise/releases/tag/v${encodeURIComponent(version.trim().replace(/^v/, ""))}`;
+}
+
 export type VersionCheck =
   | { kind: "current"; running: string; latest: string }
   | { kind: "outOfDate"; running: string; latest: string }

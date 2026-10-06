@@ -92,6 +92,10 @@ function writing(done: number, total = 100): GitProgress {
   return { phase: "Writing objects", remote: false, done, total, percent: done, finished: done === total };
 }
 
+function hostCounting(done: number): GitProgress {
+  return { phase: "Counting objects", remote: true, done, total: null, percent: null, finished: false };
+}
+
 const toolbar = () => screen.getByRole("region", { name: "Toolbar" });
 const changed = () => screen.getByTestId("changed").textContent;
 const started = (fake: ReturnType<typeof platformFor>) =>
@@ -146,13 +150,13 @@ test("a push shows Git's progress, announces it politely, and says what it pushe
   await expectNoAxeViolations(container);
 });
 
-test("a fetch is cancelled from the keyboard, and says it was", async () => {
+test("a fetch is stopped with Close from the keyboard, and says it was", async () => {
   const user = userEvent.setup();
   const fake = platformFor(originMain(0, 0));
   render(<Page commands={fake.platform.commands} />);
   await user.click(await within(toolbar()).findByRole("button", { name: "Fetch" }));
 
-  expect(await within(toolbar()).findByRole("button", { name: "Cancel fetch" })).toHaveFocus();
+  expect(await within(toolbar()).findByRole("button", { name: "Close fetch" })).toHaveFocus();
   await user.keyboard("{Enter}");
 
   expect(fake.remote.cancelled).toEqual([1]);
@@ -160,6 +164,42 @@ test("a fetch is cancelled from the keyboard, and says it was", async () => {
   act(() => fake.remote.report({ kind: "cancelled" }));
   expect(await within(toolbar()).findByText("The fetch was cancelled.")).toBeVisible();
   expect(within(toolbar()).getByRole("button", { name: "Fetch" })).toHaveFocus();
+});
+
+test("a fetch skipped runs on in the background, out of the way, and says what it did once it's done", async () => {
+  const user = userEvent.setup();
+  const fake = platformFor(originMain(0, 0), null, [configured("origin")]);
+  const { container } = render(<Page commands={fake.platform.commands} fetchOnShow />);
+  await within(toolbar()).findByRole("progressbar", { name: "Fetching…" });
+  act(() => fake.remote.report({ kind: "running", progress: hostCounting(12) }));
+  expect(await within(toolbar()).findByText("Counting objects on the Host: 12")).toBeVisible();
+  await expectNoAxeViolations(container);
+
+  await user.click(within(toolbar()).getByRole("button", { name: "Skip fetch" }));
+
+  expect(within(toolbar()).queryByRole("progressbar")).toBeNull();
+  expect(within(toolbar()).queryByRole("button", { name: "Close fetch" })).toBeNull();
+  expect(fake.remote.cancelled).toEqual([]);
+  expect(within(toolbar()).getByRole("button", { name: "Fetch" })).toHaveFocus();
+  // Its progress isn't shown while it's skipped.
+  act(() => fake.remote.report({ kind: "running", progress: hostCounting(40) }));
+  expect(within(toolbar()).queryByText(/Counting objects/)).toBeNull();
+
+  act(() => fake.remote.report({ kind: "fetched" }));
+  expect(await within(toolbar()).findByText("Fetched from every remote.")).toBeVisible();
+  expect(changed()).toBe("1");
+});
+
+test("starting anything while a skipped fetch runs shows it again, as it has to finish first", async () => {
+  const user = userEvent.setup();
+  const fake = platformFor(originMain(0, 0), null, [configured("origin")]);
+  render(<Page commands={fake.platform.commands} fetchOnShow />);
+  await user.click(await within(toolbar()).findByRole("button", { name: "Skip fetch" }));
+
+  await user.click(within(toolbar()).getByRole("button", { name: "Push" }));
+
+  expect(await within(toolbar()).findByRole("button", { name: "Close fetch" })).toBeVisible();
+  expect(started(fake)).toEqual([{ name: "startFetch", request: { repository: lanewise.root } }]);
 });
 
 test("Pull follows the Git config, and its menu picks a Pull Mode for one pull", async () => {
@@ -394,7 +434,7 @@ test("one started elsewhere while this one starts is followed instead", async ()
 
   await user.click(within(toolbar()).getByRole("button", { name: "Push" }));
 
-  expect(await within(toolbar()).findByRole("button", { name: "Cancel fetch" })).toBeVisible();
+  expect(await within(toolbar()).findByRole("button", { name: "Close fetch" })).toBeVisible();
   act(() => fake.remote.report({ kind: "fetched" }));
   expect(await within(toolbar()).findByText("Fetched from every remote.")).toBeVisible();
 });
@@ -410,7 +450,7 @@ test("shown with Fetch when a Tab is shown on, it fetches, on the Toolbar's one 
   expect(started(fake)).toEqual([{ name: "startFetch", request: { repository: lanewise.root } }]);
   // The progress is in the row with the branch and the buttons.
   const row = toolbar().querySelector(".toolbar-row");
-  expect(row).toContainElement(within(toolbar()).getByRole("button", { name: "Cancel fetch" }));
+  expect(row).toContainElement(within(toolbar()).getByRole("button", { name: "Close fetch" }));
   expect(outside).toHaveFocus();
   await expectNoAxeViolations(container);
 

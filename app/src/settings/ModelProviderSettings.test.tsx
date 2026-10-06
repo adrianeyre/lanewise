@@ -16,6 +16,7 @@ import { FAKE_LOCAL_API, fakeModelProvider } from "../test/fakeModelProvider";
 import { type FakePlatform, fakeKeyStore, fakePlatform } from "../test/fakePlatform";
 import { MODEL_PROVIDER_KEY } from "./localSettings";
 import { ModelProviderSettings } from "./ModelProviderSettings";
+import { besidesVersionCheck, isVersionCheck, upToDate } from "../test/versionCheck";
 
 afterEach(() => {
   cleanup();
@@ -29,6 +30,7 @@ function setUp(keysKept: Record<string, string> = {}, providers?: ModelProvider[
   const platform = fakePlatform({
     commands: keys.commands,
     fetch: (url, init) => {
+      if (isVersionCheck(url)) return upToDate();
       // Offline, but for a Model Provider on this computer.
       if (offline && url === CATALOG_URL) throw new TypeError("Failed to fetch");
       return url.includes("/other/") ? other.answer(url, init) : fake.answer(url, init);
@@ -59,7 +61,7 @@ test("AI is off at first, and nothing is sent to any Model Provider", async () =
     expect.stringContaining("With AI on, Lanewise also fetches its model catalog from GitHub, sending nothing with it"),
   );
   expect(ai.getByRole("combobox", { name: "Model Provider" })).toHaveValue("");
-  expect(platform.fetches).toEqual([]);
+  expect(besidesVersionCheck(platform.fetches)).toEqual([]);
   expect(platform.calls.map(({ name }) => name)).not.toContain("modelProviderKey");
   await expectNoAxeViolations(view.container);
 });
@@ -178,7 +180,9 @@ test("turning AI on first discloses exactly what's sent, and to which Model Prov
     ["https://api.fake-model-provider.test/fake/models", "Bearer sk-fake"],
   ]);
   // The model catalog comes from the repository, with nothing sent: no API key.
-  expect(platform.fetches.map(({ url, init }) => [url, new Headers(init?.headers).get("authorization")])).toEqual([
+  expect(
+    besidesVersionCheck(platform.fetches).map(({ url, init }) => [url, new Headers(init?.headers).get("authorization")]),
+  ).toEqual([
     [CATALOG_URL, null],
     ["https://api.fake-model-provider.test/fake/models", "Bearer sk-fake"],
   ]);
@@ -430,7 +434,10 @@ test("the shown repository can be set apart with a choice of its own, and put ba
 function setUpLocal(keysKept: Record<string, string> = {}, key: string | null = null) {
   const local = fakeModelProvider({ id: "local", name: "Local server", key, local: true });
   const keys = fakeKeyStore(keysKept);
-  const platform = fakePlatform({ commands: keys.commands, fetch: (url, init) => local.answer(url, init) });
+  const platform = fakePlatform({
+    commands: keys.commands,
+    fetch: (url, init) => (isVersionCheck(url) ? upToDate() : local.answer(url, init)),
+  });
   return { local, keys, platform, providers: [local.provider] };
 }
 

@@ -6,7 +6,7 @@ import { afterEach, expect, test } from "vitest";
 
 import { App } from "../App";
 import type { OpenedRepository } from "../commands/api";
-import { HOST_PAGES_KEY, RECENT_REPOSITORIES_KEY } from "../settings/localSettings";
+import { HOST_PAGES_KEY, RECENT_REPOSITORIES_KEY, UPDATE_CHECK_KEY } from "../settings/localSettings";
 import { chooseFromMenu } from "../test/appMenu";
 import { expectNoAxeViolations } from "../test/axe";
 import { fakeHostPages, fakePlatform } from "../test/fakePlatform";
@@ -172,6 +172,8 @@ test("Settings turns Host pages in Tabs off, for the browser, only where the she
 
 test("the version check opens the latest Release's page on GitHub in a Tab of its own", async () => {
   const user = userEvent.setup();
+  // Only Help asks, with the check at start off.
+  localStorage.setItem(UPDATE_CHECK_KEY, "false");
   const pages = fakeHostPages();
   const fake = fakePlatform({
     fetch: () => new Response(JSON.stringify({ version: "99.0.0" })),

@@ -52,6 +52,7 @@ import { trackCommands } from "./ui/commandActivity";
 import { KeyboardShortcuts } from "./ui/KeyboardShortcuts";
 import { Menu, type MenuItem } from "./ui/Menu";
 import { ariaShortcut, matches, type ShortcutName, SHORTCUTS, shortcutLabel } from "./ui/shortcuts";
+import { OutOfDateDialog, useOutOfDateAtStart } from "./updates/OutOfDateDialog";
 import { UpdateNotice } from "./updates/UpdateNotice";
 import { VersionCheckDialog } from "./updates/VersionCheckDialog";
 import { useUpdates } from "./updates/useUpdates";
@@ -195,6 +196,9 @@ export function App({ platform: shell, modelProviders = MODEL_PROVIDERS }: Props
       [remember],
     ),
   );
+
+  // Whether the version running is the latest, asked as Lanewise starts.
+  const [outOfDate, closeOutOfDate] = useOutOfDateAtStart(platform);
 
   const updates = useUpdates(platform.updater, {
     whyNotInstall: () =>
@@ -679,6 +683,7 @@ export function App({ platform: shell, modelProviders = MODEL_PROVIDERS }: Props
         onOpenReleasePage={openLink}
       />
       <KeyboardShortcuts open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
+      <OutOfDateDialog outOfDate={outOfDate} onClose={closeOutOfDate} onOpenLink={openInBrowser} />
       <ActivityIndicator />
       <Footer onOpenLink={openLink} policy={policy} onPolicy={setPolicy} />
     </div>

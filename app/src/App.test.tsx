@@ -9,7 +9,7 @@ import type { Cursor, FileStatusEntry, InProgressOperation, LayoutToken, OpenedR
 import { CommandRejectedError } from "./commands/reply";
 import { STORED_ITEMS } from "./legal/stored";
 import { unavailablePlatform } from "./platform/unavailable";
-import { RECENT_REPOSITORIES_KEY } from "./settings/localSettings";
+import { RECENT_REPOSITORIES_KEY, UPDATE_CHECK_KEY } from "./settings/localSettings";
 import { chooseFromMenu, openFromFileMenu } from "./test/appMenu";
 import { expectNoAxeViolations } from "./test/axe";
 import {
@@ -868,8 +868,59 @@ test("the menus' shortcuts work from anywhere in the window, but not from inside
   expect(within(shortcuts).getByRole("row", { name: /Ctrl\+Shift\+O Clone a repository/ })).toBeVisible();
 });
 
+test("as it starts, Lanewise says when the version running is out of date, and links to the latest Release", async () => {
+  const user = userEvent.setup();
+  const fake = fakePlatform({
+    fetch: (url) =>
+      url === "https://raw.githubusercontent.com/adrianeyre/lanewise/main/package.json"
+        ? new Response(JSON.stringify({ version: "99.0.0" }))
+        : new Response("", { status: 404 }),
+  });
+  const { container } = render(<App platform={fake.platform} />);
+
+  const dialog = await screen.findByRole("dialog", { name: "A newer version of Lanewise is out" });
+  expect(
+    within(dialog).getByText(`You are running Lanewise ${import.meta.env.VITE_APP_VERSION}, which is out of date.`),
+  ).toBeVisible();
+  expect(within(dialog).getByText(/The latest version is 99\.0\.0\./)).toBeVisible();
+  await expectNoAxeViolations(container);
+  await user.click(within(dialog).getByRole("link", { name: /Download Lanewise 99\.0\.0 from its Release on GitHub/ }));
+  expect(fake.links).toEqual(["https://github.com/adrianeyre/lanewise/releases/latest"]);
+  expect(fake.fetches.map(({ url }) => url)).toEqual(["https://raw.githubusercontent.com/adrianeyre/lanewise/main/package.json"]);
+
+  await user.click(within(dialog).getByRole("button", { name: "Close" }));
+  expect(screen.queryByRole("dialog", { name: "A newer version of Lanewise is out" })).toBeNull();
+});
+
+test("as it starts, Lanewise says nothing when the version running is the latest, or GitHub can't be asked", async () => {
+  const answers = [
+    () => new Response(JSON.stringify({ version: import.meta.env.VITE_APP_VERSION })),
+    () => new Response("", { status: 503 }),
+  ];
+  for (const answer of answers) {
+    const fake = fakePlatform({ fetch: answer });
+    render(<App platform={fake.platform} />);
+    await waitFor(() => expect(fake.fetches).toHaveLength(1));
+    await screen.findByRole("button", { name: "Open repository" });
+    expect(screen.queryByRole("dialog")).toBeNull();
+    cleanup();
+  }
+});
+
+test("with Check for updates when Lanewise starts off, Lanewise doesn't ask for the latest version as it starts", async () => {
+  localStorage.setItem(UPDATE_CHECK_KEY, "false");
+  const fake = fakePlatform({ fetch: () => new Response(JSON.stringify({ version: "99.0.0" })) });
+  render(<App platform={fake.platform} />);
+  await screen.findByRole("button", { name: "Open repository" });
+
+  expect(screen.queryByRole("dialog")).toBeNull();
+  expect(fake.fetches).toEqual([]);
+});
+
 test("Help checks main's package.json for the latest version, and links to it when the one running is older", async () => {
   const user = userEvent.setup();
+  // Only Help asks, with the check at start off.
+  localStorage.setItem(UPDATE_CHECK_KEY, "false");
   const fake = fakePlatform({
     fetch: (url) =>
       url === "https://raw.githubusercontent.com/adrianeyre/lanewise/main/package.json"

@@ -15,6 +15,7 @@ import { MODEL_PROVIDER_KEY } from "../settings/localSettings";
 import { expectNoAxeViolations } from "../test/axe";
 import { FAKE_API, fakeModelProvider } from "../test/fakeModelProvider";
 import { fakeKeyStore, fakePlatform, historyCommit } from "../test/fakePlatform";
+import { besidesVersionCheck, isVersionCheck, upToDate } from "../test/versionCheck";
 
 // jsdom lays nothing out, so a Range has no rectangles: CodeMirror measures
 // them to scroll a Conflict Hunk into view, and finds none.
@@ -151,7 +152,8 @@ async function opened({
         return { ok: true, value: null };
       },
     },
-    fetch: (url, init) => (fetch ? fetch(url, init, () => model.answer(url, init)) : model.answer(url, init)),
+    fetch: (url, init) =>
+      isVersionCheck(url) ? upToDate() : fetch ? fetch(url, init, () => model.answer(url, init)) : model.answer(url, init),
   });
   const { container } = render(<App platform={fake.platform} modelProviders={[model.provider]} />);
   await user.click(await screen.findByRole("button", { name: "Open repository" }));
@@ -188,7 +190,7 @@ test("while AI is off, the AI Suggestion Widget says how to turn it on, and noth
   expect(within(widget).getByText("AI is off, so nothing is sent to any Model Provider.")).toBeVisible();
   expect(within(widget).getByText(/open Settings in the title bar, turn on “Suggest Resolutions with AI”/)).toBeVisible();
   expect(within(widget).queryByRole("button", { name: "Suggest a resolution" })).toBeNull();
-  expect(fake.fetches).toEqual([]);
+  expect(besidesVersionCheck(fake.fetches)).toEqual([]);
   await expectNoAxeViolations(container);
 });
 
@@ -230,7 +232,7 @@ test("Suggest a resolution sends exactly what the disclosure lists, and shows th
   expect((asked!.body as { prompt: string }).prompt).not.toContain("// above 5\n");
   expect((asked!.body as { prompt: string }).prompt).not.toContain("// below 21");
   // Only the model catalog, the model list and the Suggestion are fetched.
-  expect(fake.fetches.map(({ url }) => url.replace(/^https:\/\/raw\.githubusercontent\.com\/.*$/, "catalog"))).toEqual([
+  expect(besidesVersionCheck(fake.fetches).map(({ url }) => url.replace(/^https:\/\/raw\.githubusercontent\.com\/.*$/, "catalog"))).toEqual([
     "catalog",
     `${FAKE_API}/fake/models`,
     `${FAKE_API}/fake/suggest`,

@@ -229,10 +229,10 @@ test("the title bar has the app's menu at the left, whose File menu opens, clone
     "Cookie Policy",
     "Accessibility",
     "Credits",
-    "Version: 1.0.0",
+    `Version: ${import.meta.env.VITE_APP_VERSION}`,
   ]);
   // The version is only said: choosing it does nothing.
-  expect(screen.getByRole("menuitem", { name: "Version: 1.0.0" })).toHaveAttribute("aria-disabled", "true");
+  expect(screen.getByRole("menuitem", { name: `Version: ${import.meta.env.VITE_APP_VERSION}` })).toHaveAttribute("aria-disabled", "true");
   // Credits, Cookie Policy and Accessibility open the footer's own dialogs.
   await user.click(screen.getByRole("menuitem", { name: "Credits" }));
   expect(await screen.findByRole("dialog", { name: "Credits" })).toBeVisible();
@@ -888,6 +888,14 @@ test("Help checks main's package.json for the latest version, and links to it wh
   expect(fake.links).toEqual(["https://github.com/adrianeyre/lanewise/releases/latest"]);
   expect(fake.fetches.map(({ url }) => url)).toEqual(["https://raw.githubusercontent.com/adrianeyre/lanewise/main/package.json"]);
   await expectNoAxeViolations(container);
+
+  // With no Host pages in Tabs, as in Web Mode, its Release page opens in the browser.
+  await user.click(within(dialog).getByRole("button", { name: "Open the Lanewise 99.0.0 Release" }));
+  expect(screen.queryByRole("dialog", { name: "Check for the latest version" })).toBeNull();
+  expect(fake.links).toEqual([
+    "https://github.com/adrianeyre/lanewise/releases/latest",
+    "https://github.com/adrianeyre/lanewise/releases/tag/v99.0.0",
+  ]);
 });
 
 test("a palette chosen in Settings is shown at once and kept", async () => {

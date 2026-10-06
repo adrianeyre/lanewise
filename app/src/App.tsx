@@ -670,12 +670,13 @@ export function App({ platform: shell, modelProviders = MODEL_PROVIDERS }: Props
           )}
         </div>
       </main>
-      {/* The Release is downloaded, which the browser does, not a Host page. */}
+      {/* The Release is downloaded, which the browser does, not a Host page; its page opens as any other. */}
       <VersionCheckDialog
         platform={platform}
         open={versionOpen}
         onClose={() => setVersionOpen(false)}
         onOpenLink={openInBrowser}
+        onOpenReleasePage={openLink}
       />
       <KeyboardShortcuts open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
       <ActivityIndicator />

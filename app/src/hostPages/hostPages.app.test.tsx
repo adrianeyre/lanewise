@@ -7,6 +7,7 @@ import { afterEach, expect, test } from "vitest";
 import { App } from "../App";
 import type { OpenedRepository } from "../commands/api";
 import { HOST_PAGES_KEY, RECENT_REPOSITORIES_KEY } from "../settings/localSettings";
+import { chooseFromMenu } from "../test/appMenu";
 import { expectNoAxeViolations } from "../test/axe";
 import { fakeHostPages, fakePlatform } from "../test/fakePlatform";
 
@@ -167,4 +168,24 @@ test("Settings turns Host pages in Tabs off, for the browser, only where the she
   await user.keyboard("{Control>},{/Control}");
   const webMode = await screen.findByRole("dialog", { name: "Settings" });
   expect(within(webMode).queryByRole("checkbox", { name: /Tabs here$/ })).toBeNull();
+});
+
+test("the version check opens the latest Release's page on GitHub in a Tab of its own", async () => {
+  const user = userEvent.setup();
+  const pages = fakeHostPages();
+  const fake = fakePlatform({
+    fetch: () => new Response(JSON.stringify({ version: "99.0.0" })),
+    hostPages: pages.hostPages,
+  });
+  render(<App platform={fake.platform} />);
+  await screen.findByRole("button", { name: "Open repository" });
+  await chooseFromMenu(user, ["Help", "Check for the latest version…"]);
+  const dialog = await screen.findByRole("dialog", { name: "Check for the latest version" });
+
+  await user.click(await within(dialog).findByRole("button", { name: "Open the Lanewise 99.0.0 Release" }));
+
+  const release = "https://github.com/adrianeyre/lanewise/releases/tag/v99.0.0";
+  expect(await screen.findByRole("tab", { name: "github.com" })).toHaveAttribute("aria-selected", "true");
+  await waitFor(() => expect(pages.calls[0]).toEqual({ call: "open", page: 1, detail: release }));
+  expect(fake.links).toEqual([]);
 });

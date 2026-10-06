@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 
-import { checkLatestVersion, compareVersions, LATEST_PACKAGE_URL } from "./latestVersion";
+import { checkLatestVersion, compareVersions, LATEST_PACKAGE_URL, releasePageOf } from "./latestVersion";
 
 const answering = (body: unknown, status = 200) => {
   const asked: string[] = [];
@@ -43,4 +43,9 @@ test("an answer that isn't a version, or no answer, says why", async () => {
   });
   const offline = { fetch: () => Promise.reject(new TypeError("offline")) };
   expect(await checkLatestVersion(offline, "1.0.0")).toMatchObject({ kind: "failed" });
+});
+
+test("a version's Release page is its tag's on GitHub", () => {
+  expect(releasePageOf("1.2.3")).toBe("https://github.com/adrianeyre/lanewise/releases/tag/v1.2.3");
+  expect(releasePageOf("v2.0.0-rc.1")).toBe("https://github.com/adrianeyre/lanewise/releases/tag/v2.0.0-rc.1");
 });

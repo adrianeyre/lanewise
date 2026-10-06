@@ -16,8 +16,10 @@ pub trait Remotes {
     /// branch's name. A branch with none isn't listed.
     fn read_upstreams(&self, git: &Git) -> Result<Vec<Upstream>, RemoteError>;
 
-    /// Fetches from every remote with `git fetch --all`, calling
-    /// `on_progress` for each progress update Git reports.
+    /// Fetches from every remote with `git fetch --all --prune`, calling
+    /// `on_progress` for each progress update Git reports. A branch deleted
+    /// on a remote, as a Host does once its pull request is merged, has its
+    /// remote-tracking branch here deleted too.
     fn fetch(
         &self,
         git: &Git,
@@ -273,8 +275,9 @@ impl Remotes for Repository {
         if self.gix.remote_names().is_empty() {
             return Err(RemoteError::NoRemotes);
         }
-        // Git's config says the rest, such as whether to prune.
-        git.command(["fetch", "--all", "--progress"])
+        // Always pruned, whatever `fetch.prune` says, so a branch the remote
+        // has deleted leaves the Commit graph. Git's config says the rest.
+        git.command(["fetch", "--all", "--prune", "--progress"])
             .current_dir(self.root())
             .run(cancel, on_progress)?;
         Ok(())

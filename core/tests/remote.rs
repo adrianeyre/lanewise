@@ -204,10 +204,9 @@ fn reads_an_upstream_deleted_on_the_remote_as_gone() {
         &remote.theirs,
         &["push", "--quiet", "origin", "--delete", "topic"],
     );
-    run_git(&remote.mine, &["config", "fetch.prune", "true"]);
     let repository = remote.open();
 
-    fetch(&repository).expect("the fetch runs, pruning as Git's config says");
+    fetch(&repository).expect("the fetch runs");
 
     let topic = upstream(&repository, "topic").unwrap();
     assert!(topic.gone);
@@ -216,6 +215,31 @@ fn reads_an_upstream_deleted_on_the_remote_as_gone() {
         Err(RemoteError::UpstreamGone { branch, upstream })
             if branch == "topic" && upstream == "origin/topic"
     ));
+}
+
+#[test]
+fn a_fetch_prunes_a_branch_deleted_on_the_remote_whatever_the_config_says() {
+    let remote = Remote::new();
+    run_git(
+        &remote.mine,
+        &["push", "--quiet", "origin", "HEAD:refs/heads/merged"],
+    );
+    run_git(&remote.mine, &["fetch", "--quiet", "origin"]);
+    run_git(
+        &remote.theirs,
+        &["push", "--quiet", "origin", "--delete", "merged"],
+    );
+    run_git(&remote.mine, &["config", "fetch.prune", "false"]);
+    let repository = remote.open();
+
+    fetch(&repository).expect("the fetch runs");
+
+    let refs = run_git(
+        &remote.mine,
+        &["for-each-ref", "--format=%(refname)", "refs/remotes"],
+    );
+    assert!(!refs.contains("refs/remotes/origin/merged"), "{refs}");
+    assert!(refs.contains("refs/remotes/origin/main"), "{refs}");
 }
 
 #[test]

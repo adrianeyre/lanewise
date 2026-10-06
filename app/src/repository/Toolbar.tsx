@@ -7,6 +7,7 @@ import {
   GitBranch,
   GitBranchPlus,
   Redo2,
+  SkipForward,
   Undo2,
   X,
 } from "lucide-react";
@@ -73,11 +74,12 @@ const PULL_MODES: readonly PullMode[] = ["merge", "rebase", "fastForwardOnly"];
 /**
  * The Repository page's Toolbar (PRD §7.6): the current branch, how far it
  * is ahead of and behind its Upstream, and Fetch, Pull and Push, each run by
- * `git` with its progress and Cancel. Pull follows the Git config; its menu
+ * `git` with its progress and Cancel; a fetch has Skip, to carry on while
+ * it finishes in the background, and Close, to stop it. Pull follows the Git config; its menu
  * picks a Pull Mode for one pull instead. Pushing a branch with no Upstream
  * asks where to push it, and sets that as its Upstream. A push the remote
  * rejects says why and offers to pull. Starting one moves focus to its
- * Cancel, and once it has gone, back to the button that started it. It
+ * Cancel, or a fetch's Close, and once it has gone, back to the button that started it. It
  * reads the branches again as the refs change. A Sign-in Failure is
  * explained with how to fix it (PRD §9.3). With `fetchOnShow` it fetches as
  * it's drawn, as when its Tab is chosen.
@@ -400,16 +402,47 @@ export function Toolbar({
                       : describeProgress(status.progress, describeStarting(status.operation, status.mode, status.setUpstream))}
                   </p>
                   <GitProgressBar progress={status.progress} labelledBy={phaseId} />
-                  <button
-                    ref={cancelButton}
-                    type="button"
-                    className="button button-small"
-                    aria-disabled={status.cancelling || undefined}
-                    onClick={remote.cancel}
-                  >
-                    <X aria-hidden="true" className="button-icon" />
-                    Cancel {operationName[status.operation]}
-                  </button>
+                  {status.operation === "fetch" ? (
+                    <>
+                      {/* Skip leaves it running in the background; Close stops it. */}
+                      <button
+                        type="button"
+                        className="button button-small"
+                        aria-label="Skip fetch"
+                        title="Carry on while the fetch finishes in the background"
+                        aria-disabled={status.cancelling || undefined}
+                        onClick={() => {
+                          if (!status.cancelling) remote.skip();
+                        }}
+                      >
+                        <SkipForward aria-hidden="true" className="button-icon" />
+                        Skip
+                      </button>
+                      <button
+                        ref={cancelButton}
+                        type="button"
+                        className="button button-small"
+                        aria-label="Close fetch"
+                        title="Stop the fetch"
+                        aria-disabled={status.cancelling || undefined}
+                        onClick={remote.cancel}
+                      >
+                        <X aria-hidden="true" className="button-icon" />
+                        Close
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      ref={cancelButton}
+                      type="button"
+                      className="button button-small"
+                      aria-disabled={status.cancelling || undefined}
+                      onClick={remote.cancel}
+                    >
+                      <X aria-hidden="true" className="button-icon" />
+                      Cancel {operationName[status.operation]}
+                    </button>
+                  )}
                 </div>
               )}
               {/* What the last one did, beside the branch, on the Toolbar's one row; in full on hover. */}

@@ -100,7 +100,7 @@ Neither of these applies the Desktop App's Content-Security-Policy, which Tauri 
 pnpm website:dev
 ```
 
-This is the project website at `http://localhost:5160/` (`website/README.md`).
+This is the project website at `http://localhost:5160/` (`website/README.md`). It has no Content-Security-Policy either: the build puts the website's in (ADR 0054), so check a change that loads something new on the built site: `pnpm website:build`, then `pnpm --filter @lanewise/website preview`.
 
 ## 5. Lint, typecheck and test
 

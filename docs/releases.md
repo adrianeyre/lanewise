@@ -49,7 +49,7 @@ A Release's build never has the key (ADR 0053). The build runs every Cargo build
 
 # The project website
 
-`website/` is Lanewise's page on GitHub Pages, [lanewise.adrianeyre.co.uk](https://lanewise.adrianeyre.co.uk/) (ADR 0031): what Lanewise is, screenshots, download buttons for the latest Release, a link to the README and the footer every page has. The build draws the page into its HTML, with the search, Open Graph and Twitter card tags, favicons, web app manifest, JSON-LD, `robots.txt` and `sitemap.xml`. `website/README.md` says how to run it and check it.
+`website/` is Lanewise's page on GitHub Pages, [lanewise.adrianeyre.co.uk](https://lanewise.adrianeyre.co.uk/) (ADR 0031): what Lanewise is, screenshots, download buttons for the latest Release, a link to the README and the footer every page has. The build draws the page into its HTML, with the search, Open Graph and Twitter card tags, favicons, web app manifest, JSON-LD, `robots.txt` and `sitemap.xml`. It offers only the Release whose version is the one it is built from, and the page has a Content-Security-Policy (ADR 0054). `website/README.md` says how to run it and check it.
 
 After each push to `main`, `release.yml` builds it with the latest Release and deploys it, once everything before it has passed. **Until GitHub Pages is turned on, it isn't deployed**: the run says so in a notice and stays green. To turn it on, once: **Settings → Pages → Build and deployment → Source: GitHub Actions**. The next push to `main` deploys it.
 

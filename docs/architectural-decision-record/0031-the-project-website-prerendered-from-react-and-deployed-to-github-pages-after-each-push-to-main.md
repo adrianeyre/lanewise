@@ -13,7 +13,7 @@ PRD §12.1 asks for a static project website on GitHub Pages at `https://lanewis
 
 It ships only React, React DOM and lucide-react, all of them among the app's own packages, which a test checks. So the footer's Credits are the app's, built by the same `credits` plugin from `app/`: Lanewise's npm packages and crates, the website's included.
 
-The page isn't on a Grid (PRD §7.1) and has no Settings, so it has no Theme choice of its own. An inline script in `index.html` follows the OS's light or dark setting before first paint, and as it changes, as the app's System Theme does. It saves nothing, since the Cookie Policy says the website stores nothing on your device at all, and a test checks the website's code never touches storage.
+The page isn't on a Grid (PRD §7.1) and has no Settings, so it has no Theme choice of its own. An inline script in `index.html` follows the OS's light or dark setting before first paint, and as it changes, as the app's System Theme does. It saves nothing, since the Cookie Policy says the website stores nothing on your device at all, and a test checks the website's code never touches storage. The built page has a Content-Security-Policy, which allows this script by its hash and nothing else inline (ADR 0054).
 
 ## Drawn to HTML when it is built
 
@@ -46,6 +46,7 @@ The download buttons link to the latest Release's universal disk image and NSIS 
 
 - a platform whose installer the Release lacks links to the Release's page;
 - a link anywhere but this repository's Releases fails the build;
+- a Release of any version but the one the website is built from, the footer's, fails the build (ADR 0054);
 - before the first Release there is nothing to save, and the page says there's nothing to download yet and links to the Releases.
 
 Looking the Release up in the visitor's browser instead would send every visitor's browser to GitHub's API, whose unauthenticated rate limit is shared by address, and would leave the buttons empty without JavaScript. A Release is only ever made by `release.yml` on a push to `main`, and the website is deployed at the end of that same run, so a build-time lookup is never out of date.

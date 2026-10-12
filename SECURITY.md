@@ -4,7 +4,7 @@ Lanewise holds things worth protecting: your repositories, the credentials Git s
 
 ## Supported versions
 
-Only the [latest Release](https://github.com/adrianeyre/lanewise/releases/latest) is supported, and a fix comes in a new Release. The installed Desktop App offers it as an Update (Settings → Updates), so staying current is one click. A copy built from source is supported at the latest commit on `main`.
+Only the [latest Release](https://github.com/adrianeyre/lanewise/releases/latest) is supported, and a fix comes in a new Release. Once the Update key is made, the installed Desktop App offers it as an Update (Settings → Updates), so staying current is one click. Until then, it says as it starts when a newer Release is out, with a link to download it. A copy built from source is supported at the latest commit on `main`.
 
 ## Reporting a vulnerability
 
@@ -52,4 +52,4 @@ These are out of scope here:
 - There's no telemetry. The Logs stay on your computer, in a folder other users of it can't open, never hold credentials, API keys, file contents or prompts, and hide anything that still looks like a credential as they're written and read (ADR 0028).
 - The window's own requests, to Model Providers, Jev, the Model catalog and the latest version's number, go only to the URLs on its HTTP allow-list, which a test holds it to, and reach a Model Provider on this computer only at its API's own paths (ADR 0051). Besides those, it shows authors' pictures from GitHub, while Settings allows them (ADR 0035). Hosts, Issue Trackers and Gateways are asked by Lanewise's core, not the window.
 - The Desktop App's window runs only the scripts it was built with: its Content-Security-Policy refuses any other script, and anything the page would load or send from somewhere it doesn't name (ADR 0050).
-- An Update is installed only if it is signed by the Update key, and only when you choose to install it (ADR 0030).
+- An Update is installed only if it is signed by the Update key, for a version newer than the one running, and only when you choose to install it (ADR 0030). So an older Release, even one the key signed, is never installed as an Update.

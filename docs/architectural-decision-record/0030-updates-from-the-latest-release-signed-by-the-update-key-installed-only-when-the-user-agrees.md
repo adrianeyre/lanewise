@@ -82,7 +82,7 @@ With no key at all, and so nothing signed, it writes no `latest.json`, which is 
 ## Alternatives
 
 - **CrabNebula Cloud**, Tauri's hosted updater: another account, and past its free tier a bill.
-- **A server of our own** answering the updater dynamically, for staged roll-outs: more to run and secure. `latest.json` on a Release can be edited later if a roll-out has to be held back.
+- **A server of our own** answering the updater dynamically, for staged roll-outs: more to run and secure. A roll-out can be held back by marking the previous Release as the latest, since a published Release's files don't change (ADR 0052).
 - **The plugin's JavaScript API** (`@tauri-apps/plugin-updater`): less Rust, but the page could point the updater anywhere.
 - **Silent updates**, installed at the next start: fewer clicks, but a restart the user didn't choose, and it would have to know about In-Progress Operations left open at quit. A setting could add it later.
 - **Signing `latest.json` itself.** The updater doesn't. It trusts the file only for where to look and what the version is. Each package's signature, bound to its version, is what it checks, so a forged `latest.json` can only offer packages already signed.
@@ -90,7 +90,7 @@ With no key at all, and so nothing signed, it writes no `latest.json`, which is 
 ## Consequences
 
 - **Nothing updates itself until the maintainer makes the key.** Copies made before the public key is committed never update: their users install the first signed Release by hand, once.
-- **The private key can't be lost.** Without it, no installed copy can be updated again, only reinstalled from a Release with a new key. If it leaks, whoever has it can sign an Update every copy takes: make a new key and ship it the same way. It needs a backup, with its password, away from the maintainer's machine.
+- **The private key can't be lost.** Without it, no installed copy can be updated again, only reinstalled from a Release with a new key. If it leaks, whoever has it can sign an Update every copy takes. It needs a backup, with its password, away from the maintainer's machine. ADR 0052 says who holds it, where its backup is and how it's rotated.
 - **Committing the public key without the secret fails every Release** until the secret is added. That's deliberate: see above.
 - The installed app contacts `github.com` at each start unless the check at start is off. GitHub sees the address asked for, as it would for any download. Nothing is sent about how Lanewise is used (PRD §11), and the window's HTTP allow-list is unchanged, since the shell asks, not the window (`app/src/platform/allowList.test.ts`).
 - On Windows a per-user install updates per user: the updater runs the installer's own upgrade (ADR 0029).

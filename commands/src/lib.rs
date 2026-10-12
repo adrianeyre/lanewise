@@ -566,4 +566,75 @@ mod tests {
             })
         );
     }
+
+    #[test]
+    fn a_request_carrying_a_secret_that_cant_be_read_never_says_the_secret() {
+        // Each is rejected before it runs, so no credential store is touched.
+        const SECRET: &str = "sk-ant-s1-canary-0123456789";
+        let header = || json!({ "name": "x-api-key", "value": SECRET });
+        let requests = [
+            (
+                "saveModelProviderKey",
+                json!({ "provider": "Not An ID", "key": SECRET }),
+            ),
+            (
+                "saveModelProviderKey",
+                json!({ "provider": "fake", "key": SECRET, "also": true }),
+            ),
+            ("saveModelProviderKey", json!({ "key": SECRET })),
+            (
+                "saveModelProviderKey",
+                json!({ "provider": "fake", "key": [SECRET] }),
+            ),
+            (
+                "saveGateway",
+                json!({ "provider": "../x", "baseUrl": "https://gateway.example", "headers": [header()] }),
+            ),
+            (
+                "saveGateway",
+                json!({ "provider": "fake", "headers": [{ "name": "x-api-key", "value": SECRET, "also": 1 }] }),
+            ),
+            (
+                "gatewayRequest",
+                json!({ "provider": "Not An ID", "path": "/", "method": "GET", "headers": [header()] }),
+            ),
+            (
+                "gatewayRequest",
+                json!({ "provider": "fake", "path": "/", "headers": [header()] }),
+            ),
+            (
+                "saveIssueTrackerAccount",
+                json!({ "tracker": "nope", "token": SECRET }),
+            ),
+            (
+                "saveIssueTrackerAccount",
+                json!({ "tracker": "trello", "key": { "key": SECRET }, "token": SECRET }),
+            ),
+            (
+                "saveIssueTrackerAccount",
+                json!({ "tracker": "jira", "site": "x.atlassian.net", "email": "a@b.c", "token": SECRET, "also": 1 }),
+            ),
+        ];
+
+        for (name, request) in requests {
+            let reply = call(name, request.clone());
+
+            assert!(
+                matches!(
+                    &reply,
+                    Reply::Rejected {
+                        rejection: Rejection::InvalidRequest { .. }
+                    }
+                ),
+                "{name} {request}: {reply:?}"
+            );
+            let sent = serde_json::to_string(&reply).unwrap();
+            assert!(!sent.contains(SECRET), "{name} {request}: {sent}");
+            let logged = logs::outcome_line(name, &reply).map(|(_, line)| line);
+            assert!(
+                logged.as_ref().is_some_and(|line| !line.contains(SECRET)),
+                "{name}: {logged:?}"
+            );
+        }
+    }
 }

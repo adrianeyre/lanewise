@@ -1,4 +1,5 @@
-import { readFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
 import Ajv from "ajv";
@@ -8,6 +9,11 @@ import { expect, test } from "vitest";
 /** A file of the repository's, as JSON. */
 function json(path: string): Record<string, unknown> {
   return JSON.parse(readFileSync(fileURLToPath(new URL(`../../../${path}`, import.meta.url)), "utf8"));
+}
+
+/** A file of the repository's, as text. */
+function text(path: string): string {
+  return readFileSync(fileURLToPath(new URL(`../../../${path}`, import.meta.url)), "utf8");
 }
 
 /** `patch` over `target` as RFC 7396 has it, which is how Tauri merges a platform's config into `tauri.conf.json`. */
@@ -51,4 +57,44 @@ test("the Windows installer is NSIS, for the current user, with no administrator
   const { bundle } = json("desktop/tauri.windows.conf.json") as { bundle: { targets: string[]; windows: { nsis: { installMode: string } } } };
   expect(bundle.targets).toEqual(["nsis"]);
   expect(bundle.windows.nsis.installMode).toBe("currentUser");
+});
+
+// Devtools would let anyone at the keyboard run script in the main webview,
+// which reads Model Provider keys through `modelProviderKey` (ADR 0020). Tauri
+// and wry turn them on only with debug assertions or the `devtools` feature.
+test("a release build can't open devtools: no crate turns them on, and the release keeps debug assertions off", () => {
+  interface Metadata {
+    packages: { id: string; name: string }[];
+    resolve: { nodes: { id: string; features: string[] }[] };
+  }
+  // Every target's, with every kind of dependency's features unified, so this holds for more than a release links.
+  const metadata = JSON.parse(
+    execFileSync("cargo", ["metadata", "--format-version", "1", "--manifest-path", fileURLToPath(new URL("../../../Cargo.toml", import.meta.url))], {
+      encoding: "utf8",
+      maxBuffer: 1024 * 1024 * 1024,
+      stdio: ["ignore", "pipe", "inherit"],
+    }),
+  ) as Metadata;
+  const names = new Map(metadata.packages.map((crate) => [crate.id, crate.name]));
+  const webview = metadata.resolve.nodes
+    .filter((node) => ["tauri", "tauri-runtime", "tauri-runtime-wry", "wry"].includes(names.get(node.id)!))
+    .map((node) => ({ crate: names.get(node.id), devtools: node.features.includes("devtools") }))
+    .toSorted((a, b) => a.crate!.localeCompare(b.crate!));
+  expect(webview).toEqual(["tauri", "tauri-runtime", "tauri-runtime-wry", "wry"].map((crate) => ({ crate, devtools: false })));
+
+  // `tauri build` builds the release profile, which has debug assertions off unless something turns them on.
+  const turnedOn = ["Cargo.toml", "desktop/Cargo.toml", ".cargo/config.toml", ".cargo/config", ".github/workflows/release.yml"].filter(
+    (path) => existsSync(fileURLToPath(new URL(`../../../${path}`, import.meta.url))) && /debug[-_]assertions/i.test(text(path)),
+  );
+  expect(turnedOn).toEqual([]);
+  const builds = text(".github/workflows/release.yml")
+    .split("\n")
+    .filter((line) => line.includes("pnpm desktop:build"));
+  expect(builds.length).toBeGreaterThan(0);
+  for (const line of builds) expect(line).not.toMatch(/--debug|--features|\s-[fF]\b|--profile/);
+
+  for (const platform of [base, merge(base, json("desktop/tauri.windows.conf.json")), merge(base, json("desktop/tauri.macos.conf.json"))]) {
+    const { windows } = (platform as { app: { windows: { devtools?: boolean }[] } }).app;
+    for (const window of windows) expect(window.devtools).not.toBe(true);
+  }
 });

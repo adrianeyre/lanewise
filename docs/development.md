@@ -142,7 +142,7 @@ This is a release build, and on macOS and Windows the installer a Release has (A
 | macOS | the app and disk image under `target/release/bundle/`. For the universal, ad hoc signed app CI makes: `node app/scripts/release/signMacos.ts -- pnpm desktop:build --target universal-apple-darwin`, which writes `target/universal-apple-darwin/release/bundle/dmg/Lanewise_<version>_universal.dmg` |
 | Linux | `target/release/lanewise-desktop`, with no installer |
 
-Without the Update key's secrets it makes no update packages, and says so ([the Update key](releases.md#the-update-key)); `node app/scripts/release/updater.ts --how` says whether it would. A copy you build this way opens without the Gatekeeper or SmartScreen warnings.
+Without the Update key's secrets it makes no update packages, and says so ([the Update key](releases.md#the-update-key)); `node app/scripts/release/updater.ts --how` says whether it would. A Release's build never has the key: the release workflow's `sign` job checks the tag with `app/scripts/release/versionCommit.ts` and signs the packages with `node app/scripts/release/updater.ts sign <dir> <version>` (ADR 0053). A copy you build this way opens without the Gatekeeper or SmartScreen warnings.
 
 ## 8. Everything else
 

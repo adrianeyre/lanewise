@@ -41,7 +41,7 @@ A copy of Lanewise trusts the one public key it was built with. `publish` checks
 If the private half leaks, or might have, or is lost:
 
 1. **Make a new key** on your own machine, with a new password: `pnpm exec tauri signer generate -w ~/.tauri/lanewise-2.key`.
-2. **Replace the two repository secrets** with the new key and its password, before anything else merges to `main`, so no later Release is signed by the old key.
+2. **Replace the two secrets** in the `release` environment (ADR 0053) with the new key and its password, before anything else merges to `main`, so no later Release is signed by the old key.
 3. **Commit the new public half** to `plugins.updater.pubkey` in `desktop/tauri.conf.json` as a `fix:` commit. Its Release is the first signed by the new key; `publish` checks it against the new public half.
 4. **Copies of every earlier Release still trust only the old key.** They find the new Release, but Install and restart refuses its package, saying it "isn't signed by Lanewise's Update key for the version it says, so it wasn't trusted", and installs nothing. Lanewise's check at start still says a newer version is out (ADR 0047). Each user installs the new Release from its page, once.
 5. **If it leaked, publish a security advisory** naming the Releases that trusted the old key and asking their users to install the new one by hand. Until they do, their copies trust the old key. Whoever has it would also need those copies to read a `latest.json` of their own, which needs push access to `adrianeyre/lanewise` or a break of TLS to `github.com`.
@@ -53,7 +53,7 @@ A bridging Release, signed by the old key and carrying the new public half, woul
 
 - **Leave Releases editable, as ADR 0030 did.** Left out: the updater limits what a changed `latest.json` can do, but nothing limits a changed installer for a first install, or a package replaced by another the key signed.
 - **Sign `latest.json` as well.** Left out again, as in ADR 0030: Tauri's updater doesn't check it. A forged one can only offer packages already signed, for their own versions, newer than the copy running.
-- **Keep the Update key in a GitHub environment that only `main` can use.** That's R2's (#28), which probes the release workflow's secrets. It doesn't change who can edit a Release.
+- **Keep the Update key in a GitHub environment that only `main` can use.** That's R2's (#28), which probes the release workflow's secrets, and ADR 0053 does it. It doesn't change who can edit a Release.
 - **Ship two public keys, so a rotation needs no bridge.** Tauri's updater takes one.
 
 ## Consequences

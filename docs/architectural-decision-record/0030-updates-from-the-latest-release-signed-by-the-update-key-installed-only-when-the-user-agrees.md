@@ -56,7 +56,7 @@ Tauri makes and signs update packages when `bundle.createUpdaterArtifacts` is on
 
 ## The release workflow publishes `latest.json` with each Release
 
-`release.yml` gives the two secrets to the macOS and Windows build steps only, and to an **Update key** step before each build. That step fails on half a set of secrets, and also when the public key is committed but the private key isn't set: that Release would announce nothing no installed copy could take, so it is better to fail than to publish silently without Updates. With neither, it leaves a notice, "No update package".
+`release.yml` gave the two secrets to the macOS and Windows build steps only, and to an **Update key** step before each build. [ADR 0053](0053-the-update-key-in-a-job-of-its-own-that-only-main-can-use.md) has since moved them out of the build, to a `sign` job of their own that installs and builds nothing, in an environment only `main` can use. That step fails on half a set of secrets, and also when the public key is committed but the private key isn't set: that Release would announce nothing no installed copy could take, so it is better to fail than to publish silently without Updates. With neither, it leaves a notice, "No update package".
 
 The Windows job uploads the installer with its `.sig`. Tauri names the Mac's package `Lanewise.app.tar.gz` whatever the version, so the macOS job uploads it and its `.sig` renamed to `Lanewise_<version>_universal.app.tar.gz`, as the installers are named. The signature is over the contents, not the name, so renaming it is safe.
 
@@ -94,7 +94,7 @@ With no key at all, and so nothing signed, it writes no `latest.json`, which is 
 - **Committing the public key without the secret fails every Release** until the secret is added. That's deliberate: see above.
 - The installed app contacts `github.com` at each start unless the check at start is off. GitHub sees the address asked for, as it would for any download. Nothing is sent about how Lanewise is used (PRD §11), and the window's HTTP allow-list is unchanged, since the shell asks, not the window (`app/src/platform/allowList.test.ts`).
 - On Windows a per-user install updates per user: the updater runs the installer's own upgrade (ADR 0029).
-- Every Release build job has the Update key in its build step's environment, as it has the Windows signing secrets. Pull requests never do.
+- Every Release build job had the Update key in its build step's environment, as it has the Windows signing secrets. Pull requests never do. Since ADR 0053, no build job has it.
 
 ## Limits of this result
 

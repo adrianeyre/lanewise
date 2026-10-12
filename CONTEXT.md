@@ -225,7 +225,7 @@ A newer Release than the one running, which the installed Desktop App finds in t
 _Avoid_: Upgrade, patch, new version
 
 **Update key**:
-The minisign key pair every Update's package is signed with, for its version: the public half is built into the Desktop App, and the private half is a secret only the release workflow has. The app installs nothing the key didn't sign.
+The minisign key pair every Update's package is signed with, for its version: the public half is built into the Desktop App, and the private half is a secret only the release workflow's `sign` job has, never its build (ADR 0053). The app installs nothing the key didn't sign.
 _Avoid_: Updater key, signing key, code signing certificate
 
 **Project website**:

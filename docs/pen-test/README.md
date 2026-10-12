@@ -35,4 +35,4 @@ Each scope file has the trust boundary; each probe from its brief with what was 
 | P1 | #32 | Web Mode's design, before it is built: how the Access token is made and where it can leak, the WebSocket's `Origin` and `Host` checks and DNS rebinding, what a page on another site gets, which commands cross the WebSocket, and two browsers or two users on one machine | [P1.md](P1.md) |
 | H15 | #33 | Code scanning for the tree, with a named owner for its alerts | [H15.md](H15.md) |
 
-The round's other scope issues (W1–W4, G1–G4, S1–S3, M1–M2, R1–R5, P1, and the code-scanning issue) are listed in the PRD's §6, and add their rows here as they are worked.
+Every scope issue of the PRD's §6 has its row. A Finding, once fixed in a Release, is filed as §7 says and linked from its scope file.

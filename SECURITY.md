@@ -51,4 +51,5 @@ These are out of scope here:
 - Lanewise signs in to Hosts through Git and Git Credential Manager, and never keeps or shows those credentials itself (ADR 0016).
 - There's no telemetry. The Logs stay on your computer, never hold credentials, API keys, file contents or prompts, and hide anything that still looks like a credential as they're written and read (ADR 0028).
 - The window can only make requests to the URLs on its allow-list, which a test holds it to.
+- The Desktop App's window runs only the scripts it was built with: its Content-Security-Policy refuses any other script, and anything the page would load or send from somewhere it doesn't name (ADR 0050).
 - An Update is installed only if it is signed by the Update key, and only when you choose to install it (ADR 0030).

@@ -11,10 +11,9 @@ use std::io::Write as _;
 use std::path::Path;
 use std::process::Stdio;
 
-use lanewise_core::{
-    Branch, CheckOut, CommitId, ConflictSide, Conflicts, Git, Operations, Repository,
-    WholeFileChoice,
-};
+use lanewise_core::{Branch, CheckOut, CommitId, Git, Repository};
+#[cfg(unix)]
+use lanewise_core::{ConflictSide, Conflicts, Operations, WholeFileChoice};
 use tempfile::TempDir;
 
 /// Runs `git` in `dir`, failing the test if it fails, and gives its stdout.

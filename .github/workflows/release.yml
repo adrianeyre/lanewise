@@ -5,7 +5,8 @@ name: Release
 # tree; then semantic-release reads the Conventional Commits since the last
 # tag, decides the next version, puts it in package.json, writes CHANGELOG.md,
 # tags it and makes a draft GitHub Release. The Desktop App is built from that
-# tag for macOS and Windows, the installers go on the Release with the
+# tag for macOS and Windows, its update packages are signed by the Update key
+# in a job of their own (ADR 0053), the installers go on the Release with the
 # signed update packages and the `latest.json` the installed app updates
 # from (ADR 0030), the notes say how to install them, and the Release is
 # published. Last, the project website goes to GitHub Pages with the latest
@@ -129,8 +130,10 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # The tagged release: its package.json has the version semantic-release
-          # just gave it, which Tauri names the installer with.
-          ref: ${{ needs.release.outputs.tag }}
+          # just gave it, which Tauri names the installer with. In full, so a
+          # branch of the same name is never built in its place: `sign`
+          # checks the tag.
+          ref: refs/tags/${{ needs.release.outputs.tag }}
           persist-credentials: false
 
       - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
@@ -155,48 +158,25 @@ jobs:
             echo "signed=signed" >> "$GITHUB_OUTPUT"
           fi
 
-      # Whether the update package is signed with the Update key, before the
-      # build: `docs/releases.md`'s "The Update key". Half a set of secrets fails, as does the
-      # key's public half committed without its private half here, since no
-      # installed copy would take this Release.
-      - name: Update key
-        shell: bash
-        env:
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-        run: |
-          how=$(node app/scripts/release/updater.ts --how)
-          pubkey=$(node -p 'require("./desktop/tauri.conf.json").plugins.updater.pubkey')
-          if [ "$how" = unsigned ] && [ -n "$pubkey" ]; then
-            echo "::error title=No Update key::The Update key's public half is in desktop/tauri.conf.json, but TAURI_SIGNING_PRIVATE_KEY isn't set, so no installed copy would update to this Release."
-            exit 1
-          elif [ "$how" = unsigned ]; then
-            echo "::notice title=No update package::The updater has no key yet (docs/releases.md, \"The Update key\"), so this Release makes no update package and installed copies won't update to it."
-          fi
-
       - run: rustup toolchain install stable --profile minimal && rustup default stable
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
 
       - run: pnpm install --frozen-lockfile
 
-      # The NSIS installer is the update package too, and with the Update key
-      # Tauri signs it, once it is code signed, into a `.sig` beside it.
+      # The NSIS installer is the update package too. The build never has the
+      # Update key: `sign` signs the installer this job uploads (ADR 0053).
       - run: pnpm desktop:build
         env:
           WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
           WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
 
       # Named for the release's version, so a build of any other fails here.
-      # The installer's update signature, if there is one, goes with it.
       - shell: bash
         env:
           INSTALLER: target/release/bundle/nsis/Lanewise_${{ needs.release.outputs.version }}_x64-setup.exe
         run: |
           mkdir upload
           cp "$INSTALLER" upload/
-          if [ -f "$INSTALLER.sig" ]; then cp "$INSTALLER.sig" upload/; fi
           ls -l upload
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -223,7 +203,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ needs.release.outputs.tag }}
+          ref: refs/tags/${{ needs.release.outputs.tag }}
           persist-credentials: false
 
       - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
@@ -240,31 +220,26 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      # Whether the update package is signed with the Update key, before the
-      # build: `docs/releases.md`'s "The Update key". Half a set of secrets fails, as does the
-      # key's public half committed without its private half here, since no
-      # installed copy would take this Release.
-      - name: Update key
-        shell: bash
-        env:
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+      # The build never has the Update key (ADR 0053). Tauri makes the update
+      # package, a `Lanewise.app.tar.gz` of the ad-hoc signed app, only when it
+      # can sign it too, so once the app has a public key the build is given a
+      # key made here and thrown away with the runner. Tauri only warns that it
+      # isn't the app's. Its `.sig` is left behind, and `sign` signs the
+      # package with the Update key.
+      - id: throwaway
+        name: Throwaway key
         run: |
-          how=$(node app/scripts/release/updater.ts --how)
           pubkey=$(node -p 'require("./desktop/tauri.conf.json").plugins.updater.pubkey')
-          if [ "$how" = unsigned ] && [ -n "$pubkey" ]; then
-            echo "::error title=No Update key::The Update key's public half is in desktop/tauri.conf.json, but TAURI_SIGNING_PRIVATE_KEY isn't set, so no installed copy would update to this Release."
-            exit 1
-          elif [ "$how" = unsigned ]; then
-            echo "::notice title=No update package::The updater has no key yet (docs/releases.md, \"The Update key\"), so this Release makes no update package and installed copies won't update to it."
+          if [ -n "$pubkey" ]; then
+            password=$(node -p 'require("node:crypto").randomBytes(24).toString("hex")')
+            pnpm exec tauri signer generate --ci -p "$password" -w "$RUNNER_TEMP/throwaway.key" > /dev/null
+            { echo "key=$RUNNER_TEMP/throwaway.key"; echo "password=$password"; } >> "$GITHUB_OUTPUT"
           fi
 
-      # With the Update key, Tauri also makes `Lanewise.app.tar.gz`, the update
-      # package, from the ad-hoc signed app, and signs it into a `.sig`.
       - run: node app/scripts/release/signMacos.ts -- pnpm desktop:build --target universal-apple-darwin
         env:
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ steps.throwaway.outputs.key }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ steps.throwaway.outputs.password }}
 
       # Asks what a Mac asks: the signature holds over the whole app; and that
       # it is ad hoc, universal and the release's version.
@@ -275,25 +250,106 @@ jobs:
 
       # The disk image, not the app itself: an artifact is a zip, which would
       # lose the app's symlinks and executable bits. The update package, a
-      # tarball that keeps them, goes too if there is one, named for the
-      # version as the installers are: its signature is of its contents, not
-      # its name.
+      # tarball that keeps them, goes to `sign` if there is one, named for the
+      # version as the installers are, without the throwaway key's `.sig`.
       - env:
           VERSION: ${{ needs.release.outputs.version }}
         run: |
-          mkdir upload
+          mkdir upload update
           cp "$DMG" upload/
           if [ -f "$APP.tar.gz" ]; then
-            cp "$APP.tar.gz" "upload/Lanewise_${VERSION}_universal.app.tar.gz"
-            cp "$APP.tar.gz.sig" "upload/Lanewise_${VERSION}_universal.app.tar.gz.sig"
+            cp "$APP.tar.gz" "update/Lanewise_${VERSION}_universal.app.tar.gz"
           fi
-          ls -l upload
+          ls -l upload update
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: lanewise-macos
           path: upload/*
           if-no-files-found: error
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: update-macos
+          path: update/*
+          if-no-files-found: ignore
+
+  # The Update key signs the update packages here, and nowhere else
+  # (ADR 0053). The build jobs run every Cargo build script, proc macro and
+  # Vite plugin in the tree, and semantic-release runs some three hundred npm
+  # packages, so none of them has the key. This job runs only GitHub's own
+  # actions, Node and Lanewise's own scripts, which import only Node's
+  # modules: nothing is installed. It runs in the `release` environment,
+  # which holds the key's two secrets and which only `main` can use.
+  #
+  # First it checks, from the commit merged rather than from the tag, that the
+  # tag the build jobs built is that commit and semantic-release's version
+  # commit, and nothing more. Then it signs the NSIS installer and the Mac's
+  # `.app.tar.gz` for the version, once it has checked the key is the one whose
+  # public half the app is built with. With no key yet there is nothing to
+  # sign; the public half committed without the private half fails, since no
+  # installed copy would take this Release.
+  sign:
+    name: Update packages
+    needs: [release, windows, macos]
+    if: needs.release.outputs.released == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: release
+    permissions:
+      contents: read
+    env:
+      TAG: ${{ needs.release.outputs.tag }}
+      VERSION: ${{ needs.release.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # The commit merged, and the tags, to check the tag against.
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 26
+
+      - name: The tag is what was merged
+        run: node app/scripts/release/versionCommit.ts "$GITHUB_SHA" "$TAG" "$VERSION"
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: lanewise-windows
+          path: update
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          path: update
+          pattern: update-*
+          merge-multiple: true
+
+      - name: Update key
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: |
+          node app/scripts/release/updater.ts sign update "$VERSION"
+          if ! ls update/*.sig > /dev/null 2>&1; then
+            echo "::notice title=No update package::The updater has no key yet (docs/releases.md, \"The Update key\"), so this Release makes no update package and installed copies won't update to it."
+          fi
+
+      # The signatures, and the Mac's package they sign. The installer is
+      # already on its way to `publish`.
+      - run: |
+          mkdir signed
+          for sig in update/*.sig; do
+            [ -f "$sig" ] || continue
+            cp "$sig" signed/
+            case "$sig" in *.app.tar.gz.sig) cp "${sig%.sig}" signed/ ;; esac
+          done
+          ls -l signed
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: lanewise-update
+          path: signed/*
+          if-no-files-found: ignore
 
   # The installers go on semantic-release's draft Release with the installing
   # section added to its notes (`app/scripts/release/releaseNotes.ts`), and
@@ -301,21 +357,20 @@ jobs:
   # made latest, so installed copies, which ask the latest Release for
   # `latest.json`, never update to one.
   publish:
-    needs: [release, windows, macos]
+    needs: [release, windows, macos, sign]
     if: needs.release.outputs.released == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
       contents: write
     env:
-      GH_TOKEN: ${{ github.token }}
       TAG: ${{ needs.release.outputs.tag }}
       VERSION: ${{ needs.release.outputs.version }}
       WINDOWS: ${{ needs.windows.outputs.signed }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ needs.release.outputs.tag }}
+          ref: refs/tags/${{ needs.release.outputs.tag }}
           persist-credentials: false
 
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
@@ -334,7 +389,10 @@ jobs:
       # package's signature against the committed public key and this version
       # first, as the installed app will, and fails on any it wouldn't take.
       # Before the Update key is made, there are none, and no latest.json.
-      - run: |
+      # The token goes only to the two steps that run `gh`.
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
           gh release view "$TAG" --json body --jq .body > notes.md
           node app/scripts/release/updater.ts manifest release "https://github.com/adrianeyre/lanewise/releases/download/$TAG" notes.md
           if [ ! -f release/latest.json ]; then
@@ -342,7 +400,9 @@ jobs:
           fi
           node app/scripts/release/releaseNotes.ts notes.md "$VERSION" "$WINDOWS"
 
-      - run: |
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
           gh release upload "$TAG" release/* --clobber
           latest=(--latest)
           case "$VERSION" in *-*) latest=(--prerelease --latest=false) ;; esac
@@ -377,7 +437,9 @@ jobs:
   # installers for its download buttons and deployed with GitHub's Pages
   # actions. Only on a push to main, and only once everything before it has
   # passed: the checks, semantic-release, and the Release's publishing when
-  # there was one, so the buttons offer the Release just made.
+  # there was one, so the buttons offer the Release just made. The build runs
+  # the website's npm packages, so its token can only read; `deploy` holds
+  # the deployment's and runs only `deploy-pages` (ADR 0053).
   website:
     name: Project website
     needs: [verify, release, publish, pages]
@@ -387,23 +449,15 @@ jobs:
       (needs.publish.result == 'success' || needs.publish.result == 'skipped')
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    # One deployment at a time, and never cancelled halfway.
-    concurrency:
-      group: pages
-      cancel-in-progress: false
     permissions:
       contents: read
-      pages: write # the deployment
-      id-token: write # which deploy-pages proves it comes from this run with
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      pages: read # configure-pages reads the site's settings
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # The version commit semantic-release made, if it made one, so the
           # footer's version is the Release's.
-          ref: ${{ needs.release.outputs.tag || github.sha }}
+          ref: ${{ needs.release.outputs.tag && format('refs/tags/{0}', needs.release.outputs.tag) || github.sha }}
           persist-credentials: false
 
       - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
@@ -435,5 +489,22 @@ jobs:
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: website/dist
+
+  deploy:
+    name: Deploy the project website
+    needs: website
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # One deployment at a time, and never cancelled halfway.
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    permissions:
+      pages: write # the deployment
+      id-token: write # which deploy-pages proves it comes from this run with
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - id: deployment
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

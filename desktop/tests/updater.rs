@@ -36,6 +36,12 @@ const UNVERSIONED_KEY: &str =
     include_str!("../../app/scripts/release/fixtures/unversioned/throwaway.pub");
 const UNVERSIONED_SIGNATURE: &str =
     include_str!("../../app/scripts/release/fixtures/unversioned/Lanewise_1.2.3_x64-setup.exe.sig");
+/// The same stand-in packages, signed by `updater.ts sign` with a third
+/// throwaway key, as a Release's `sign` job signs them (ADR 0053), and the
+/// `latest.json` the script wrote for them.
+const SIGNED: &str = "../app/scripts/release/fixtures/signed";
+const SIGNED_KEY: &str = include_str!("../../app/scripts/release/fixtures/signed/throwaway.pub");
+const SIGNED_LATEST: &str = include_str!("../../app/scripts/release/fixtures/signed/latest.json");
 /// Where the script's `latest.json` says the packages are.
 const RELEASE: &str = "https://github.com/adrianeyre/lanewise/releases/download/v1.2.3";
 
@@ -160,6 +166,31 @@ fn a_package_signed_by_the_update_key_for_the_version_announced_downloads() {
         assert_eq!(found, "1.2.3", "{target}");
         assert_eq!(downloaded, Ok(package(target)), "{target}");
     }
+}
+
+#[test]
+fn a_package_the_release_script_signed_downloads() {
+    let address = serve_from(SIGNED, SIGNED_LATEST);
+    for target in ["windows-x86_64-nsis", "darwin-aarch64-app", "darwin-x86_64"] {
+        let (found, downloaded) =
+            check_and_download_at(&address, SIGNED_KEY, "1.0.0", target).expect("an Update");
+        assert_eq!(found, "1.2.3", "{target}");
+        assert_eq!(downloaded, Ok(package(target)), "{target}");
+    }
+    // Announced as newer, it is still bound to the version it was signed for.
+    let address = serve_from(
+        SIGNED,
+        &SIGNED_LATEST.replace("\"version\": \"1.2.3\"", "\"version\": \"1.2.4\""),
+    );
+    let (_, downloaded) =
+        check_and_download_at(&address, SIGNED_KEY, "1.0.0", "windows-x86_64-nsis")
+            .expect("an Update");
+    assert!(
+        downloaded
+            .as_ref()
+            .is_err_and(|error| error.contains("signed for version 1.2.3")),
+        "{downloaded:?}"
+    );
 }
 
 #[test]

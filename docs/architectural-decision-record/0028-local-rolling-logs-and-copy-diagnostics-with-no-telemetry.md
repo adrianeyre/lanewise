@@ -33,9 +33,11 @@ Only records whose target is Lanewise's own (`lanewise` or `lanewise_…`) are k
 Every line then goes through `logs::redact` twice: as it's written and as it's read back for Copy diagnostics. It does four things:
 
 - It hides a URL's user and password with `hide_credentials`, the core's function for remotes.
-- It replaces anything shaped like a Model Provider's or Host's key or token with `***`. This covers the prefixes `sk-`, `sk-ant-`, `xai-`, `AIza`, `gh…_`, `github_pat_` and `glpat-`.
+- It replaces anything shaped like a Model Provider's, Host's or Issue Tracker's key or token with `***`, after anything but a letter. This covers the prefixes `sk-`, `sk-ant-`, `xai-`, `AIza`, `gh…_`, `github_pat_`, GitLab's `glpat-` and its other tokens' `gl…-`, Atlassian's `ATATT`, `ATCTT` and `ATBB` for Jira and Bitbucket, Trello's `ATTA`, and Azure DevOps' tokens by the `AZDO` in them. A token from before these prefixes, such as Trello's 64 hexadecimal digits, has no shape of its own: it looks like an object ID.
 - It does the same for any value after `Bearer` or `Basic`, and after a name such as `api_key`, `token`, `password` or `authorization`.
-- It keeps each record to one line of at most 2,000 characters.
+- It keeps each record to one line of at most 2,000 characters, with each control character, such as a terminal's escape, and each Unicode line break or direction mark written out as `\u{…}`, so a line reads the same in a terminal, an editor or the bug-report form.
+
+On macOS and Linux the log folder and its files can only be opened by the user (`0700` and `0600`), set again each time the Logs start. On Windows they're in the user's own `%LOCALAPPDATA%`, which only the user, the system and administrators can open.
 
 ## Copy diagnostics fills in a bug report the user sends
 

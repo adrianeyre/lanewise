@@ -17,8 +17,12 @@
 //! is passed through [`redact`] as it's written and again as it's read back,
 //! which hides whatever still looks like a credential.
 
+#[cfg(unix)]
+use std::fs::Permissions;
 use std::fs::{self, File, OpenOptions};
 use std::io::{self, Write};
+#[cfg(unix)]
+use std::os::unix::fs::{OpenOptionsExt, PermissionsExt};
 use std::path::{Path, PathBuf};
 use std::sync::{LazyLock, Mutex, OnceLock, PoisonError};
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -104,11 +108,20 @@ pub fn recent_lines(folder: &Path, count: usize) -> Vec<String> {
     lines
 }
 
-/// Key-shaped tokens, by the prefixes Model Providers and Hosts give them.
+/// Key-shaped tokens, by the prefixes Model Providers, Hosts and Issue
+/// Trackers give them: OpenAI's, Anthropic's, xAI's and Gemini's keys,
+/// GitHub's and GitLab's tokens, Atlassian's for Jira and Bitbucket, Trello's,
+/// and Azure DevOps' by the `AZDO` in its tokens. A token is taken after
+/// anything but a letter, so one after `_`, a digit or `%22` is hidden too.
 static TOKEN: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(
-        r"\b(?:sk-ant-|sk-proj-|sk-|xai-|AIza|gh[pousr]_|github_pat_|glpat-)[A-Za-z0-9_\-]{8,}",
-    )
+    Regex::new(concat!(
+        r"(^|[^A-Za-z])(?:",
+        r"(?:sk-ant-|sk-proj-|sk-|xai-|AIza|gh[pousr]_|github_pat_|gl(?:pat|rt|dt|cbt|ft|soat|ptt|imt|oas)-)[A-Za-z0-9_\-]{8,}",
+        r"|(?:ATATT|ATCTT|ATBB)[A-Za-z0-9_\-=]{16,}",
+        r"|ATTA[0-9A-Fa-f]{32,}",
+        r"|[A-Za-z0-9]{76}AZDO[A-Za-z0-9]{4}",
+        r")",
+    ))
     .expect("the token pattern is valid")
 });
 /// A token given with its scheme, as in an `Authorization` header.
@@ -128,17 +141,36 @@ static NAMED: LazyLock<Regex> = LazyLock::new(|| {
 /// `text` as a log line keeps it: anything that looks like a credential
 /// hidden as `***` (a key or token by its prefix, one after `Bearer`, one
 /// named `password=` or `api_key:`, and a URL's name and password), on one
-/// line, and no longer than [`LONGEST_LINE`] characters.
+/// line, with every character that would change how it reads written out,
+/// and no longer than [`LONGEST_LINE`] characters.
 pub fn redact(text: &str) -> String {
     let text = hide_credentials(text);
-    let text = TOKEN.replace_all(&text, "***");
+    let text = TOKEN.replace_all(&text, "${1}***");
     let text = SCHEME.replace_all(&text, "${1}${2}***");
     let text = NAMED.replace_all(&text, "${1}${2}***");
-    let one_line = text.replace("\r\n", "\\n").replace(['\r', '\n'], "\\n");
+    let mut one_line = String::with_capacity(text.len());
+    for c in text.replace("\r\n", "\n").chars() {
+        match c {
+            '\r' | '\n' => one_line.push_str("\\n"),
+            c if is_unseen(c) => one_line.extend(c.escape_unicode()),
+            c => one_line.push(c),
+        }
+    }
     match one_line.char_indices().nth(LONGEST_LINE) {
         Some((cut, _)) => format!("{}…", &one_line[..cut]),
         None => one_line,
     }
+}
+
+/// Whether `c` would change how a line reads where it's shown rather than
+/// show as itself: a control character, such as a terminal's escape, a tab
+/// aside, or a Unicode line break or direction mark.
+fn is_unseen(c: char) -> bool {
+    (c.is_control() && c != '\t')
+        || matches!(
+            c,
+            '\u{061c}' | '\u{200e}' | '\u{200f}' | '\u{2028}'..='\u{202e}' | '\u{2066}'..='\u{2069}'
+        )
 }
 
 /// What's logged for `reply` to the command `name`: nothing for a response;
@@ -262,13 +294,13 @@ pub struct RollingFiles {
 
 impl RollingFiles {
     /// The log files in `folder`, making it if it isn't there, adding to
-    /// the log file already there, if there's one.
+    /// the log file already there, if there's one. On macOS and Linux only
+    /// the user can open the folder.
     pub fn open(folder: &Path, max_bytes: u64, older: usize) -> io::Result<Self> {
         fs::create_dir_all(folder)?;
-        let file = OpenOptions::new()
-            .create(true)
-            .append(true)
-            .open(folder.join(LOG_FILE))?;
+        #[cfg(unix)]
+        fs::set_permissions(folder, Permissions::from_mode(0o700))?;
+        let file = Self::create(folder)?;
         let size = file.metadata()?.len();
         Ok(Self {
             folder: folder.to_owned(),
@@ -314,11 +346,18 @@ impl RollingFiles {
         Ok(())
     }
 
+    /// Opens [`LOG_FILE`] to add to, making it if it isn't there. On macOS
+    /// and Linux only the user can read it, or the folder it's in, even if
+    /// they were made before with more.
     fn create(folder: &Path) -> io::Result<File> {
-        OpenOptions::new()
-            .create(true)
-            .append(true)
-            .open(folder.join(LOG_FILE))
+        let mut options = OpenOptions::new();
+        options.create(true).append(true);
+        #[cfg(unix)]
+        options.mode(0o600);
+        let file = options.open(folder.join(LOG_FILE))?;
+        #[cfg(unix)]
+        file.set_permissions(Permissions::from_mode(0o600))?;
+        Ok(file)
     }
 }
 
@@ -447,9 +486,82 @@ mod tests {
             "gho_notARealToken0123",
             "github_pat_11notARealToken",
             "glpat-notARealToken0123",
+            "glrt-notARealToken0123",
+            "gldt-notARealToken0123",
+            "glsoat-notARealToken0123",
+            "ATATT3xFfGF0notARealToken_0123-abc=0A1B2C3D",
+            "ATCTT3xFfGN0notARealToken_0123-abc=0A1B2C3D",
+            "ATBBnotARealToken0123456789AB0A1B2C3D",
+            "ATTA0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0A1B2C3D",
+            "notARealTokennotARealTokennotARealTokennotARealTokennotARealTokennotARealTo1AZDO2abc",
         ] {
             assert_eq!(redact(&format!("sent {key}.")), "sent ***.", "{key}");
         }
+    }
+
+    #[test]
+    fn a_token_is_hidden_after_anything_but_a_letter() {
+        for (text, shown) in [
+            ("%22sk-ant-api03-notARealKey%22", "%22***%22"),
+            ("x_sk-ant-api03-notARealKey", "x_***"),
+            ("2ATATT3xFfGF0notARealToken0123", "2***"),
+            ("sk-notARealKey0123", "***"),
+        ] {
+            assert_eq!(redact(text), shown, "{text}");
+        }
+        for text in [
+            "task-notARealKey0123",
+            "risk-assessment-report-2026",
+            "ATTACHMENTS_ARE_NOT_SECRET",
+            "0123456789abcdef0123456789abcdef01234567",
+        ] {
+            assert_eq!(redact(text), text);
+        }
+    }
+
+    #[test]
+    fn a_line_writes_out_what_would_change_how_it_reads() {
+        assert_eq!(
+            redact("\u{1b}]0;title\u{7} \u{1b}[31mred\u{0}\u{7f}\u{9b}"),
+            r"\u{1b}]0;title\u{7} \u{1b}[31mred\u{0}\u{7f}\u{9b}"
+        );
+        assert_eq!(
+            redact("a\u{2028}b\u{2029}c\u{202e}exe.txt\u{2066}d\u{200f}"),
+            r"a\u{2028}b\u{2029}c\u{202e}exe.txt\u{2066}d\u{200f}"
+        );
+        assert_eq!(redact("a\tb é ✓"), "a\tb é ✓");
+        let redacted = redact("\u{1b}[2J sk-ant-api03-notARealKey");
+        assert_eq!(redact(&redacted), redacted);
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn the_logs_are_kept_to_their_user() {
+        let mode = |path: &Path| fs::metadata(path).unwrap().permissions().mode() & 0o777;
+        let folder = tempfile::tempdir().unwrap();
+        let logs = folder.path().join("logs");
+        fs::create_dir(&logs).unwrap();
+        fs::set_permissions(&logs, Permissions::from_mode(0o755)).unwrap();
+        fs::write(logs.join(LOG_FILE), "from before\n").unwrap();
+        fs::set_permissions(logs.join(LOG_FILE), Permissions::from_mode(0o644)).unwrap();
+
+        let mut files = RollingFiles::open(&logs, 20, 2).unwrap();
+        assert_eq!(mode(&logs.join(LOG_FILE)), 0o600);
+        for n in 0..5 {
+            files.write_line(&format!("line {n:04}")).unwrap();
+        }
+
+        assert_eq!(mode(&logs), 0o700);
+        let mut seen = 0;
+        for file in fs::read_dir(&logs).unwrap() {
+            assert_eq!(mode(&file.unwrap().path()), 0o600);
+            seen += 1;
+        }
+        assert_eq!(seen, 3);
+        let fresh = folder.path().join("fresh");
+        RollingFiles::open(&fresh, 20, 2).unwrap();
+        assert_eq!(mode(&fresh), 0o700);
+        assert_eq!(mode(&fresh.join(LOG_FILE)), 0o600);
     }
 
     #[test]

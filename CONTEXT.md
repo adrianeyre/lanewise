@@ -168,6 +168,10 @@ _Avoid_: Native app, client
 Lanewise's core running as a local server on the machine that has the repositories, used from a browser.
 _Avoid_: Browser version, web app, hosted version
 
+**Access token**:
+The random secret `lanewise serve` makes fresh at each start and prints once, in the fragment of the URL it gives, which Web Mode's page sends as its WebSocket's first frame before the server runs any command for it (ADR 0055). Whoever has it can do anything the user can, so it's kept like a password, and is worthless once `serve` stops.
+_Avoid_: Password, API key, session, cookie
+
 ### Settings
 
 **Settings**:

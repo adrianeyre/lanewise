@@ -32,7 +32,7 @@ The commands reach the store through a `KeyStore` trait, so the Rust tests use o
 
 The `Platform` has a `fetch`. In the Desktop App it's Tauri's HTTP plugin (`tauri-plugin-http`), which makes the request from Rust, so the webview's CORS rules don't apply and no Model Provider has to allow Lanewise's origin. The plugin's scope in `desktop/capabilities/default.json` allows only the Model Providers' APIs (`api.anthropic.com`, `api.openai.com`, `api.x.ai`, `generativelanguage.googleapis.com` and `api.meta.ai`) and `localhost` and `127.0.0.1` on any port, for a Model Provider the user runs on this computer. ADR 0051 narrows those two to the two paths the adapter asks a local server for. Redirects are never followed (`maxRedirections: 0`), so a request carrying an API key can't be sent on to a host it wasn't meant for.
 
-In Web Mode, the browser can't make these requests itself, so `serve` will forward them, with the same list of hosts (PRD §7.12, P1). Until then the unavailable platform's `fetch` fails.
+In Web Mode, the browser can't make these requests itself, so `serve` will make them, with the same list of hosts (PRD §7.12, P1). ADR 0055 says how: as a command over its WebSocket, with the key added by the core, so `modelProviderKey` never crosses it. Until then the unavailable platform's `fetch` fails.
 
 ## AI is off until the user accepts the First-use disclosure for each Model Provider
 
@@ -47,7 +47,7 @@ Settings also says plainly that consumer subscriptions (Claude Pro or Max, ChatG
 ## Consequences
 
 - The adapters come with PRD §8.3 (M6). The first, Anthropic's, is ADR 0022, Gemini's is ADR 0023, and the OpenAI-compatible adapter's, whose local server takes an optional key at a base URL the user sets, is ADR 0024. While `MODEL_PROVIDERS` is empty, Settings says no Model Provider can be chosen in this version of Lanewise. The model catalog, which describes the models their lists return, is ADR 0021.
-- An adapter for another cloud Model Provider needs its API's host added to the HTTP plugin's scope, and to Web Mode's forwarding.
+- An adapter for another cloud Model Provider needs its API's host added to the HTTP plugin's scope, and to Web Mode's list (ADR 0055).
 - A key kept in the OS credential store stays there when Lanewise is uninstalled, as the credential store's own entries do, until the user forgets it in Settings or in the credential store.
 - On Linux, keeping a key needs a running Secret Service (GNOME Keyring or KWallet). Without one, Settings says the credential store isn't available.
 - The Confidence checks, downgrading a Suggestion to low when it still has Conflict Markers, is empty or drops lines only one side has, are `checkSuggestion` in `confidence.ts`, run on every Suggestion the AI Suggestion Widget shows (§8.1, ADR 0025).

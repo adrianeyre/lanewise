@@ -92,7 +92,7 @@ This is the Desktop App from source: Tauri starts the UI's Vite dev server on `h
 pnpm dev
 ```
 
-This is only the UI, at `http://localhost:5150`, in your browser. It has no core to talk to, so anything that needs Git fails, saying "This is Lanewise's UI on its own, in a browser". It's for working on how the UI looks. Web Mode (`serve/`), which will carry the core to a browser, isn't built yet.
+This is only the UI, at `http://localhost:5150`, in your browser. It has no core to talk to, so anything that needs Git fails, saying "This is Lanewise's UI on its own, in a browser". It's for working on how the UI looks. Web Mode (`serve/`), which will carry the core to a browser, isn't built yet. Its design is ADR 0055, which names every command the command API has as crossing its WebSocket or not: a new command needs a row there, and `serve/tests/design.rs` fails until it has one.
 
 Neither of these applies the Desktop App's Content-Security-Policy, which Tauri sends only with a build's own assets (ADR 0050). A change that has the page load something new, or adds an inline script or style, can work here and still be refused in a release. Check it in a release build: `pnpm exec tauri build --no-bundle`, then run `target/release/lanewise-desktop`.
 

@@ -42,7 +42,7 @@ The capability in `desktop/capabilities/default.json` gave the page `core:defaul
 The policy holds while three things stay true: the page loads nothing from anywhere but its own assets, GitHub's avatars and IPC; it has one inline script; and Web Mode isn't built. Look at it again when any of them changes:
 
 - **A new origin the page loads from**, such as a font or picture service, goes into the policy and `csp.test.ts` in the same change, or the release build refuses it.
-- **Web Mode** serves the same `index.html` from `serve/`. Before P1 (#32) ships, its server sends its own policy, makes the style nonce fresh for each page, and answers the PRD's §9 design review.
+- **Web Mode** serves the same `index.html` from `serve/`. Before P1 (#32) ships, its server sends its own policy, makes the style nonce fresh for each page, and answers the PRD's §9 design review. ADR 0055 is that review, and says how its policy differs from this one.
 - **At the next Pen-test round**, and by **12 April 2027** at the latest, whichever comes first.
 
 ## Considered options

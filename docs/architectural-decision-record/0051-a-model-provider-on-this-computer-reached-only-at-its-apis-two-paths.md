@@ -21,7 +21,7 @@ The plugin treats `*` in a path as anything, slashes included, and reads a path 
 - **No other server on this computer is reached through the plugin**, unless one of its own paths ends in `/models` or `/chat/completions`. Run headless on Linux, a request to any other path on a local port was refused by the plugin before anything was sent. The adapter's two paths were still answered.
 - **It doesn't change the cloud Model Providers' entries.** Each is its API's host, every path on it, over `https` at its own port. A request there can only go to that Model Provider.
 - **It doesn't cover the core's own requests.** Hosts, Issue Trackers and Gateways are asked by the core, not the page, and a Gateway on this computer is W4's (#17).
-- **It doesn't cover Web Mode**, which will make its Model Provider requests some other way (PRD §9, P1, #32).
+- **It doesn't cover Web Mode**, which will make its Model Provider requests in the core, to the same list (ADR 0055).
 
 ## Considered options
 

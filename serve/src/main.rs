@@ -1,7 +1,7 @@
 //! Web Mode (ADR 0003): the same Rust core as the Desktop App, run as a local
 //! server that serves `app/`'s build and carries the command API over a
-//! WebSocket. It binds to `127.0.0.1` only and requires a per-start access
-//! token (PRD §7.12).
+//! WebSocket. It binds to `127.0.0.1` only and requires a per-start Access
+//! token (PRD §7.12), checked as ADR 0055 says.
 
 use std::process::ExitCode;
 

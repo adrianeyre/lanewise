@@ -32,6 +32,7 @@ Each scope file has the trust boundary; each probe from its brief with what was 
 | R3 | #29 | Caches, branch protection and the Model catalog: whether anything but `main` can write a cache the release jobs restore, what `main`'s branch protection allows and who can push to it, and what a hostile catalog could do with a `match` expression or a name | [R3.md](R3.md) |
 | R4 | #30 | The Project website's content and build: whether Release data read as it's built can reach the page or change a download link, its inline scripts and a Content-Security-Policy, and whether anything third-party is loaded | [R4.md](R4.md) |
 | R5 | #31 | Sandcastle: what an issue or a comment can make the agent do, what the container can reach and which credentials it holds, and what review a run's commits get before they reach `main` | [R5.md](R5.md) |
+| P1 | #32 | Web Mode's design, before it is built: how the Access token is made and where it can leak, the WebSocket's `Origin` and `Host` checks and DNS rebinding, what a page on another site gets, which commands cross the WebSocket, and two browsers or two users on one machine | [P1.md](P1.md) |
 | H15 | #33 | Code scanning for the tree, with a named owner for its alerts | [H15.md](H15.md) |
 
 The round's other scope issues (W1–W4, G1–G4, S1–S3, M1–M2, R1–R5, P1, and the code-scanning issue) are listed in the PRD's §6, and add their rows here as they are worked.

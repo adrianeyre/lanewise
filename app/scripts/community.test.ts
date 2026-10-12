@@ -9,6 +9,7 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { basename, dirname, join, normalize } from "node:path";
 
 import { expect, test } from "vitest";
+import { parse } from "yaml";
 
 const root = join(import.meta.dirname, "..", "..");
 
@@ -154,16 +155,49 @@ test("the README and its guides cover installing and building Lanewise, and what
   expect(setup).toContain("`packageManager`");
 });
 
-test("each issue form is labelled, and the accessibility form `accessibility`", () => {
+/** An issue form's fields, as GitHub reads them from its YAML. */
+interface Field {
+  type: string;
+  id?: string;
+  attributes: { label?: string; value?: string; description?: string; options?: (string | { label: string; required?: boolean })[] };
+  validations?: { required?: boolean };
+}
+interface Form {
+  name: string;
+  description: string;
+  title?: string;
+  labels: string[];
+  body: Field[];
+}
+
+/** An issue form, parsed as GitHub parses it, which fails if it isn't valid YAML. */
+function form(file: string): Form {
+  return parse(read(`${FORMS_DIR}/${file}`)) as Form;
+}
+
+test("each issue form is valid YAML of GitHub's shape, labelled, and the accessibility form `accessibility`", () => {
   for (const path of FORMS.filter((each) => !each.endsWith("config.yml"))) {
-    const form = read(path);
-    expect(form).toMatch(/^name: .+\ndescription: .+\nlabels: \["[\w-]+"\]\nbody:\n/);
-    const ids = [...form.matchAll(/^\s+id: ([\w-]+)$/gm)].map((match) => match[1]);
+    const { name, description, labels, body } = form(basename(path));
+    expect({ path, name, description, labels }).toEqual({
+      path,
+      name: expect.any(String),
+      description: expect.any(String),
+      labels: [expect.stringMatching(/^[\w:-]+$/)],
+    });
+    for (const { type, attributes } of body) {
+      expect({ path, type }).toEqual({ path, type: expect.stringMatching(/^(markdown|input|textarea|dropdown|checkboxes)$/) });
+      expect({ path, text: type === "markdown" ? attributes.value : attributes.label }).toEqual({ path, text: expect.any(String) });
+    }
+    const ids = body.flatMap(({ id }) => (id === undefined ? [] : [id]));
     expect(ids).toEqual([...new Set(ids)]);
   }
-  expect(read(`${FORMS_DIR}/accessibility.yml`)).toContain('labels: ["accessibility"]');
-  expect(read(`${FORMS_DIR}/feature-request.yml`)).toContain('labels: ["enhancement"]');
-  expect(read(`${FORMS_DIR}/config.yml`)).toContain("url: https://github.com/adrianeyre/lanewise/security/advisories/new");
+  expect(form("accessibility.yml").labels).toEqual(["accessibility"]);
+  expect(form("feature-request.yml").labels).toEqual(["enhancement"]);
+  expect(form("config.yml")).toMatchObject({
+    contact_links: expect.arrayContaining([
+      expect.objectContaining({ url: "https://github.com/adrianeyre/lanewise/security/advisories/new" }),
+    ]),
+  });
 });
 
 // Pen-testing PRD §3: the rules are written and linked before a window opens.

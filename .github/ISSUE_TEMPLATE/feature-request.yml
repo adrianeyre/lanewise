@@ -17,7 +17,7 @@ body:
     id: idea
     attributes:
       label: What would help
-      description: What you'd like Lanewise to do, and where: the page, Widget or dialog, if you know.
+      description: "What you'd like Lanewise to do, and where: the page, Widget or dialog, if you know."
     validations:
       required: true
   - type: textarea

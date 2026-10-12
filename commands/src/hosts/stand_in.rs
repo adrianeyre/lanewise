@@ -171,3 +171,38 @@ impl Credentials for Helper {
         Ok(())
     }
 }
+
+/// Signs in to `host` through `integration` twice, the helper forgetting
+/// its credential between, as when the user signs out in Git Credential
+/// Manager. The second sign-in asks the helper afresh and finds nothing,
+/// and nothing more reaches the Host: the integration kept no token of its
+/// own from the first.
+pub(super) fn keeps_no_token(
+    integration: &dyn super::HostIntegration,
+    helper: &Helper,
+    host: &str,
+    asked: &Asked,
+) {
+    let first = integration.sign_in(host, false);
+    assert!(first.is_ok(), "{first:?}");
+    let secret = helper.give(host).unwrap().secret().to_owned();
+    let sent = asked.lock().unwrap().len();
+    helper.reject(&Credential::new(host, None, "")).unwrap();
+
+    let again = integration.sign_in(host, false);
+
+    assert!(
+        matches!(&again, Err(super::HostError::NoCredential { host: named, .. }) if named == host),
+        "{again:?}"
+    );
+    assert_eq!(asked.lock().unwrap().len(), sent);
+    assert_eq!(
+        helper.told(),
+        [
+            format!("fill {host}"),
+            format!("approve {secret}"),
+            "reject ".to_owned(),
+            format!("fill {host}"),
+        ]
+    );
+}

@@ -351,7 +351,7 @@ impl Repository {
 mod tests {
     use serde_json::{Value, json};
 
-    use super::super::stand_in::{Helper, Reply, reply, serve};
+    use super::super::stand_in::{Helper, Reply, keeps_no_token, reply, serve};
     use super::*;
     use crate::page::Cursor;
 
@@ -485,6 +485,19 @@ mod tests {
                 "fill dev.azure.com".to_owned(),
                 format!("approve {ENTRA_TOKEN}")
             ]
+        );
+    }
+
+    #[test]
+    fn keeps_no_token_between_calls_and_asks_the_helper_for_each() {
+        let (api, asked) = serve(azure_devops(&[], 0));
+        let helper = Helper::holding(ENTRA_TOKEN);
+
+        keeps_no_token(
+            &integration(&helper, &api),
+            &helper,
+            "dev.azure.com",
+            &asked,
         );
     }
 

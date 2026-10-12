@@ -29,11 +29,14 @@ export interface Downloads {
 /**
  * The downloads of `release`, whose installers are named for its version as
  * the release workflow names them (ADR 0029). A Release without one of them
- * links that button to its page instead, and a link anywhere but this
- * repository's Releases is refused.
+ * links that button to its page instead. A Release of any version but
+ * `version`, the one the website is built from and its footer shows, and a
+ * link anywhere but this repository's Releases, are refused (ADR 0054).
  */
-export function downloadsOf(release: GitHubRelease): Downloads {
-  const version = release.tag_name.replace(/^v/, "");
+export function downloadsOf(release: GitHubRelease, version: string): Downloads {
+  if (release.tag_name !== `v${version}`) {
+    throw new Error(`The latest Release is ${release.tag_name}, but the website is built from version ${version}`);
+  }
   const notes = `${RELEASES_URL}/tag/${release.tag_name}`;
   if (release.html_url !== notes) throw new Error(`The latest Release's page is ${release.html_url}, not ${notes}`);
   const asset = (name: string) => {

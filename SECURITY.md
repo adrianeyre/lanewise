@@ -50,6 +50,6 @@ These are out of scope here:
 - API keys are kept in the OS credential store (Keychain on macOS, Credential Manager on Windows, the Secret Service on Linux), never in Lanewise's settings, and go only to the Model Provider they're for (ADR 0020).
 - Lanewise signs in to Hosts through Git and Git Credential Manager, and never keeps or shows those credentials itself (ADR 0016).
 - There's no telemetry. The Logs stay on your computer, never hold credentials, API keys, file contents or prompts, and hide anything that still looks like a credential as they're written and read (ADR 0028).
-- The window can only make requests to the URLs on its allow-list, which a test holds it to.
+- The window's own requests, to Model Providers, Jev, the Model catalog and the latest version's number, go only to the URLs on its HTTP allow-list, which a test holds it to, and reach a Model Provider on this computer only at its API's own paths (ADR 0051). Besides those, it shows authors' pictures from GitHub, while Settings allows them (ADR 0035). Hosts, Issue Trackers and Gateways are asked by Lanewise's core, not the window.
 - The Desktop App's window runs only the scripts it was built with: its Content-Security-Policy refuses any other script, and anything the page would load or send from somewhere it doesn't name (ADR 0050).
 - An Update is installed only if it is signed by the Update key, and only when you choose to install it (ADR 0030).

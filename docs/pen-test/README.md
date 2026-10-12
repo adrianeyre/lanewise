@@ -19,6 +19,7 @@ Each scope file has the trust boundary; each probe from its brief with what was 
 | W3 | #16 | The HTTP allow-list and every request outside it: this computer's servers, the webview's own requests, redirects and `SECURITY.md`'s wording | [W3.md](W3.md) |
 | W4 | #17 | Gateways: that their headers go only to the address they were saved for, and what `gatewayRequest` can be made to do | [W4.md](W4.md) |
 | G1 | #18 | What opening, fetching and diffing a Hostile repository runs: the UI's reads with no click, `gix`'s status and diffs, ownership and `safe.directory`, and the fetch as a Tab is shown and the window focused | [G1.md](G1.md) |
+| G2 | #19 | Arguments chosen by refs, URLs and paths: refs from `packed-refs` and a remote whose names start with `-`, remote URLs and paths starting with `-`, and whether every `git` run with a Hostile-chosen name has a `--` or a check | [G2.md](G2.md) |
 | H15 | #33 | Code scanning for the tree, with a named owner for its alerts | [H15.md](H15.md) |
 
 The round's other scope issues (W1–W4, G1–G4, S1–S3, M1–M2, R1–R5, P1, and the code-scanning issue) are listed in the PRD's §6, and add their rows here as they are worked.

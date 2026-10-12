@@ -105,6 +105,33 @@ mod tests {
         assert_eq!(windows[0].title, "Lanewise");
     }
 
+    #[test]
+    fn the_main_webview_has_a_content_security_policy() {
+        // ADR 0050: Lanewise's own scripts and stylesheet, the theme script by
+        // its hash and CodeMirror's styles by a nonce, both of which Tauri
+        // adds, and no request but over IPC.
+        let context = context();
+        let security = &context.config().app.security;
+        let csp = security
+            .csp
+            .as_ref()
+            .expect("the main webview has a Content-Security-Policy")
+            .to_string();
+
+        for directive in [
+            "default-src 'self'",
+            "script-src 'self'",
+            "style-src 'self'",
+            "connect-src ipc: http://ipc.localhost",
+            "object-src 'none'",
+        ] {
+            assert!(csp.contains(directive), "{directive} isn't in {csp}");
+        }
+        assert!(!csp.contains("unsafe-"), "{csp}");
+        let modified = &security.dangerous_disable_asset_csp_modification;
+        assert!(modified.can_modify("script-src") && modified.can_modify("style-src"));
+    }
+
     /// What the UI gets back for invoking `cmd` with `body`, through the IPC
     /// of a mock window, with the app's own plugin config, which the updater
     /// won't start without.

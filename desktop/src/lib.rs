@@ -255,7 +255,14 @@ mod tests {
 
     #[test]
     fn a_remote_page_such_as_a_host_page_reaches_no_command() {
-        for cmd in ["call", "host_page_close", "update_status"] {
+        for cmd in [
+            "call",
+            "host_page_close",
+            "update_status",
+            "update_check",
+            "update_install",
+            "update_progress",
+        ] {
             let refused = invoke_from("https://github.com", cmd, json!({ "page": 1 }));
             assert!(
                 refused.is_err(),
@@ -373,5 +380,58 @@ mod tests {
                 .is_some_and(|said| said.contains("update itself")),
             "{said}"
         );
+    }
+
+    #[test]
+    fn the_apps_own_updater_offers_no_older_release() {
+        // The updater as `app` builds it, with the committed config and a
+        // throwaway key, asked by copies at three versions about a Release
+        // at 1.2.3 served from this machine. `desktop/tests/updater.rs` holds
+        // what it then downloads to the package's signature.
+        use std::io::{BufRead, BufReader, Write};
+        use tauri_plugin_updater::UpdaterExt;
+
+        const LATEST: &str = include_str!("../../app/scripts/release/fixtures/updater/latest.json");
+        let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+        let address = format!("http://{}/latest.json", listener.local_addr().unwrap());
+        std::thread::spawn(move || {
+            for mut stream in listener.incoming().flatten() {
+                let mut line = String::new();
+                let mut reader = BufReader::new(&stream);
+                while reader.read_line(&mut line).is_ok_and(|read| read > 2) {
+                    line.clear();
+                }
+                let head = format!(
+                    "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
+                    LATEST.len()
+                );
+                let _ = stream.write_all(head.as_bytes());
+                let _ = stream.write_all(LATEST.as_bytes());
+            }
+        });
+
+        for (running, found) in [("1.0.0", Some("1.2.3")), ("1.2.4", None), ("2.0.0", None)] {
+            let mut mock = mock_context(noop_assets());
+            let mut plugins = context().config().plugins.clone();
+            plugins.0.get_mut("updater").expect("the updater's config")["pubkey"] = json!(
+                include_str!("../../app/scripts/release/fixtures/updater/throwaway.pub")
+            );
+            mock.config_mut().plugins = plugins;
+            mock.package_info_mut().version = running.parse().unwrap();
+            let app = app(mock_builder()).build(mock).expect("the app builds");
+            let updater = app
+                .updater_builder()
+                .target("windows-x86_64-nsis")
+                .endpoints(vec![address.parse().unwrap()])
+                .unwrap()
+                .build()
+                .unwrap();
+            let update = tauri::async_runtime::block_on(updater.check()).expect("it checks");
+            assert_eq!(
+                update.map(|update| update.version).as_deref(),
+                found,
+                "{running}"
+            );
+        }
     }
 }

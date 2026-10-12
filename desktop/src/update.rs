@@ -381,6 +381,16 @@ mod tests {
             json!(["https://github.com/adrianeyre/lanewise/releases/latest/download/latest.json"])
         );
         assert_eq!(updater["requireSignedVersion"], json!(true));
+        // Nothing that would let an older Release, plain http or a
+        // certificate it can't check through.
+        for loosened in [
+            "allowDowngrades",
+            "dangerousInsecureTransportProtocol",
+            "dangerousAcceptInvalidCerts",
+            "dangerousAcceptInvalidHostnames",
+        ] {
+            assert_eq!(updater.get(loosened), None, "{loosened}");
+        }
         // Update packages are made only when the build is given the key.
         assert_eq!(config["bundle"].get("createUpdaterArtifacts"), None);
     }

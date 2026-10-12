@@ -29,6 +29,13 @@ const FIXTURES: &str = "../app/scripts/release/fixtures/updater";
 const THROWAWAY: &str = include_str!("../../app/scripts/release/fixtures/updater/throwaway.pub");
 const OTHER: &str = include_str!("../../app/scripts/release/fixtures/updater/other-throwaway.pub");
 const LATEST: &str = include_str!("../../app/scripts/release/fixtures/updater/latest.json");
+/// A stand-in package signed by another throwaway key with no version in
+/// its trusted comment, as `tauri signer sign` without `--app-version` signs.
+const UNVERSIONED: &str = "../app/scripts/release/fixtures/unversioned";
+const UNVERSIONED_KEY: &str =
+    include_str!("../../app/scripts/release/fixtures/unversioned/throwaway.pub");
+const UNVERSIONED_SIGNATURE: &str =
+    include_str!("../../app/scripts/release/fixtures/unversioned/Lanewise_1.2.3_x64-setup.exe.sig");
 /// Where the script's `latest.json` says the packages are.
 const RELEASE: &str = "https://github.com/adrianeyre/lanewise/releases/download/v1.2.3";
 
@@ -38,15 +45,25 @@ fn context() -> tauri::Context<tauri::test::MockRuntime> {
     tauri::generate_context!()
 }
 
-/// Serves `latest.json`, announcing `version`, and the packages it names,
-/// from this machine until the test ends; the address.
+/// Serves the script's `latest.json`, announcing `version`, and the packages
+/// it names, from this machine until the test ends; the address.
 fn serve(version: &str) -> String {
+    serve_from(
+        FIXTURES,
+        &LATEST.replace(
+            "\"version\": \"1.2.3\"",
+            &format!("\"version\": \"{version}\""),
+        ),
+    )
+}
+
+/// Serves `manifest` as `latest.json`, with its URLs under `RELEASE` pointed
+/// at this machine, and the packages it names from `fixtures`, until the
+/// test ends; the address.
+fn serve_from(fixtures: &'static str, manifest: &str) -> String {
     let listener = TcpListener::bind("127.0.0.1:0").unwrap();
     let address = format!("http://{}", listener.local_addr().unwrap());
-    let manifest = LATEST.replace(RELEASE, &address).replace(
-        "\"version\": \"1.2.3\"",
-        &format!("\"version\": \"{version}\""),
-    );
+    let manifest = manifest.replace(RELEASE, &address);
     thread::spawn(move || {
         for stream in listener.incoming() {
             let Ok(mut stream) = stream else { continue };
@@ -63,7 +80,7 @@ fn serve(version: &str) -> String {
                 manifest.clone().into_bytes()
             } else {
                 let file = path.trim_start_matches('/');
-                std::fs::read(format!("{}/{FIXTURES}/{file}", env!("CARGO_MANIFEST_DIR")))
+                std::fs::read(format!("{}/{fixtures}/{file}", env!("CARGO_MANIFEST_DIR")))
                     .unwrap_or_default()
             };
             let head = format!(
@@ -97,7 +114,16 @@ fn check_and_download(
     announced: &str,
     target: &str,
 ) -> Option<(String, Result<Vec<u8>, String>)> {
-    let address = serve(announced);
+    check_and_download_at(&serve(announced), pubkey, running, target)
+}
+
+/// The same, with the latest Release's `latest.json` at `address`.
+fn check_and_download_at(
+    address: &str,
+    pubkey: &str,
+    running: &str,
+    target: &str,
+) -> Option<(String, Result<Vec<u8>, String>)> {
     let mut context = context();
     context.package_info_mut().version = running.parse().unwrap();
     let app = mock_builder()
@@ -170,6 +196,62 @@ fn a_package_signed_for_another_version_is_turned_away() {
 }
 
 #[test]
+fn an_older_release_genuinely_signed_is_no_update() {
+    // The latest Release's latest.json, changed to announce an older Release
+    // with its own package and signature, as they are.
+    for running in ["1.2.4", "1.3.0", "2.0.0"] {
+        for target in ["windows-x86_64-nsis", "darwin-aarch64-app"] {
+            assert_eq!(
+                check_and_download(THROWAWAY, running, "1.2.3", target),
+                None,
+                "{running} {target}"
+            );
+        }
+    }
+}
+
+#[test]
+fn an_older_release_announced_as_newer_is_turned_away() {
+    // The same package and signature, for 1.2.3, announced as newer than the
+    // 1.2.4 running, however its version is spelled.
+    for announced in ["1.2.5", "v1.2.5", "1.2.4+1", "1.3.0-rc.1", "99.0.0"] {
+        let (found, downloaded) =
+            check_and_download(THROWAWAY, "1.2.4", announced, "windows-x86_64-nsis")
+                .expect("an Update");
+        assert_eq!(found, announced.trim_start_matches('v'));
+        assert!(
+            downloaded
+                .as_ref()
+                .is_err_and(|error| error.contains("signed for version 1.2.3")),
+            "{announced}: {downloaded:?}"
+        );
+    }
+}
+
+#[test]
+fn a_package_signed_with_no_version_is_turned_away() {
+    let manifest = json!({
+        "version": "1.2.3",
+        "platforms": {
+            "windows-x86_64-nsis": {
+                "signature": UNVERSIONED_SIGNATURE.trim(),
+                "url": format!("{RELEASE}/Lanewise_1.2.3_x64-setup.exe"),
+            },
+        },
+    });
+    let address = serve_from(UNVERSIONED, &manifest.to_string());
+    let (_, downloaded) =
+        check_and_download_at(&address, UNVERSIONED_KEY, "1.0.0", "windows-x86_64-nsis")
+            .expect("an Update");
+    assert!(
+        downloaded
+            .as_ref()
+            .is_err_and(|error| error.contains("does not specify the version")),
+        "requireSignedVersion lets it through: {downloaded:?}"
+    );
+}
+
+#[test]
 fn the_page_cant_call_the_updaters_own_commands() {
     let app = mock_builder()
         .plugin(tauri_plugin_updater::Builder::new().build())
@@ -178,8 +260,11 @@ fn the_page_cant_call_the_updaters_own_commands() {
     let window = WebviewWindowBuilder::new(&app, "main", Default::default())
         .build()
         .expect("the main window opens");
+    // Every command the plugin has (its `build.rs`).
     for cmd in [
         "plugin:updater|check",
+        "plugin:updater|download",
+        "plugin:updater|install",
         "plugin:updater|download_and_install",
     ] {
         let request = InvokeRequest {

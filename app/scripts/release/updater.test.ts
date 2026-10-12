@@ -28,6 +28,8 @@ const FIXTURES = fileURLToPath(new URL("./fixtures/updater/", import.meta.url));
 const fixture = (name: string) => readFileSync(join(FIXTURES, name));
 const PUBKEY = fixture("throwaway.pub").toString("utf8");
 const OTHER = fixture("other-throwaway.pub").toString("utf8");
+// Signed by another throwaway key with no version bound to it, as `tauri signer sign` signs without `--app-version`.
+const UNVERSIONED = fileURLToPath(new URL("./fixtures/unversioned/", import.meta.url));
 const EXE = "Lanewise_1.2.3_x64-setup.exe";
 const MAC = "Lanewise_1.2.3_universal.app.tar.gz";
 const URL_BASE = "https://github.com/adrianeyre/lanewise/releases/download/v1.2.3";
@@ -262,6 +264,17 @@ describe("a Release's update packages", () => {
       kind: "problems",
       problems: [`${MAC} is signed for version 1.2.3, not 1.2.4.`, `${EXE} is signed for version 1.2.3, not 1.2.4.`],
     });
+  });
+
+  test("a package signed with no version bound to it is refused, as the updater would refuse it", () => {
+    const pubkey = readFileSync(join(UNVERSIONED, "throwaway.pub"), "utf8");
+    expect(verify(pubkey, readFileSync(join(UNVERSIONED, EXE)), readFileSync(join(UNVERSIONED, `${EXE}.sig`), "utf8"))).toEqual({
+      ok: true,
+      version: undefined,
+    });
+    dir = mkdtempSync(join(tmpdir(), "lanewise-updater-"));
+    for (const name of [EXE, `${EXE}.sig`]) copyFileSync(join(UNVERSIONED, name), join(dir, name));
+    expect(release(dir, pubkey, "1.2.3")).toEqual({ kind: "problems", problems: [`${EXE} is signed for version (none), not 1.2.3.`] });
   });
 
   test("a package signed by another key is refused", () => {

@@ -25,13 +25,15 @@ const root = mkdtempSync(join(tmpdir(), "lanewise-pen-test-"));
 const markerDir = join(root, "markers-never-created");
 const reports = new Map<string, Report>();
 
+// Building every fixture runs `git` many times over, and starting
+// a process is slow on Windows: it ran past Vitest's 10 seconds there.
 beforeAll(() => {
   for (const fixture of fixtures) {
     const dir = join(root, fixture.name);
     init(dir);
     reports.set(fixture.name, fixture.build({ dir, markerDir }));
   }
-});
+}, 60_000);
 
 afterAll(() => {
   rmSync(root, { recursive: true, force: true });

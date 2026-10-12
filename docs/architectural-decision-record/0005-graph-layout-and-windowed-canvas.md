@@ -1,5 +1,7 @@
 # The commit graph: straight lanes with long edges cut, drawn from index-addressed windows of segments
 
+**Amended by [ADR 0048](0048-long-edges-cut-only-in-a-wide-graph.md):** long edges are cut only in a graph that would be 16 columns wide without the cut.
+
 The Commit graph Widget shows history in topological order. Its lanes are straight: a lane never moves once it starts, and HEAD's first-parent line is pinned to column 0. An edge longer than 100 rows is cut: it is drawn as a short arrow at each end, as gitk does, rather than as a line down the whole screen. Rust loads the graph with `gix`, using the repository's commit-graph file, and lays out the whole history when the repository opens. The UI draws one canvas the size of the viewport. It fills it from 200-row windows it asks for by row index, not by keyset cursor. Each window carries its rows and the line segments that reach it, and the segments keep their ids across windows.
 
 This comes from the timeboxed spike in issue #7, measured on `git/git`. Its throwaway code and raw results are in [`spikes/graph/`](../../spikes/graph/README.md). The `graph` crate (M2) is written fresh from this ADR.

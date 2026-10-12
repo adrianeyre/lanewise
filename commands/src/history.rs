@@ -416,7 +416,13 @@ impl Order {
             &parents[parent_start[row as usize] as usize..parent_start[row as usize + 1] as usize]
         };
         let head = refs.head().and_then(|head| rows.get(&head).copied());
-        let layout = lanewise_graph::lay_out(ids.len(), parents_of, head, lanewise_graph::CUT);
+        let layout = lanewise_graph::lay_out(
+            ids.len(),
+            parents_of,
+            head,
+            lanewise_graph::CUT,
+            lanewise_graph::WIDE,
+        );
 
         // A line is named by the branches on it; the checked-out branch is
         // stronger than any other, and a local branch than a remote one.

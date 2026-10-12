@@ -19,7 +19,7 @@ Uncommitted changes, and untracked files if asked for, that Git has put aside to
 _Avoid_: Shelf, shelved changes, saved changes
 
 **Lane**:
-One column of the Commit graph: a line of history drawn straight down from a commit to its parent, in one of the Theme's lane colours. A lane never moves sideways, and `HEAD`'s first-parent line is always the leftmost. A parent more than 100 rows below is not given a lane; each end shows a short arrow instead.
+One column of the Commit graph: a line of history drawn straight down from a commit to its parent, in one of the Theme's lane colours. A lane never moves sideways, and `HEAD`'s first-parent line is always the leftmost. In a graph that would be 16 or more lanes wide, a parent more than 100 rows below is not given a lane; each end shows a short arrow instead.
 _Avoid_: Track, rail, column, branch line
 
 **Hunk**:

@@ -6,7 +6,7 @@ mod lanes;
 mod lines;
 mod order;
 
-pub use lanes::{COLOURS, CUT, Layout, Segment, Stub, Window, WindowRow, lay_out};
+pub use lanes::{COLOURS, CUT, Layout, Segment, Stub, WIDE, Window, WindowRow, lay_out};
 pub use lines::name_lines;
 pub use order::topological;
 

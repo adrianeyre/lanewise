@@ -33,7 +33,7 @@ pub fn name_lines<N: Clone>(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{CUT, lay_out};
+    use crate::{CUT, WIDE, lay_out};
 
     const CURRENT: u8 = 0;
     const BRANCH: u8 = 1;
@@ -44,7 +44,7 @@ mod tests {
         head: Option<u32>,
         own: &[(u32, u8, &'static str)],
     ) -> Vec<Option<&'static str>> {
-        let layout = lay_out(parents.len(), |row| parents[row as usize], head, CUT);
+        let layout = lay_out(parents.len(), |row| parents[row as usize], head, CUT, WIDE);
         name_lines(&layout, |row| {
             own.iter()
                 .find(|(at, ..)| *at == row)

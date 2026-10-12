@@ -66,6 +66,25 @@ test("Open repository opens its GitHub page in a Tab of its own, beside the othe
   expect(fake.links).toEqual([`${web.url}/pulls`]);
 });
 
+test("a Host page gone on to another site shows that site's address, and a globe for its logo, not the Host's", async () => {
+  const user = userEvent.setup();
+  const { fake, pages, container } = renderApp();
+  await user.click(await screen.findByRole("button", { name: "Open repository lanewise on GitHub" }));
+  const toolbar = await screen.findByRole("toolbar", { name: "Page" });
+  expect(toolbar.querySelector(".lucide-globe")).toBeNull();
+
+  act(() => pages.tell({ kind: "loading", page: 1, url: "https://example.com/sign-in", done: true }));
+  expect(within(toolbar).getByText("https://example.com/sign-in")).toBeVisible();
+  expect(toolbar.querySelector(".lucide-globe")).not.toBeNull();
+  // Named by the site's host until it has a title of its own, with the same globe.
+  const tab = screen.getByRole("tab", { name: "example.com" });
+  expect(tab.querySelector(".lucide-globe")).not.toBeNull();
+  await expectNoAxeViolations(container);
+
+  await user.click(within(toolbar).getByRole("button", { name: "Open in browser" }));
+  expect(fake.links).toEqual(["https://example.com/sign-in"]);
+});
+
 test("a link the page opens in a new window opens in a new Tab, and a Host page goes with its Tab", async () => {
   const user = userEvent.setup();
   const { pages } = renderApp();

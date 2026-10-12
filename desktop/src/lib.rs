@@ -249,6 +249,16 @@ mod tests {
                 "{cmd} answered a remote page: {refused:?}"
             );
         }
+        // Nor from a frame in one, which has the page's origin, a blob's or none.
+        for url in [
+            "about:srcdoc",
+            "about:blank",
+            "blob:https://github.com/0",
+            "data:text/html,<p>page</p>",
+        ] {
+            let refused = invoke_from(url, "call", json!({ "name": "recentRepositories" }));
+            assert!(refused.is_err(), "call answered {url}: {refused:?}");
+        }
         // Closing a Host page that isn't open does nothing, from Lanewise's own page.
         assert_eq!(
             invoke("host_page_close", json!({ "page": 1 })),

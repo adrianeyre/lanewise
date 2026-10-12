@@ -325,6 +325,50 @@ test("offline, the model catalog Lanewise came with describes the models", async
   await expectNoAxeViolations(view.container);
 });
 
+/** A version of a model in a catalog served to the picker, matching `match` alone, which takes no effort. */
+function catalogVersion(match: string, name?: string) {
+  return { match, examples: [match], name, efforts: [], defaultEffort: null };
+}
+
+test("the model catalog's names are drawn as text, and it offers no model the live list doesn't have", async () => {
+  localStorage.setItem(
+    MODEL_PROVIDER_KEY,
+    JSON.stringify({ enabled: true, disclosed: ["fake"], global: { provider: "fake", model: "fake-mini" } }),
+  );
+  const markup = '<img src="x" onerror="document.title = 1">';
+  const catalog = {
+    format: 1,
+    providers: {
+      fake: {
+        families: [
+          { id: "fake-opus", name: "Fake Opus", versions: [catalogVersion("fake-opus-.*")] },
+          { id: "fake-mini", name: `${markup}Fake Mini`, versions: [catalogVersion("fake-mini-1", `${markup}Fake Mini 1`)] },
+          { id: "fake-unlisted", name: "Fake Unlisted", versions: [catalogVersion("fake-unlisted-1", "Fake Unlisted 1")] },
+        ],
+      },
+    },
+  };
+  const fake = fakeModelProvider();
+  const platform = fakePlatform({
+    commands: fakeKeyStore({ fake: "sk-fake" }).commands,
+    fetch: (url, init) => {
+      if (isVersionCheck(url)) return upToDate();
+      return url === CATALOG_URL ? Response.json(catalog) : fake.answer(url, init);
+    },
+  });
+  const { ai, view } = await openAi(platform, [fake.provider]);
+
+  const model = await ai.findByRole("combobox", { name: "Model" });
+  expect(within(model).getAllByRole("option").map((option) => option.textContent)).toEqual([
+    "Fake Opus",
+    `${markup}Fake Mini`,
+    "Other versions",
+  ]);
+  expect(ai.getByText(`${markup}Fake Mini 1 takes no effort.`)).toBeInTheDocument();
+  expect(view.container.querySelector('img[src="x"]')).toBeNull();
+  await expectNoAxeViolations(view.container);
+});
+
 test("with AI on, choosing a Model Provider not yet disclosed discloses it first", async () => {
   localStorage.setItem(
     MODEL_PROVIDER_KEY,

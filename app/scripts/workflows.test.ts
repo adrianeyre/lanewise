@@ -27,6 +27,8 @@ interface Step {
 }
 
 interface Job {
+  /** A workflow this job calls in place of steps of its own. */
+  uses?: string;
   needs?: string | string[];
   permissions?: Record<string, string>;
   environment?: string | { name: string };
@@ -80,6 +82,39 @@ test("each action is at the same commit in every workflow", () => {
 
 test("no workflow runs a pull request's code with the base repository's token", () => {
   expect(WORKFLOWS.filter((file) => "pull_request_target" in workflow(file).on)).toEqual([]);
+});
+
+// A run saves its caches for its own ref, and restores them from that ref or
+// the default branch's. A pull request's run saves for its merge ref, so only
+// runs on main save what the release jobs, which run on main, restore.
+test("no workflow runs on main for anything but a push to it, a schedule or someone who can write to the repository", () => {
+  const started = WORKFLOWS.map((file) => [file, Object.keys(workflow(file).on).toSorted()]);
+  expect(started).toEqual([
+    ["ci.yml", ["pull_request", "workflow_call", "workflow_dispatch"]],
+    ["codeql.yml", ["pull_request", "push", "schedule", "workflow_dispatch"]],
+    ["release.yml", ["push", "workflow_dispatch"]],
+  ]);
+  const pushes = WORKFLOWS.flatMap((file) => ("push" in workflow(file).on ? [[file, workflow(file).on.push]] : []));
+  expect(pushes).toEqual([
+    ["codeql.yml", { branches: ["main"] }],
+    ["release.yml", { branches: ["main"] }],
+  ]);
+  // The only workflow that calls another is the release workflow, on main.
+  const calling = WORKFLOWS.flatMap((file) =>
+    Object.entries(workflow(file).jobs).flatMap(([name, job]) => (job.uses === undefined ? [] : [`${file} ${name}: ${job.uses}`])),
+  );
+  expect(calling).toEqual(["release.yml verify: ./.github/workflows/ci.yml"]);
+});
+
+test("the jobs that sign and publish a Release restore no cache another job saved", () => {
+  const { jobs } = workflow("release.yml");
+  for (const name of ["sign", "publish"]) {
+    const steps = jobs[name]?.steps ?? [];
+    expect(steps.map(actionOf).filter((action) => action !== undefined && /cache|rust-cache|action-setup/.test(action))).toEqual([]);
+    // setup-node restores pnpm's store only when asked, and npm's only when package.json names npm.
+    expect(steps.find((step) => actionOf(step) === "actions/setup-node")?.with).toEqual({ "node-version": 26 });
+    expect(JSON.parse(readFileSync(join(root, "package.json"), "utf8")).packageManager).toMatch(/^pnpm@/);
+  }
 });
 
 test("code scanning reads the Rust, the TypeScript and the workflows on each pull request, each push to main and each week", () => {

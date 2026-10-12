@@ -136,6 +136,7 @@ describe("parseCatalog", () => {
     ["with a pattern that isn't one", (catalog) => (catalog.providers.anthropic.families[0].versions[0].match = "claude-(")],
     // Only a pattern once it's inside the anchors, where it would match every model ID.
     ["with a pattern that's one only inside the anchors", (catalog) => (catalog.providers.anthropic.families[0].versions[0].match = "claude-opus-5-5)|(?:")],
+    ["with a Model Provider named as an object's own property", (catalog) => (catalog.providers = JSON.parse(`{"__proto__": ${JSON.stringify(catalog.providers.anthropic)}}`))],
     ["with an exclusion that isn't a pattern", (catalog) => (catalog.providers.gemini.exclude = ["(veo"])],
     ["with a version without examples", (catalog) => (catalog.providers.anthropic.families[0].versions[0].examples = [])],
     ["with an effort Lanewise doesn't name", (catalog) => (catalog.providers.anthropic.families[0].versions[0].efforts = ["xhigh"])],
@@ -287,6 +288,23 @@ describe("describeModels", () => {
       { id: "new-10", name: "new-10", efforts: null, defaultEffort: null, budgets: null },
       { id: "new-9", name: "new-9", efforts: null, defaultEffort: null, budgets: null },
     ]);
+  });
+
+  test("offers only the model IDs the live list returns, however much a pattern matches", () => {
+    const everything = parseCatalog({
+      format: 1,
+      providers: {
+        test: {
+          families: [
+            { id: "all", name: "All", versions: [{ match: ".*", examples: ["unlisted"], efforts: [], defaultEffort: null }] },
+          ],
+        },
+      },
+    })?.sections.test;
+
+    const models = describeModels([listed("big-2"), listed("small-1")], everything);
+
+    expect(models.flatMap(({ versions }) => versions.map(({ id }) => id)).toSorted()).toEqual(["big-2", "small-1"]);
   });
 
   test("offers every model under Other versions for a Model Provider the catalog has no section for", () => {

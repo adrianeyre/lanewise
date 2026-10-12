@@ -192,6 +192,20 @@ _Avoid_: Telemetry, analytics, crash reports, tracing
 What Copy diagnostics, in Settings, copies for a bug report: the Lanewise, operating system, Git and Git Credential Manager versions and the latest lines of the Logs. It also opens the bug-report form on GitHub with them filled in, which the user reads and submits themselves.
 _Avoid_: Debug info, system info, support bundle
 
+### Security
+
+**Pen-test round**:
+One adversarial attempt, against the scope the pen-testing PRD sets, to show that Lanewise gives up something it holds: a repository, a Host's credentials, a Model Provider's API key, or the Update key's word that a package is genuine. It has a window, rules of engagement and an end, and its results are Findings.
+_Avoid_: Audit, security review, pentest
+
+**Finding**:
+One thing a Pen-test round showed Lanewise does that it shouldn't, filed as an issue of its own with a severity and the scope it was found under. It is a hypothesis until it has been shown on a Release.
+_Avoid_: Vulnerability, bug, issue, defect
+
+**Hostile repository**:
+A repository made to attack whoever opens, clones, fetches or resolves conflicts in it: crafted refs, paths, configuration, attributes, history or conflicts. Every Pen-test round's fixtures include some, and none is ever a real project's.
+_Avoid_: Malicious repo, evil repo, poisoned repository
+
 ### Releases
 
 **Release**:

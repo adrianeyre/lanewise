@@ -36,6 +36,8 @@ Anything in `adrianeyre/lanewise`: the Desktop App, Web Mode once it's built, th
 - a way to have the Desktop App install an Update not signed by the Update key;
 - a way into the release workflow, its secrets or the packages on a Release.
 
+The [pen-testing PRD](docs/product-requirements-document/pen-testing.md) sets out the surface in more detail, with what a tester should try first.
+
 These are out of scope here:
 
 - **Git, Git Credential Manager and Tauri themselves.** Report them to [Git](https://git-scm.com/community), [Git Credential Manager](https://github.com/git-ecosystem/git-credential-manager/security) or [Tauri](https://github.com/tauri-apps/tauri/security). Tell us too, if Lanewise should do something about it.

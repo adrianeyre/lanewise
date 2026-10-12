@@ -23,6 +23,7 @@ Each scope file has the trust boundary; each probe from its brief with what was 
 | G3 | #20 | Lanewise's own writes and deletes: every place it writes or removes a file by a path a Hostile repository chose, in resolving conflicts, Whole-file choices, Undo and Redo and checkouts, with `..`, links along a path and case-folding | [G3.md](G3.md) |
 | G4 | #21 | Clone URLs, transports and submodules: `ext::`, `fd::`, `file://` and local paths, a clone's destination, whether a clone, checkout, fetch or pull ever reaches into a submodule, and what a credential helper is told about a Host | [G4.md](G4.md) |
 | S1 | #22 | Keys and tokens crossing IPC: every command that hands the UI a secret and why, whether a key outlives its request in the UI's memory, whether a release build can open devtools, and whether a secret can reach a panic, an error or a reply | [S1.md](S1.md) |
+| S2 | #23 | The OS credential store entries: which Lanewise makes and under which services, who else can read them on each OS, whether Forget leaves a copy, and whether Lanewise keeps a Host's credentials itself | [S2.md](S2.md) |
 | H15 | #33 | Code scanning for the tree, with a named owner for its alerts | [H15.md](H15.md) |
 
 The round's other scope issues (W1–W4, G1–G4, S1–S3, M1–M2, R1–R5, P1, and the code-scanning issue) are listed in the PRD's §6, and add their rows here as they are worked.

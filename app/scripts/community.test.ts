@@ -19,7 +19,9 @@ function read(path: string): string {
 
 /** The pages the README links to for the detail it leaves out. */
 const GUIDES = ["docs/installing.md", "docs/ai-suggestions.md", "docs/development.md", "docs/releases.md"];
-const DOCUMENTS = ["README.md", "CONTRIBUTING.md", "CODE_OF_CONDUCT.md", "SECURITY.md", ...GUIDES];
+/** The rules every Pen-test round's tester agrees to, which the security policy points testers at. */
+const RULES_OF_ENGAGEMENT = "docs/product-requirements-document/pen-testing-rules-of-engagement.md";
+const DOCUMENTS = ["README.md", "CONTRIBUTING.md", "CODE_OF_CONDUCT.md", "SECURITY.md", RULES_OF_ENGAGEMENT, ...GUIDES];
 /** The documents that give commands and link to headings. */
 const GUIDING = ["README.md", "CONTRIBUTING.md", ...GUIDES];
 const FORMS_DIR = ".github/ISSUE_TEMPLATE";
@@ -162,6 +164,15 @@ test("each issue form is labelled, and the accessibility form `accessibility`", 
   expect(read(`${FORMS_DIR}/accessibility.yml`)).toContain('labels: ["accessibility"]');
   expect(read(`${FORMS_DIR}/feature-request.yml`)).toContain('labels: ["enhancement"]');
   expect(read(`${FORMS_DIR}/config.yml`)).toContain("url: https://github.com/adrianeyre/lanewise/security/advisories/new");
+});
+
+// Pen-testing PRD §3: the rules are written and linked before a window opens.
+test("the pen-testing PRD and the security policy link to the rules of engagement, which date each window", () => {
+  expect(read("docs/product-requirements-document/pen-testing.md")).toContain("](./pen-testing-rules-of-engagement.md)");
+  expect(read("SECURITY.md")).toContain(`](${RULES_OF_ENGAGEMENT})`);
+  const rules = read(RULES_OF_ENGAGEMENT);
+  expect(rules).toMatch(/^\| 1 \| \w+day \d{1,2} \w+ \d{4} \| \w+day \d{1,2} \w+ \d{4} \|$/m);
+  expect(rules).toContain("https://github.com/adrianeyre/lanewise/security/advisories/new");
 });
 
 test("the code of conduct is the Contributor Covenant, with a way to report filled in", () => {

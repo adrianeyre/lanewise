@@ -26,6 +26,7 @@ Each scope file has the trust boundary; each probe from its brief with what was 
 | S2 | #23 | The OS credential store entries: which Lanewise makes and under which services, who else can read them on each OS, whether Forget leaves a copy, and whether Lanewise keeps a Host's credentials itself | [S2.md](S2.md) |
 | S3 | #24 | The Logs and Diagnostics: tokens the redaction didn't know, panic and internal-error messages, `writeLog` with whatever the UI sends, the Log files' permissions, and what Copy diagnostics puts in the public form | [S3.md](S3.md) |
 | M1 | #25 | Prompt injection from a Hostile repository: a Conflict Hunk, path or Commit Message steering a Suggestion, a harmful Suggestion at high Confidence, what the AI Suggestion Widget says about Confidence, and Jev asked about the same Conflict Hunk | [M1.md](M1.md) |
+| M2 | #26 | Nothing applied without the user: every path by which a Resolution changes, Suggestions for every Conflict Hunk, Jev's answers to each question Lanewise asks it, and every Model Provider, on this computer and through a Gateway | [M2.md](M2.md) |
 | H15 | #33 | Code scanning for the tree, with a named owner for its alerts | [H15.md](H15.md) |
 
 The round's other scope issues (W1–W4, G1–G4, S1–S3, M1–M2, R1–R5, P1, and the code-scanning issue) are listed in the PRD's §6, and add their rows here as they are worked.

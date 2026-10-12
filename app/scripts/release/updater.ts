@@ -375,7 +375,7 @@ export function signRelease(dir: string, version: string, env: Env, pubkey: stri
 
   const files = readdirSync(dir);
   const packages = files.filter((file) => targets(file).length > 0).toSorted();
-  const named = new RegExp(`^Lanewise_${version.replace(/[.+]/g, "\\$&")}_(?:x64-setup\\.exe|universal\\.app\\.tar\\.gz)$`);
+  const named = new RegExp(`^Lanewise_${version.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}_(?:x64-setup\\.exe|universal\\.app\\.tar\\.gz)$`);
   const problems = [
     ...(packages.length === 0 ? ["There are no update packages to sign."] : []),
     ...packages.filter((file) => !named.test(file)).map((file) => `${JSON.stringify(file)} isn't named for ${version}.`),

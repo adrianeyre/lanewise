@@ -183,17 +183,20 @@ pub(super) fn keeps_no_token(
     host: &str,
     asked: &Asked,
 ) {
+    // The sign-ins' answers aren't printed when an assertion fails: one
+    // that went wrong could be carrying the token.
     let first = integration.sign_in(host, false);
-    assert!(first.is_ok(), "{first:?}");
-    let secret = helper.give(host).unwrap().secret().to_owned();
+    assert!(first.is_ok(), "the first sign-in failed");
+    let credential = helper.give(host).unwrap();
+    let secret = credential.secret().to_owned();
     let sent = asked.lock().unwrap().len();
-    helper.reject(&Credential::new(host, None, "")).unwrap();
+    helper.reject(&credential).unwrap();
 
     let again = integration.sign_in(host, false);
 
     assert!(
         matches!(&again, Err(super::HostError::NoCredential { host: named, .. }) if named == host),
-        "{again:?}"
+        "the second sign-in wasn't refused for want of a credential"
     );
     assert_eq!(asked.lock().unwrap().len(), sent);
     assert_eq!(
@@ -201,7 +204,7 @@ pub(super) fn keeps_no_token(
         [
             format!("fill {host}"),
             format!("approve {secret}"),
-            "reject ".to_owned(),
+            format!("reject {secret}"),
             format!("fill {host}"),
         ]
     );

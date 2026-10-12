@@ -57,7 +57,7 @@ function prerender(): Plugin {
  */
 function themeScript(): string {
   const html = readFileSync(new URL("index.html", import.meta.url), "utf8");
-  const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map((match) => match[1]!);
+  const scripts = [...html.matchAll(/<script\s*>([\s\S]*?)<\/script[^>]*>/gi)].map((match) => match[1]!);
   if (scripts.length !== 1) throw new Error(`index.html has ${scripts.length} inline scripts, not the theme's alone`);
   // Hashed as a browser's parser hands it over, with its line endings made LF.
   return scripts[0]!.replaceAll(/\r\n?/g, "\n");

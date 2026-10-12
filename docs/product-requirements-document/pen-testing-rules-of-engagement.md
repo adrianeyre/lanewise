@@ -78,7 +78,7 @@ It never means:
 - spending past a key's limit, or anything a service's terms don't allow;
 - putting a Hostile repository or a payload anywhere public: a public repository, gist, issue, Pull Request, wiki or Issue. It goes only into the round's own private repositories, sites and boards.
 
-**A payload proves itself and does nothing else.** A command a Hostile repository or a crafted answer runs only writes a marker file under the OS temp folder, as E1's do (`lanewise-pen-test-markers`). A proof that a key or a file's contents can leave sends a canary or a throwaway key to a listener on the same disposable machine, never across the internet. No payload deletes, encrypts or spreads, and none denies service to anything outside the machine it runs on.
+**A payload proves itself and does nothing else.** A command a Hostile repository or a crafted answer runs only writes a marker file under the OS temp folder, as E1's do (a `lanewise-pen-test-markers-*` folder). A proof that a key or a file's contents can leave sends a canary or a throwaway key to a listener on the same disposable machine, never across the internet. No payload deletes, encrypts or spreads, and none denies service to anything outside the machine it runs on.
 
 ## 5. Pushing
 

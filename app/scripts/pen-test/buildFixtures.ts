@@ -6,7 +6,7 @@
  *   pnpm pen-test:fixtures [--out <folder>] [--force]
  *
  * Every repository is synthetic, built from nothing by `fixtures.ts`, and
- * written under `--out` (by default a folder in the OS temp directory, so
+ * written under `--out` (by default a new folder in the OS temp directory, so
  * the worktree stays clean and the fixtures sit outside it). Each gets its
  * own README saying what it is for and the marker that shows it worked, and
  * a top-level README indexes them. The script runs nothing a fixture arms:
@@ -14,7 +14,7 @@
  * only if Lanewise runs them.
  */
 
-import { mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { parseArgs } from "node:util";
@@ -29,8 +29,10 @@ const { values } = parseArgs({
   },
 });
 
-const outDir = values.out ?? join(tmpdir(), "lanewise-hostile-fixtures");
-const markerDir = join(tmpdir(), "lanewise-pen-test-markers");
+// Made afresh, and only this user's, rather than at a fixed path in a temp
+// folder another user on the machine could have made first.
+const outDir = values.out ?? mkdtempSync(join(tmpdir(), "lanewise-hostile-fixtures-"));
+const markerDir = mkdtempSync(join(tmpdir(), "lanewise-pen-test-markers-"));
 
 /** The README written into one fixture's folder. */
 function fixtureReadme(fixture: Fixture, report: Report): string {
@@ -72,7 +74,7 @@ A fixture that arms a command does so so the command only ever writes a marker f
 
     ${markerDir}
 
-An empty or absent marker directory means nothing a fixture armed has run. A file appearing there after an action in Lanewise is how that probe shows code ran. Delete the directory between runs to start clean.
+Each build makes a new, empty one. An empty marker directory means nothing a fixture armed has run. A file appearing there after an action in Lanewise is how that probe shows code ran. Empty it between runs to start clean.
 
 ## The fixtures
 
@@ -86,7 +88,7 @@ ${rows}
 pnpm pen-test:fixtures [--out <folder>] [--force]
 \`\`\`
 
-\`--out\` defaults to a folder under the OS temp directory. \`--force\` rebuilds over an existing one. The build is deterministic: the same \`git\` makes byte-for-byte the same objects each time.
+\`--out\` defaults to a new folder under the OS temp directory. \`--force\` rebuilds over an existing one. The build is deterministic: the same \`git\` makes byte-for-byte the same objects each time.
 `;
 }
 

@@ -48,7 +48,15 @@ test("a request anywhere else, or of another method, is never sent", async () =>
   const { commands, sent } = core();
   const fetch = gatewayFetch(commands, anthropic);
 
-  await expect(fetch("https://api.anthropic.com.evil.example/v1/messages")).rejects.toThrow(/went elsewhere/);
+  for (const url of [
+    "https://api.anthropic.com.evil.example/v1/messages",
+    "https://api.anthropic.com@elsewhere.example/v1/messages",
+    "https://api.anthropic.com:8443/v1/messages",
+    "http://api.anthropic.com/v1/messages",
+    "https://elsewhere.example/https://api.anthropic.com/v1/messages",
+  ]) {
+    await expect(fetch(url)).rejects.toThrow(/went elsewhere/);
+  }
   await expect(fetch("https://api.anthropic.com/v1/x", { method: "DELETE" })).rejects.toThrow(/GET and POST/);
   expect(sent).toEqual([]);
 });

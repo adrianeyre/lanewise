@@ -548,6 +548,17 @@ mod tests {
             "https://gateway.example.com/?key=1",
             "ftp://gateway.example.com",
             "https://",
+            "https:/gateway.example.com",
+            "https:///gateway.example.com",
+            "http://localhost.example.com",
+            "http://127.0.0.1.example.com",
+            "http://localhost.",
+            "http://[::1]:4000",
+            "http://0.0.0.0:4000",
+            "http://localhost\\@gateway.example.com",
+            "https://gateway.example.com\\@elsewhere.example.com",
+            "https://g\u{430}teway.example.com",
+            "https://gateway.example.com/a b",
         ] {
             assert_eq!(
                 save(&store, url, vec![]),
@@ -589,6 +600,15 @@ mod tests {
 
     /// A server on this computer that answers one request, and gives it back as it came.
     fn answering(status: u16, body: &'static str) -> (String, thread::JoinHandle<String>) {
+        answering_with(status, String::new(), body)
+    }
+
+    /// [`answering`], with `headers` of its own in the answer, each ending `\r\n`.
+    fn answering_with(
+        status: u16,
+        headers: String,
+        body: &'static str,
+    ) -> (String, thread::JoinHandle<String>) {
         let listener = TcpListener::bind("127.0.0.1:0").unwrap();
         let address = format!("http://127.0.0.1:{}", listener.local_addr().unwrap().port());
         let handle = thread::spawn(move || {
@@ -612,7 +632,7 @@ mod tests {
             request.push_str(&String::from_utf8(sent).unwrap());
             write!(
                 stream,
-                "HTTP/1.1 {status} OK\r\ncontent-type: application/json\r\nrequest-id: r-1\r\ncontent-length: {}\r\nconnection: close\r\n\r\n{body}",
+                "HTTP/1.1 {status} OK\r\ncontent-type: application/json\r\nrequest-id: r-1\r\n{headers}content-length: {}\r\nconnection: close\r\n\r\n{body}",
                 body.len()
             )
             .unwrap();
@@ -696,5 +716,116 @@ mod tests {
             panic!("port 9 answers nothing");
         };
         assert!(!message.contains("127.0.0.1"), "{message}");
+    }
+
+    /// An address on this computer where nothing is answered, to show nothing was sent there.
+    fn unanswered() -> (String, TcpListener) {
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        listener.set_nonblocking(true).unwrap();
+        let address = format!("http://127.0.0.1:{}", listener.local_addr().unwrap().port());
+        (address, listener)
+    }
+
+    fn sent_nothing(listener: &TcpListener) -> bool {
+        matches!(listener.accept(), Err(error) if error.kind() == std::io::ErrorKind::WouldBlock)
+    }
+
+    #[test]
+    fn a_redirect_comes_back_as_it_was_answered_and_nothing_follows_it() {
+        let store = MemoryStore::default();
+        let (elsewhere, listener) = unanswered();
+        let (address, server) =
+            answering_with(307, format!("location: {elsewhere}/v1/messages\r\n"), "");
+        save(&store, &address, vec![header("X-Gateway-Key", "secret")]).unwrap();
+
+        let answer = GatewayRequest {
+            provider: provider(),
+            path: "/v1/messages".into(),
+            method: "POST".into(),
+            headers: vec![],
+            body: Some("{}".into()),
+        }
+        .run_in(&store)
+        .unwrap();
+
+        assert_eq!(answer.status, 307);
+        assert!(
+            answer
+                .headers
+                .iter()
+                .any(|h| h.name == "location" && h.value == format!("{elsewhere}/v1/messages"))
+        );
+        server.join().unwrap();
+        assert!(sent_nothing(&listener));
+    }
+
+    #[test]
+    fn a_request_stays_on_its_gateways_host_whatever_its_path_and_sends_no_header_http_sets_itself()
+    {
+        let store = MemoryStore::default();
+        for path in [
+            "//elsewhere.example/v1/models",
+            "/@elsewhere.example/v1/models",
+            "/http:/elsewhere.example/v1/models",
+            "/v1/models?to=//elsewhere.example",
+        ] {
+            let (address, server) = answering(200, "{}");
+            save(&store, &format!("{address}/anthropic"), vec![]).unwrap();
+            let answer = GatewayRequest {
+                provider: provider(),
+                path: path.into(),
+                method: "POST".into(),
+                headers: vec![
+                    header("Host", "elsewhere.example"),
+                    header("Content-Length", "0"),
+                    header("Transfer-Encoding", "chunked"),
+                    header("Connection", "upgrade"),
+                    header("X-Asked", "yes"),
+                ],
+                body: Some("{}".into()),
+            }
+            .run_in(&store)
+            .unwrap();
+
+            assert_eq!(answer.status, 200, "{path}");
+            let request = server.join().unwrap().to_ascii_lowercase();
+            assert!(
+                request.starts_with(&format!("post /anthropic{path} http/1.1\r\n")),
+                "{request}"
+            );
+            let host = address.trim_start_matches("http://");
+            assert!(request.contains(&format!("host: {host}\r\n")), "{request}");
+            assert!(!request.contains("host: elsewhere"), "{request}");
+            assert!(request.contains("content-length: 2\r\n"), "{request}");
+            assert!(!request.contains("transfer-encoding"), "{request}");
+            assert!(!request.contains("connection:"), "{request}");
+            assert!(request.contains("x-asked: yes"), "{request}");
+        }
+
+        // A method other than GET or POST, or a header's value with a line
+        // break in it, is refused before anything is sent.
+        let (address, listener) = unanswered();
+        save(&store, &address, vec![header("X-Gateway-Key", "secret")]).unwrap();
+        let request = |method: &str, headers: Vec<Header>| GatewayRequest {
+            provider: provider(),
+            path: "/v1/models".into(),
+            method: method.into(),
+            headers,
+            body: None,
+        };
+        for method in [
+            "get", "PUT", "DELETE", "HEAD", "OPTIONS", "TRACE", "CONNECT",
+        ] {
+            assert_eq!(
+                request(method, vec![]).run_in(&store),
+                Err(GatewayError::InvalidPath),
+                "{method}"
+            );
+        }
+        assert!(matches!(
+            request("GET", vec![header("X-Asked", "yes\r\nX-Added: yes")]).run_in(&store),
+            Err(GatewayError::Unreachable { .. })
+        ));
+        assert!(sent_nothing(&listener));
     }
 }

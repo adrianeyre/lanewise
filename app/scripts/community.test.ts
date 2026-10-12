@@ -22,7 +22,17 @@ function read(path: string): string {
 const GUIDES = ["docs/installing.md", "docs/ai-suggestions.md", "docs/development.md", "docs/releases.md"];
 /** The rules every Pen-test round's tester agrees to, which the security policy points testers at. */
 const RULES_OF_ENGAGEMENT = "docs/product-requirements-document/pen-testing-rules-of-engagement.md";
-const DOCUMENTS = ["README.md", "CONTRIBUTING.md", "CODE_OF_CONDUCT.md", "SECURITY.md", RULES_OF_ENGAGEMENT, ...GUIDES];
+/** How the owner triages a Finding, with the pen-testing PRD's targets where the triage sees them. */
+const FINDING_TRIAGE = "docs/processes/triaging-a-finding.md";
+const DOCUMENTS = [
+  "README.md",
+  "CONTRIBUTING.md",
+  "CODE_OF_CONDUCT.md",
+  "SECURITY.md",
+  RULES_OF_ENGAGEMENT,
+  FINDING_TRIAGE,
+  ...GUIDES,
+];
 /** The documents that give commands and link to headings. */
 const GUIDING = ["README.md", "CONTRIBUTING.md", ...GUIDES];
 const FORMS_DIR = ".github/ISSUE_TEMPLATE";
@@ -68,7 +78,7 @@ test("every document and issue form is there", () => {
   // The README links to each of its guides.
   expect(GUIDES.filter((guide) => !read("README.md").includes(`](${guide}`))).toEqual([]);
   expect(FORMS.toSorted()).toEqual(
-    ["accessibility.yml", "bug-report.yml", "config.yml", "feature-request.yml"].map((file) => `${FORMS_DIR}/${file}`),
+    ["accessibility.yml", "bug-report.yml", "config.yml", "feature-request.yml", "finding.yml"].map((file) => `${FORMS_DIR}/${file}`),
   );
 });
 
@@ -198,6 +208,50 @@ test("each issue form is valid YAML of GitHub's shape, labelled, and the accessi
       expect.objectContaining({ url: "https://github.com/adrianeyre/lanewise/security/advisories/new" }),
     ]),
   });
+});
+
+// Pen-testing PRD §7: a Finding is filed with its scope issue, the promise it breaks, the
+// Release it was shown on, its steps and the test that would have caught it, and a
+// critical or high one goes privately instead.
+test("the Finding form sends a critical or high Finding to private vulnerability reporting before anything else", () => {
+  const finding = form("finding.yml");
+  const advisories = "https://github.com/adrianeyre/lanewise/security/advisories/new";
+  expect(finding.description).toMatch(/^A critical or high Finding goes through private vulnerability reporting instead\./);
+  expect(finding.title).toBe("[finding] <ID> — <what it does>");
+  expect(finding.labels).toEqual(["prd:pen-test"]);
+
+  const [first, ...fields] = finding.body;
+  expect(first?.type).toBe("markdown");
+  expect(first?.attributes.value).toMatch(/^\*\*Stop here if the Finding is critical or high\.\*\*/);
+  expect(first?.attributes.value).toContain(`[private vulnerability reporting](${advisories})`);
+
+  const field = (id: string) => fields.find((each) => each.id === id);
+  const required = ["scope-issue", "severity", "promise", "release", "steps", "test"];
+  expect(required.filter((id) => field(id)?.validations?.required !== true)).toEqual([]);
+  const disclosure = field("disclosure");
+  expect(disclosure?.type).toBe("checkboxes");
+  expect(fields.indexOf(disclosure as Field)).toBeLessThan(fields.indexOf(field("scope-issue") as Field));
+  const boxes = disclosure?.attributes.options ?? [];
+  expect(boxes).toHaveLength(3);
+  expect(boxes.every((box) => typeof box === "object" && box.required === true)).toBe(true);
+});
+
+test("the Finding form and its triage guide carry the pen-testing PRD's targets for each severity", () => {
+  const prd = read("docs/product-requirements-document/pen-testing.md");
+  const rows = [...prd.matchAll(/^\| (critical|high|medium|low) \| ([^|]+) \| .+ \|$/gm)];
+  expect(rows.map(([, severity]) => severity)).toEqual(["critical", "high", "medium", "low"]);
+
+  const finding = form("finding.yml");
+  const table = finding.body.map(({ attributes }) => attributes.value ?? "").join("\n");
+  const options = finding.body.find(({ id }) => id === "severity")?.attributes.options;
+  const triage = read(FINDING_TRIAGE);
+  expect(options).toEqual(rows.map(([, severity, target = ""]) => `${severity}: target ${target.replace(/^(\d+)/, "$1 days")}`));
+  for (const [row, severity] of rows) {
+    expect(table).toContain(`\n${row}\n`);
+    expect(triage).toContain(`\n${row}\n`);
+    expect(triage).toContain(`\`severity:${severity}\``);
+  }
+  expect(triage).toContain("(`.github/ISSUE_TEMPLATE/finding.yml`)");
 });
 
 // Pen-testing PRD §3: the rules are written and linked before a window opens.

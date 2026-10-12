@@ -5,7 +5,7 @@ Thank you for helping. Lanewise is a free, open-source Git client, and it's buil
 ## Before you start
 
 - **Read what's been decided.** The [product requirements document](docs/product-requirements-document/git-client.md) says what's being built, and the [architectural decision records](docs/architectural-decision-record/) say how, and why. A change that goes against one starts with a new ADR ([below](#decisions-are-recorded-in-adrs)).
-- **Find or open an issue.** For anything more than a small fix, say what you mean to do on its issue first, so nobody works on the same thing twice. Use the issue forms: [a bug](https://github.com/adrianeyre/lanewise/issues/new?template=bug-report.yml), [a feature](https://github.com/adrianeyre/lanewise/issues/new?template=feature-request.yml) or [an accessibility barrier](https://github.com/adrianeyre/lanewise/issues/new?template=accessibility.yml).
+- **Find or open an issue.** For anything more than a small fix, say what you mean to do on its issue first, so nobody works on the same thing twice. Use the issue forms: [a bug](https://github.com/adrianeyre/lanewise/issues/new?template=bug-report.yml), [a feature](https://github.com/adrianeyre/lanewise/issues/new?template=feature-request.yml) or [an accessibility barrier](https://github.com/adrianeyre/lanewise/issues/new?template=accessibility.yml). A Pen-test round's Finding has [a form of its own](https://github.com/adrianeyre/lanewise/issues/new?template=finding.yml), for one that's safe to say in public; anything with a way to do harm goes through `SECURITY.md` instead.
 - **One issue per pull request.** Where a later issue will fill something in, leave a short `TODO(#<issue>)` naming it rather than doing it too.
 
 ## Setting up

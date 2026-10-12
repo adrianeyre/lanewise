@@ -169,7 +169,7 @@ One more issue builds rather than probes: code scanning for the tree, with a nam
 
 ## 7. Findings workflow
 
-Every Finding is an issue of its own, titled `[finding] <ID> — <what it does>`, where `<ID>` is its scope issue's with a number (`G3-1`). It carries `prd:pen-test`, one of `severity:critical`, `severity:high`, `severity:medium` or `severity:low`, and a link to its scope issue. It says which promise it breaks, from the PRD, an ADR or `SECURITY.md`, the Release it was shown on, and the test that would have caught it. A critical or high Finding is a private security advisory until its fix is released (§4).
+Every Finding is an issue of its own, titled `[finding] <ID> — <what it does>`, where `<ID>` is its scope issue's with a number (`G3-1`). It carries `prd:pen-test`, one of `severity:critical`, `severity:high`, `severity:medium` or `severity:low`, and a link to its scope issue. It says which promise it breaks, from the PRD, an ADR or `SECURITY.md`, the Release it was shown on, and the test that would have caught it. A critical or high Finding is a private security advisory until its fix is released (§4). A public Finding is filed with the [Finding issue form](../../.github/ISSUE_TEMPLATE/finding.yml), which asks for each of these and says first that a critical or high one goes privately instead. The owner triages it, labels its severity and sets its target as [Triaging a Finding](../processes/triaging-a-finding.md) says (E4).
 
 Targets, in days after the Finding is confirmed on a Release:
 

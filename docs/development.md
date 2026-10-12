@@ -92,13 +92,15 @@ This is the Desktop App from source: Tauri starts the UI's Vite dev server on `h
 pnpm dev
 ```
 
-This is only the UI, at `http://localhost:5150`, in your browser. It has no core to talk to, so anything that needs Git fails, saying "This is Lanewise's UI on its own, in a browser". It's for working on how the UI looks. Web Mode (`serve/`), which will carry the core to a browser, isn't built yet.
+This is only the UI, at `http://localhost:5150`, in your browser. It has no core to talk to, so anything that needs Git fails, saying "This is Lanewise's UI on its own, in a browser". It's for working on how the UI looks. Web Mode (`serve/`), which will carry the core to a browser, isn't built yet. Its design is ADR 0055, which names every command the command API has as crossing its WebSocket or not: a new command needs a row there, and `serve/tests/design.rs` fails until it has one.
+
+Neither of these applies the Desktop App's Content-Security-Policy, which Tauri sends only with a build's own assets (ADR 0050). A change that has the page load something new, or adds an inline script or style, can work here and still be refused in a release. Check it in a release build: `pnpm exec tauri build --no-bundle`, then run `target/release/lanewise-desktop`.
 
 ```bash
 pnpm website:dev
 ```
 
-This is the project website at `http://localhost:5160/` (`website/README.md`).
+This is the project website at `http://localhost:5160/` (`website/README.md`). It has no Content-Security-Policy either: the build puts the website's in (ADR 0054), so check a change that loads something new on the built site: `pnpm website:build`, then `pnpm --filter @lanewise/website preview`.
 
 ## 5. Lint, typecheck and test
 
@@ -140,7 +142,7 @@ This is a release build, and on macOS and Windows the installer a Release has (A
 | macOS | the app and disk image under `target/release/bundle/`. For the universal, ad hoc signed app CI makes: `node app/scripts/release/signMacos.ts -- pnpm desktop:build --target universal-apple-darwin`, which writes `target/universal-apple-darwin/release/bundle/dmg/Lanewise_<version>_universal.dmg` |
 | Linux | `target/release/lanewise-desktop`, with no installer |
 
-Without the Update key's secrets it makes no update packages, and says so ([the Update key](releases.md#the-update-key)); `node app/scripts/release/updater.ts --how` says whether it would. A copy you build this way opens without the Gatekeeper or SmartScreen warnings.
+Without the Update key's secrets it makes no update packages, and says so ([the Update key](releases.md#the-update-key)); `node app/scripts/release/updater.ts --how` says whether it would. A Release's build never has the key: the release workflow's `sign` job checks the tag with `app/scripts/release/versionCommit.ts` and signs the packages with `node app/scripts/release/updater.ts sign <dir> <version>` (ADR 0053). A copy you build this way opens without the Gatekeeper or SmartScreen warnings.
 
 ## 8. Everything else
 
@@ -151,6 +153,8 @@ Without the Update key's secrets it makes no update packages, and says so ([the 
 | `pnpm website:screenshots` | The README's and the website's screenshots, taken again of a demo repository in the Desktop App's release build over WebDriver: under `xvfb-run` on Linux (`website/README.md`, "Screenshots") |
 | `pnpm eval:corpus` | Replays the merges in `eval/repositories.json` to make `eval/corpus/` again (`eval/README.md`) |
 | `pnpm eval:suggestions <model provider> …` | Measures Suggestions on the Evaluation corpus with your own key, showing its estimated cost and waiting for `yes` first. Run by hand, never in CI (`eval/README.md`) |
+| `pnpm pen-test:fixtures` | Makes the first Pen-test round's Hostile repository fixtures (`app/scripts/pen-test/buildFixtures.ts`), synthetic and built from nothing, into a folder under the OS temp directory. Run by hand, never in CI against a real project (`docs/pen-test/E1.md`) |
+| `pnpm pen-test:host-page-probe --cert <pem> --key <pem>` | Serves the first Pen-test round's Host page probe (`app/scripts/pen-test/hostPageProbe.ts`) on `127.0.0.1:8443`, as `https://lanewise-probe.test:8443/`, for a Host page in a disposable Release to be sent on to. It checks, on the page itself, that the page and its frames reach none of Lanewise's commands or origins, and sends nothing anywhere. Run by hand on a disposable machine, with a certificate only it trusts and the name in its hosts file (`docs/pen-test/W2.md`) |
 | `pnpm try:<model provider>` | Sends one real Suggestion request ([below](#trying-a-model-provider)) |
 | `pnpm sandcastle <issue>` | Runs a coding agent on one issue in a container (`docs/processes/running-sandcastle.md`) |
 
@@ -167,7 +171,38 @@ LANEWISE_META_API_KEY=… pnpm try:meta [--model <id>] [--effort <level>]
 pnpm try:local [--base-url http://localhost:11434/v1] [--model <id>] [--effort <level>]
 ```
 
+In the Desktop App, a Model Provider on this computer is reached only at its base URL's `/models` and `/chat/completions`, which are all the adapter asks for (ADR 0051). A change that asks a local server for anything else adds it to the HTTP allow-list in `desktop/capabilities/default.json` first.
+
 Keep keys out of your shell history: set the variable with your shell's own way of reading a secret, or from a password manager's command line, rather than typing it in the command.
+
+## 9. Code scanning
+
+CodeQL reads the tree's Rust, TypeScript and workflows on every pull request, on every push to `main` and every Monday (`.github/workflows/codeql.yml`, ADR 0049). What it finds are Code scanning alerts. The owner, Adrian Eyre, reads every one and triages it within 7 days, or before the pull request it's on is merged. GitHub keeps them in three places:
+
+| Where | Who can see it | What it shows |
+| --- | --- | --- |
+| A pull request's **Checks**: **CodeQL (rust)**, **CodeQL (javascript-typescript)**, **CodeQL (actions)** and **Code scanning results** | Anyone who can read the pull request | Whether the change brings in an alert. A new error, or a new critical or high security alert, fails the check |
+| A pull request's **Files changed** | Anyone who can read the pull request | Each alert as an annotation on its line, with the rule and what to do |
+| The repository's **Security and quality** tab → **Code scanning**, at `https://github.com/adrianeyre/lanewise/security/code-scanning` | Only people with write access | Every open alert on `main`, filtered by `tool:CodeQL`, `language:rust`, `severity:high` and so on. Each shows the rule, the path the data takes through the code, CodeQL's help for the rule, and **Dismiss alert** |
+
+**Secret scanning** and **Dependabot** are on the same tab. Their alerts are read by the owner within the same week, and a secret is revoked where it came from on the day it's found.
+
+To triage an alert, do one of these, and write which in the alert or the pull request:
+
+- **fix it**, in a pull request that describes the fix as hardening and says nothing of how to exploit what it closes;
+- **dismiss it**, as a false positive, as used in tests, or as won't fix, with a comment saying why;
+- **report it privately**, if it shows a concrete way to do harm in a Release, as `SECURITY.md` says. It becomes a Finding ([Triaging a Finding](processes/triaging-a-finding.md)).
+
+If a pull request of yours fails the check, fix the alert in the pull request, or say in it why the alert is wrong; the owner dismisses it.
+
+**Never re-run a Code scanning run with debug logging.** In debug mode, `github/codeql-action` uploads the run's results as an artifact, and anyone can download a public repository's artifacts. To look into a run, run CodeQL locally instead. The CodeQL CLI is free for open-source code such as Lanewise's. Download the latest `codeql-bundle-linux64.tar.gz`, `codeql-bundle-osx64.tar.gz` or `codeql-bundle-win64.tar.gz` from [`github/codeql-action`'s releases](https://github.com/github/codeql-action/releases), unpack it outside the clone, and put its `codeql` folder on your `PATH`. Then, from the clone, for each of `rust`, `javascript` and `actions`:
+
+```bash
+codeql database create ../codeql-results/rust --language=rust --build-mode=none --overwrite
+codeql database analyze ../codeql-results/rust codeql/rust-queries:codeql-suites/rust-security-extended.qls --format=csv --output=../codeql-results/rust.csv
+```
+
+Keep the results outside the clone and out of anything public.
 
 ## Common setup problems
 

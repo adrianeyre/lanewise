@@ -1,0 +1,67 @@
+name: Code scanning
+
+# CodeQL reads the tree's Rust, TypeScript and workflows for the patterns its
+# security queries know, and GitHub's code scanning keeps what it finds as
+# alerts, which the owner reads and triages (ADR 0049). It is free for a
+# public repository. Defence in depth: clippy and oxlint already read the
+# tree in `ci.yml`, but neither looks for how data flows from where an
+# attacker chooses it to where it does harm.
+#
+# A committed workflow rather than GitHub's default setup, so the queries,
+# the languages and each action's version are in the tree, reviewed and
+# pinned like everything else. GitHub refuses a workflow's results while the
+# default setup is on (`docs/development.md`, "Code scanning").
+on:
+  pull_request:
+  push:
+    branches: [main]
+  # New queries come with each CodeQL release, and find things in code that
+  # hasn't changed, so the default branch is read again every week.
+  schedule:
+    - cron: "17 4 * * 1"
+  workflow_dispatch:
+
+concurrency:
+  group: codeql-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: CodeQL (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      security-events: write # upload the results as code scanning alerts
+    strategy:
+      fail-fast: false
+      matrix:
+        # Each is read from its source with no build: CodeQL's Rust extractor
+        # needs none, and TypeScript and workflows are never built for it.
+        # `actions` reads `.github/workflows/`, which `release.yml`'s secrets
+        # make worth reading.
+        language: [rust, javascript-typescript, actions]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # The Rust extractor loads each Cargo workspace through Cargo, so it
+      # gets the stable Rust `ci.yml` builds with.
+      - if: matrix.language == 'rust'
+        run: rustup toolchain install stable --profile minimal && rustup default stable
+
+      - uses: github/codeql-action/init@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: none
+          # The default queries and the security queries with more false
+          # positives, but not the quality ones: clippy and oxlint do that.
+          queries: security-extended
+
+      - uses: github/codeql-action/analyze@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
+        with:
+          category: /language:${{ matrix.language }}

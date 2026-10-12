@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import "@testing-library/jest-dom/vitest";
-import { cleanup, render, screen, within } from "@testing-library/react";
+import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { afterEach, beforeAll, expect, test } from "vitest";
@@ -178,7 +178,8 @@ test("with no stashes the Widget says so, and reports none, for the Commit graph
   const { container, told } = renderStashes(stashRepository([]).commands);
 
   expect(await within(widget()).findByText("No stashes.")).toBeVisible();
-  expect(told.counts).toEqual([0]);
+  // The count is reported by an effect after the list is drawn.
+  await waitFor(() => expect(told.counts).toEqual([0]));
   await expectNoAxeViolations(container);
 });
 

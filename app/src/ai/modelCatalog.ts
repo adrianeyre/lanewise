@@ -67,11 +67,16 @@ function text(value: unknown): string | null {
   return typeof value === "string" && value !== "" ? value : null;
 }
 
-/** `source` as a pattern matching a whole model ID, or `null` if it isn't a regular expression. */
+/**
+ * `source` as a pattern matching a whole model ID, or `null` if it isn't a
+ * regular expression. It must be one on its own, as the schema's `regex`
+ * format checks, not only once it's inside the anchors.
+ */
 function pattern(source: unknown): RegExp | null {
   if (text(source) === null) return null;
   try {
-    return new RegExp(`^(?:${source as string})$`);
+    const alone = new RegExp(source as string);
+    return new RegExp(`^(?:${alone.source})$`);
   } catch {
     return null;
   }

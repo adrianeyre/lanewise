@@ -239,7 +239,7 @@ impl From<Project> for HostRepository {
 mod tests {
     use serde_json::{Value, json};
 
-    use super::super::stand_in::{Helper, Reply, parameter, reply, serve};
+    use super::super::stand_in::{Helper, Reply, keeps_no_token, parameter, reply, serve};
     use super::*;
     use crate::page::Cursor;
 
@@ -292,6 +292,14 @@ mod tests {
             [("/user".to_owned(), Some("Bearer glpat-from-gcm".to_owned()))]
         );
         assert_eq!(helper.told(), ["fill gitlab.com", "approve glpat-from-gcm"]);
+    }
+
+    #[test]
+    fn keeps_no_token_between_calls_and_asks_the_helper_for_each() {
+        let (api, asked) = serve(user);
+        let helper = Helper::holding("glpat-from-gcm");
+
+        keeps_no_token(&integration(&helper, &api), &helper, "gitlab.com", &asked);
     }
 
     #[test]

@@ -16,6 +16,7 @@ import {
 } from "@codemirror/view";
 import type { Parser } from "@lezer/common";
 
+import { editorStyleNonce } from "../ui/styleNonce";
 import type { DiffDocument, DiffLineKind } from "./document";
 import { diffHighlighting } from "./highlight";
 
@@ -72,6 +73,7 @@ export function diffEditor(
         // Only `\n` ends a line, so a carriage return stays in its line, shown by
         // `highlightSpecialChars`, as the core sends it.
         EditorState.lineSeparator.of("\n"),
+        editorStyleNonce(),
         // Read-only, but still editable to the browser, so the keyboard can move a
         // caret through it and select and copy lines, all of them however few
         // are drawn. Tab is never bound, so it always moves focus on.

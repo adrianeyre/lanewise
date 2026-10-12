@@ -4,6 +4,7 @@
  *
  *   node app/scripts/release/updater.ts build [tauri build's options]   build, with update packages if the key is set
  *   node app/scripts/release/updater.ts --how                           print whether it would sign them, and build nothing
+ *   node app/scripts/release/updater.ts sign <dir> <version>            sign the update packages in <dir> with the Update key, for <version>
  *   node app/scripts/release/updater.ts manifest <dir> <url> [notes]    check a Release's update packages and write its latest.json
  *
  * The installed Desktop App updates itself through Tauri's updater, which
@@ -20,6 +21,14 @@
  * the public key, or its password without the key, is half a set, and fails,
  * naming what is missing and never a value, as `signWindows.ts` does.
  *
+ * `sign` is how a Release signs them (ADR 0053). The build runs every
+ * Cargo build script, proc macro and Vite plugin in the tree, so a Release's
+ * build never has the key: its packages are signed afterwards, in a job of
+ * their own that runs only Node and this script. It reads the key as `tauri
+ * signer generate` writes it, decrypts it with its password, checks it is the
+ * key whose public half the app is built with, and writes each package's
+ * `.sig` as Tauri does, with the version in its trusted comment.
+ *
  * `manifest` is the Release's side: the app asks the latest Release for
  * `latest.json`, which names the version, what's new, and each platform's
  * package and signature. It checks every signature against the committed
@@ -29,7 +38,15 @@
  * Node runs it as it is, stripping the types, so it imports only Node's own modules.
  */
 import { spawnSync } from "node:child_process";
-import { createHash, createPublicKey, verify as verifyEd25519 } from "node:crypto";
+import {
+  createHash,
+  createPrivateKey,
+  createPublicKey,
+  type KeyObject,
+  scryptSync,
+  sign as signEd25519,
+  verify as verifyEd25519,
+} from "node:crypto";
 import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { join, resolve } from "node:path";
@@ -149,6 +166,74 @@ export function verify(pubkey: string, data: Buffer, signature: string): Verdict
   return { ok: true, version: version?.slice("version:".length) };
 }
 
+/** Node reads a raw Ed25519 private key only wrapped in this DER header. */
+const ED25519_PKCS8 = Buffer.from("302e020100300506032b657004220420", "hex");
+
+export type SecretKey = { ok: true; id: Buffer; key: KeyObject } | { ok: false; why: string };
+
+/**
+ * scrypt's cost for minisign's `opslimit` and `memlimit`, as libsodium's
+ * `pickparams` works it out; for `tauri signer generate`'s keys, N = 2¹⁵.
+ */
+function scryptParams(opslimit: number, memlimit: number): { N: number; r: number; p: number } {
+  const ops = Math.max(opslimit, 32768);
+  const r = 8;
+  const maxN = ops < memlimit / 32 ? ops / (r * 4) : memlimit / (r * 128);
+  let log2 = 1;
+  while (log2 < 63 && 2 ** log2 <= maxN / 2) log2 += 1;
+  const p = ops < memlimit / 32 ? 1 : Math.max(1, Math.floor(Math.min(ops / 4 / 2 ** log2, 0x3fffffff) / r));
+  return { N: 2 ** log2, r, p };
+}
+
+/**
+ * The Update key's private half, `privateKey` as `tauri signer generate`
+ * writes it (base64 of minisign's secret key box), decrypted with
+ * `password`, if it is the key whose public half is `pubkey`. A wrong
+ * password is told from a wrong key, and neither says anything of either.
+ */
+export function secretKey(privateKey: string, password: string, pubkey: string): SecretKey {
+  const box = Buffer.from(lines(privateKey)[1] ?? "", "base64");
+  const kdf = box.subarray(2, 4).toString("latin1");
+  if (box.length !== 158 || box.subarray(0, 2).toString() !== "Ed" || (kdf !== "Sc" && kdf !== "\0\0")) {
+    return { ok: false, why: `${PRIVATE_KEY} isn't a key tauri signer generate made` };
+  }
+  let secret = box.subarray(54, 158);
+  if (kdf === "Sc") {
+    const { N, r, p } = scryptParams(Number(box.readBigUInt64LE(38)), Number(box.readBigUInt64LE(46)));
+    const stream = scryptSync(password, box.subarray(6, 38), secret.length, { N, r, p, maxmem: 256 * N * r * p });
+    secret = Buffer.from(secret.map((byte, index) => byte ^ (stream[index] ?? 0)));
+  }
+  const id = secret.subarray(0, 8);
+  const key = createPrivateKey({ key: Buffer.concat([ED25519_PKCS8, secret.subarray(8, 40)]), format: "der", type: "pkcs8" });
+  const derived = createPublicKey(key).export({ format: "der", type: "spki" }).subarray(ED25519_SPKI.length);
+  // The box keeps the public half after the private one: it matches only if the password was right.
+  if (!derived.equals(secret.subarray(40, 72))) return { ok: false, why: `${PASSWORD} isn't the key's password` };
+  const committed = Buffer.from(lines(pubkey)[1] ?? "", "base64");
+  if (!committed.subarray(2, 10).equals(id) || !committed.subarray(10).equals(derived)) {
+    return { ok: false, why: `${PRIVATE_KEY} isn't the key whose public half is ${PUBLIC_KEY}` };
+  }
+  return { ok: true, id, key };
+}
+
+/**
+ * The contents of `file`'s `.sig`, as Tauri writes it: minisign's signature
+ * over the BLAKE2b-512 hash of `data`, and a global signature over that and
+ * the trusted comment, which binds it to `version`.
+ */
+export function packageSignature(key: Extract<SecretKey, { ok: true }>, data: Buffer, file: string, version: string, timestamp: number): string {
+  const sig = signEd25519(null, createHash("blake2b512").update(data).digest(), key.key);
+  const trusted = `timestamp:${timestamp}\tfile:${file}\tversion:${version}`;
+  const global = signEd25519(null, Buffer.concat([sig, Buffer.from(trusted)]), key.key);
+  const text = [
+    "untrusted comment: signature from tauri secret key",
+    Buffer.concat([Buffer.from("ED"), key.id, sig]).toString("base64"),
+    `${TRUSTED}${trusted}`,
+    global.toString("base64"),
+    "",
+  ].join("\n");
+  return Buffer.from(text).toString("base64");
+}
+
 /**
  * Each kind of update package, by the end of its name, and the updater's
  * names for the platforms it updates: `{os}-{arch}-{bundle type}` first, then
@@ -263,6 +348,53 @@ export function release(dir: string, pubkey: string, version: string): Release {
   return problems.length > 0 ? { kind: "problems", problems } : { kind: "signed", packages: signed };
 }
 
+/** A version semantic-release makes, which goes into a trusted comment, so it holds no tab or line break. */
+const VERSION = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
+
+/**
+ * Signs each update package in `dir` for `version` with the Update key in
+ * `env`, writing its `.sig` beside it, as a Release's `sign` job does; whether
+ * it could, and what it says about it. With no key yet there is nothing to
+ * sign, which is no failure, but the public key committed without the
+ * private key is: no installed copy would take that Release. Each package
+ * must be named for `version`, as the build jobs name them, since its name
+ * goes into the trusted comment.
+ */
+export function signRelease(dir: string, version: string, env: Env, pubkey: string, now: Date): { ok: boolean; said: string } {
+  if (!VERSION.test(version)) return { ok: false, said: `${JSON.stringify(version)} isn't a version.` };
+  const how = signing(env, pubkey);
+  if (how.kind === "incomplete") return { ok: false, said: summary(how) };
+  if (how.kind === "unsigned") {
+    return how.publicKey
+      ? {
+          ok: false,
+          said: `The Update key's public half is in ${PUBLIC_KEY}, but ${PRIVATE_KEY} isn't set, so no installed copy would update to this Release.`,
+        }
+      : { ok: true, said: summary(how) };
+  }
+
+  const files = readdirSync(dir);
+  const packages = files.filter((file) => targets(file).length > 0).toSorted();
+  const named = new RegExp(`^Lanewise_${version.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}_(?:x64-setup\\.exe|universal\\.app\\.tar\\.gz)$`);
+  const problems = [
+    ...(packages.length === 0 ? ["There are no update packages to sign."] : []),
+    ...packages.filter((file) => !named.test(file)).map((file) => `${JSON.stringify(file)} isn't named for ${version}.`),
+    ...packages.filter((file) => files.includes(`${file}.sig`)).map((file) => `${file} is already signed.`),
+  ];
+  if (problems.length > 0) return { ok: false, said: problems.join("\n") };
+
+  const key = secretKey(env[PRIVATE_KEY] ?? "", env[PASSWORD] ?? "", pubkey);
+  if (!key.ok) return { ok: false, said: `${key.why}.` };
+  const timestamp = Math.floor(now.getTime() / 1000);
+  for (const file of packages) {
+    writeFileSync(join(dir, `${file}.sig`), packageSignature(key, readFileSync(join(dir, file)), file, version, timestamp));
+  }
+  // What the publish job and the app will check, checked now.
+  const checked = release(dir, pubkey, version);
+  if (checked.kind !== "signed") return { ok: false, said: checked.kind === "problems" ? checked.problems.join("\n") : "Nothing was signed." };
+  return { ok: true, said: `Signed ${packages.join(", ")} for ${version}.` };
+}
+
 export interface Releasing {
   version: string;
   pubkey: string;
@@ -314,6 +446,11 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     }
   } else if (args[0] === "build") {
     process.exitCode = build(args.slice(1), process.env);
+  } else if (args[0] === "sign" && args.length === 3) {
+    const pubkey = publicKey(readFileSync(CONFIG, "utf8"));
+    const { ok, said } = signRelease(args[1] as string, args[2] as string, process.env, pubkey, new Date());
+    (ok ? console.log : console.error)(said);
+    process.exitCode = ok ? 0 : 1;
   } else if (args[0] === "manifest" && (args.length === 3 || args.length === 4)) {
     const { version } = JSON.parse(readFileSync(PACKAGE, "utf8")) as { version: string };
     const notes = args[3] === undefined ? "" : readFileSync(args[3], "utf8");
@@ -322,7 +459,9 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     (ok ? console.log : console.error)(said);
     process.exitCode = ok ? 0 : 1;
   } else {
-    console.error("usage: node app/scripts/release/updater.ts build [options] | --how | manifest <dir> <url> [notes-file]");
+    console.error(
+      "usage: node app/scripts/release/updater.ts build [options] | --how | sign <dir> <version> | manifest <dir> <url> [notes-file]",
+    );
     process.exitCode = 2;
   }
 }

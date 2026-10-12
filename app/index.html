@@ -26,8 +26,13 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
     <link rel="manifest" href="/app.webmanifest" />
 
+    <!-- The nonce the Desktop App's Content-Security-Policy allows CodeMirror's own <style> elements by (ADR 0050,
+         `src/ui/styleNonce.ts`). Tauri puts a fresh one in each time it serves this page; anywhere else it stays a placeholder. -->
+    <meta name="lanewise-style-nonce" content="__TAURI_STYLE_NONCE__" />
+
     <!-- The saved Theme and palette, or the OS's Theme, before first paint, so there is no flash of the wrong one (`settings/theme.ts`).
-         A Content-Security-Policy would have to allow this script by its hash. -->
+         The Desktop App's Content-Security-Policy allows this script, the page's only inline one, by its hash, which Tauri
+         works out as it builds (ADR 0050). -->
     <script>
       (function () {
         var theme = null;

@@ -171,3 +171,41 @@ impl Credentials for Helper {
         Ok(())
     }
 }
+
+/// Signs in to `host` through `integration` twice, the helper forgetting
+/// its credential between, as when the user signs out in Git Credential
+/// Manager. The second sign-in asks the helper afresh and finds nothing,
+/// and nothing more reaches the Host: the integration kept no token of its
+/// own from the first.
+pub(super) fn keeps_no_token(
+    integration: &dyn super::HostIntegration,
+    helper: &Helper,
+    host: &str,
+    asked: &Asked,
+) {
+    // The sign-ins' answers aren't printed when an assertion fails: one
+    // that went wrong could be carrying the token.
+    let first = integration.sign_in(host, false);
+    assert!(first.is_ok(), "the first sign-in failed");
+    let credential = helper.give(host).unwrap();
+    let secret = credential.secret().to_owned();
+    let sent = asked.lock().unwrap().len();
+    helper.reject(&credential).unwrap();
+
+    let again = integration.sign_in(host, false);
+
+    assert!(
+        matches!(&again, Err(super::HostError::NoCredential { host: named, .. }) if named == host),
+        "the second sign-in wasn't refused for want of a credential"
+    );
+    assert_eq!(asked.lock().unwrap().len(), sent);
+    assert_eq!(
+        helper.told(),
+        [
+            format!("fill {host}"),
+            format!("approve {secret}"),
+            format!("reject {secret}"),
+            format!("fill {host}"),
+        ]
+    );
+}

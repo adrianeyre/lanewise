@@ -12,7 +12,7 @@ pnpm --filter @lanewise/website preview  # serves website/dist at http://localho
 
 ## The downloads
 
-The build offers the Release it is given in `LANEWISE_LATEST_RELEASE`, the path to a JSON file of GitHub's `releases/latest`, and says there's nothing to download yet without one. To see the buttons locally:
+The build offers the Release it is given in `LANEWISE_LATEST_RELEASE`, the path to a JSON file of GitHub's `releases/latest`, and says there's nothing to download yet without one. It refuses a Release of any version but the root `package.json`'s, which the footer shows (ADR 0054), so build from `main` or the Release's tag. To see the buttons locally:
 
 ```bash
 gh api repos/adrianeyre/lanewise/releases/latest > /tmp/latest-release.json
@@ -54,6 +54,10 @@ chrome --headless --hide-scrollbars --force-device-scale-factor=1 --window-size=
   --screenshot=website/public/og-image.png website/icons/og-image.svg
 ```
 
+## The Content-Security-Policy
+
+The built page has a Content-Security-Policy in its head (ADR 0054): everything from its own origin, and the theme script in `index.html` by its hash. The dev server has none, so check a change that loads something new on the built site, with `preview`, and look in the browser's console for a message naming `Content-Security-Policy`. `src/build.test.ts` builds the site and holds the policy, what the page loads and its download links.
+
 ## Hand checks
 
 jsdom lays nothing out, so the tests can't measure the page as a browser draws it. Before a change to how it looks, build it, serve it with `preview`, and in Chrome, with `prefers-color-scheme` set to light and then dark (DevTools → Rendering → Emulate CSS media feature):
@@ -61,3 +65,4 @@ jsdom lays nothing out, so the tests can't measure the page as a browser draws i
 - run Lighthouse (DevTools → Lighthouse): accessibility and SEO must be 100;
 - run axe (the axe DevTools extension) on the page and on each footer dialog: no violations;
 - check it at a phone's width and at 200% zoom, and go through it with the keyboard alone.
+- open each footer dialog with the console open: no message names `Content-Security-Policy`.

@@ -168,6 +168,10 @@ _Avoid_: Native app, client
 Lanewise's core running as a local server on the machine that has the repositories, used from a browser.
 _Avoid_: Browser version, web app, hosted version
 
+**Access token**:
+The random secret `lanewise serve` makes fresh at each start and prints once, in the fragment of the URL it gives, which Web Mode's page sends as its WebSocket's first frame before the server runs any command for it (ADR 0055). Whoever has it can do anything the user can, so it's kept like a password, and is worthless once `serve` stops.
+_Avoid_: Password, API key, session, cookie
+
 ### Settings
 
 **Settings**:
@@ -206,6 +210,10 @@ _Avoid_: Vulnerability, bug, issue, defect
 A repository made to attack whoever opens, clones, fetches or resolves conflicts in it: crafted refs, paths, configuration, attributes, history or conflicts. Every Pen-test round's fixtures include some, and none is ever a real project's.
 _Avoid_: Malicious repo, evil repo, poisoned repository
 
+**Code scanning alert**:
+What CodeQL reports when it reads the tree's Rust, TypeScript or workflows (`.github/workflows/codeql.yml`) and finds a pattern its security queries know. GitHub keeps it until it's fixed or dismissed, and the owner triages each within a week (ADR 0049). It is a lead, not a Finding: CodeQL shows the pattern, not that a Release can be made to reach it.
+_Avoid_: Vulnerability, warning, finding, issue
+
 ### Releases
 
 **Release**:
@@ -221,7 +229,7 @@ A newer Release than the one running, which the installed Desktop App finds in t
 _Avoid_: Upgrade, patch, new version
 
 **Update key**:
-The minisign key pair every Update's package is signed with, for its version: the public half is built into the Desktop App, and the private half is a secret only the release workflow has. The app installs nothing the key didn't sign.
+The minisign key pair every Update's package is signed with, for its version: the public half is built into the Desktop App, and the private half is a secret only the release workflow's `sign` job has, never its build (ADR 0053). The app installs nothing the key didn't sign.
 _Avoid_: Updater key, signing key, code signing certificate
 
 **Project website**:

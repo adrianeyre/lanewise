@@ -1,5 +1,6 @@
 import { spawnSync } from "node:child_process";
-import { copyFileSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { copyFileSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -13,7 +14,9 @@ import {
   pair,
   publicKey,
   release,
+  secretKey,
   signing,
+  signRelease,
   summary,
   targets,
   tauriArgs,
@@ -28,6 +31,8 @@ const FIXTURES = fileURLToPath(new URL("./fixtures/updater/", import.meta.url));
 const fixture = (name: string) => readFileSync(join(FIXTURES, name));
 const PUBKEY = fixture("throwaway.pub").toString("utf8");
 const OTHER = fixture("other-throwaway.pub").toString("utf8");
+// Signed by another throwaway key with no version bound to it, as `tauri signer sign` signs without `--app-version`.
+const UNVERSIONED = fileURLToPath(new URL("./fixtures/unversioned/", import.meta.url));
 const EXE = "Lanewise_1.2.3_x64-setup.exe";
 const MAC = "Lanewise_1.2.3_universal.app.tar.gz";
 const URL_BASE = "https://github.com/adrianeyre/lanewise/releases/download/v1.2.3";
@@ -264,6 +269,17 @@ describe("a Release's update packages", () => {
     });
   });
 
+  test("a package signed with no version bound to it is refused, as the updater would refuse it", () => {
+    const pubkey = readFileSync(join(UNVERSIONED, "throwaway.pub"), "utf8");
+    expect(verify(pubkey, readFileSync(join(UNVERSIONED, EXE)), readFileSync(join(UNVERSIONED, `${EXE}.sig`), "utf8"))).toEqual({
+      ok: true,
+      version: undefined,
+    });
+    dir = mkdtempSync(join(tmpdir(), "lanewise-updater-"));
+    for (const name of [EXE, `${EXE}.sig`]) copyFileSync(join(UNVERSIONED, name), join(dir, name));
+    expect(release(dir, pubkey, "1.2.3")).toEqual({ kind: "problems", problems: [`${EXE} is signed for version (none), not 1.2.3.`] });
+  });
+
   test("a package signed by another key is refused", () => {
     expect(release(releaseDir(...ALL), OTHER, "1.2.3")).toMatchObject({
       kind: "problems",
@@ -291,6 +307,118 @@ describe("a Release's update packages", () => {
   });
 });
 
+describe("signing a Release's update packages", () => {
+  let dir: string | undefined;
+  afterEach(() => {
+    if (dir) rmSync(dir, { recursive: true, force: true });
+    dir = undefined;
+  });
+
+  const PASSWORD = "a-throwaway-password";
+
+  /**
+   * A throwaway Update key, made by `tauri signer generate` as the
+   * maintainer makes the real one, in a folder with the two stand-in update
+   * packages the build jobs upload; the folder, the key and its public half.
+   * Nothing here outlives the test.
+   */
+  function made(): { at: string; env: Record<string, string>; pubkey: string } {
+    dir = mkdtempSync(join(tmpdir(), "lanewise-sign-"));
+    const at = join(dir, "update");
+    const tauri = createRequire(import.meta.url).resolve("@tauri-apps/cli/tauri.js");
+    const key = join(dir, "throwaway.key");
+    const generated = spawnSync(process.execPath, [tauri, "signer", "generate", "--ci", "-p", PASSWORD, "-w", key], { encoding: "utf8" });
+    expect({ status: generated.status, stderr: generated.stderr }).toMatchObject({ status: 0 });
+    mkdirSync(at);
+    for (const name of [EXE, MAC]) copyFileSync(join(FIXTURES, name), join(at, name));
+    return {
+      at,
+      env: { TAURI_SIGNING_PRIVATE_KEY: readFileSync(key, "utf8"), TAURI_SIGNING_PRIVATE_KEY_PASSWORD: PASSWORD },
+      pubkey: readFileSync(`${key}.pub`, "utf8"),
+    };
+  }
+
+  const NOW = new Date("2026-10-12T12:00:00Z");
+
+  test("with the key tauri signer generate made, each package is signed as Tauri signs it, for the version", () => {
+    const { at, env, pubkey } = made();
+    expect(signRelease(at, "1.2.3", env, pubkey, NOW)).toEqual({ ok: true, said: `Signed ${MAC}, ${EXE} for 1.2.3.` });
+    for (const file of [EXE, MAC]) {
+      const sig = readFileSync(join(at, `${file}.sig`), "utf8");
+      expect(verify(pubkey, readFileSync(join(at, file)), sig)).toEqual({ ok: true, version: "1.2.3" });
+      expect(Buffer.from(sig, "base64").toString("utf8")).toContain(`trusted comment: timestamp:1791806400\tfile:${file}\tversion:1.2.3\n`);
+    }
+    expect(release(at, pubkey, "1.2.3")).toMatchObject({ kind: "signed" });
+    expect(release(at, pubkey, "1.2.4").kind).toBe("problems");
+  });
+
+  test("fixtures/signed, which the Desktop App's updater test serves, is what this signs", () => {
+    const signed = fileURLToPath(new URL("./fixtures/signed/", import.meta.url));
+    const pubkey = readFileSync(join(signed, "throwaway.pub"), "utf8");
+    expect(release(signed, pubkey, "1.2.3")).toMatchObject({ kind: "signed" });
+    for (const file of [EXE, MAC]) expect(readFileSync(join(signed, file))).toEqual(fixture(file));
+  });
+
+  test("a wrong password is refused, signs nothing and never says the password", () => {
+    const { at, env, pubkey } = made();
+    const said = signRelease(at, "1.2.3", { ...env, TAURI_SIGNING_PRIVATE_KEY_PASSWORD: "hunter2-not-it" }, pubkey, NOW);
+    expect(said).toEqual({ ok: false, said: "TAURI_SIGNING_PRIVATE_KEY_PASSWORD isn't the key's password." });
+    expect(readdirSync(at).toSorted()).toEqual([MAC, EXE]);
+  });
+
+  test("a key that isn't the one the app is built with is refused before anything is signed", () => {
+    const { at, env } = made();
+    expect(signRelease(at, "1.2.3", env, PUBKEY, NOW)).toEqual({
+      ok: false,
+      said: "TAURI_SIGNING_PRIVATE_KEY isn't the key whose public half is plugins.updater.pubkey in desktop/tauri.conf.json.",
+    });
+    expect(secretKey("bm90IGEga2V5", PASSWORD, PUBKEY)).toEqual({ ok: false, why: "TAURI_SIGNING_PRIVATE_KEY isn't a key tauri signer generate made" });
+    expect(readdirSync(at).toSorted()).toEqual([MAC, EXE]);
+  });
+
+  test("with no key yet there is nothing to sign, but the public key without the private key fails", () => {
+    const { at, pubkey } = made();
+    expect(signRelease(at, "1.2.3", {}, "", NOW)).toEqual({ ok: true, said: expect.stringMatching(/the updater has no key yet/) });
+    expect(signRelease(at, "1.2.3", { TAURI_SIGNING_PRIVATE_KEY: "" }, pubkey, NOW)).toEqual({
+      ok: false,
+      said: "The Update key's public half is in plugins.updater.pubkey in desktop/tauri.conf.json, but TAURI_SIGNING_PRIVATE_KEY isn't set, so no installed copy would update to this Release.",
+    });
+    expect(signRelease(at, "1.2.3", { TAURI_SIGNING_PRIVATE_KEY_PASSWORD: PASSWORD }, pubkey, NOW).ok).toBe(false);
+    expect(readdirSync(at).toSorted()).toEqual([MAC, EXE]);
+  });
+
+  test("only packages named for the version are signed, since the name goes into the trusted comment", () => {
+    // Windows allows neither a tab nor a colon in a file name, so the name
+    // that would add a field to the trusted comment can only be made elsewhere.
+    const misnamed = [
+      "Lanewise_1.2.3-9.9.9_x64-setup.exe",
+      ...(process.platform === "win32" ? [] : ["Lanewise_1.2.3\tversion:9.9.9_x64-setup.exe"]),
+    ];
+    for (const name of misnamed) {
+      const { at, env, pubkey } = made();
+      copyFileSync(join(at, EXE), join(at, name));
+      expect(signRelease(at, "1.2.3", env, pubkey, NOW)).toEqual({ ok: false, said: `${JSON.stringify(name)} isn't named for 1.2.3.` });
+      expect(readdirSync(at).filter((file) => file.endsWith(".sig"))).toEqual([]);
+    }
+    const { at, env, pubkey } = made();
+    expect(signRelease(at, "1.2.3\tversion:9.9.9", env, pubkey, NOW)).toEqual({ ok: false, said: '"1.2.3\\tversion:9.9.9" isn\'t a version.' });
+    expect(signRelease(at, "1.2.4", env, pubkey, NOW).said).toMatch(/isn't named for 1\.2\.4/);
+    expect(readdirSync(at).filter((file) => file.endsWith(".sig"))).toEqual([]);
+  });
+
+  test("a package already signed, such as by a throwaway key in a build, is refused, not signed again", () => {
+    const { at, env, pubkey } = made();
+    writeFileSync(join(at, `${MAC}.sig`), fixture(`${MAC}.sig`));
+    expect(signRelease(at, "1.2.3", env, pubkey, NOW)).toEqual({ ok: false, said: `${MAC} is already signed.` });
+  });
+
+  test("a folder with no update package to sign fails, rather than make a Release without Updates", () => {
+    const { at, env, pubkey } = made();
+    for (const file of [EXE, MAC]) rmSync(join(at, file));
+    expect(signRelease(at, "1.2.3", env, pubkey, NOW)).toEqual({ ok: false, said: "There are no update packages to sign." });
+  });
+});
+
 /** The script, run by Node, with only what Node needs of the environment, so no secret of this machine's leaks in. */
 function run(args: string[], env: Record<string, string> = {}) {
   return spawnSync(process.execPath, [SCRIPT, ...args], {
@@ -310,6 +438,22 @@ describe("the script", () => {
     expect(result.status).toBe(1);
     expect(result.stderr).toMatch(/TAURI_SIGNING_PRIVATE_KEY isn't set/);
     expect(result.stdout + result.stderr).not.toMatch(/hunter2-the-password/);
+  });
+
+  test("sign, with the app's public key still empty, signs nothing, and a key given then is half a set, never printed", () => {
+    const at = mkdtempSync(join(tmpdir(), "lanewise-sign-"));
+    try {
+      copyFileSync(join(FIXTURES, EXE), join(at, EXE));
+      const none = run(["sign", at, "1.2.3"]);
+      expect({ status: none.status, stdout: none.stdout }).toEqual({ status: 0, stdout: expect.stringMatching(/the updater has no key yet/) });
+      const half = run(["sign", at, "1.2.3"], { TAURI_SIGNING_PRIVATE_KEY: "c2VjcmV0LWtleS1zdGFuZC1pbg==" });
+      expect(half.status).toBe(1);
+      expect(half.stderr).toMatch(/plugins\.updater\.pubkey in desktop\/tauri\.conf\.json isn't set/);
+      expect(half.stdout + half.stderr).not.toMatch(/c2VjcmV0LWtleS1zdGFuZC1pbg/);
+      expect(readdirSync(at)).toEqual([EXE]);
+    } finally {
+      rmSync(at, { recursive: true, force: true });
+    }
   });
 
   test("without a mode, it says how it is used", () => {

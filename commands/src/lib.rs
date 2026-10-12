@@ -566,4 +566,188 @@ mod tests {
             })
         );
     }
+
+    #[test]
+    fn a_request_carrying_a_secret_that_cant_be_read_never_says_the_secret() {
+        // Each is rejected before it runs, so no credential store is touched.
+        const SECRET: &str = "sk-ant-s1-canary-0123456789";
+        let header = || json!({ "name": "x-api-key", "value": SECRET });
+        let requests = [
+            (
+                "saveModelProviderKey",
+                json!({ "provider": "Not An ID", "key": SECRET }),
+            ),
+            (
+                "saveModelProviderKey",
+                json!({ "provider": "fake", "key": SECRET, "also": true }),
+            ),
+            ("saveModelProviderKey", json!({ "key": SECRET })),
+            (
+                "saveModelProviderKey",
+                json!({ "provider": "fake", "key": [SECRET] }),
+            ),
+            (
+                "saveGateway",
+                json!({ "provider": "../x", "baseUrl": "https://gateway.example", "headers": [header()] }),
+            ),
+            (
+                "saveGateway",
+                json!({ "provider": "fake", "headers": [{ "name": "x-api-key", "value": SECRET, "also": 1 }] }),
+            ),
+            (
+                "gatewayRequest",
+                json!({ "provider": "Not An ID", "path": "/", "method": "GET", "headers": [header()] }),
+            ),
+            (
+                "gatewayRequest",
+                json!({ "provider": "fake", "path": "/", "headers": [header()] }),
+            ),
+            (
+                "saveIssueTrackerAccount",
+                json!({ "tracker": "nope", "token": SECRET }),
+            ),
+            (
+                "saveIssueTrackerAccount",
+                json!({ "tracker": "trello", "key": { "key": SECRET }, "token": SECRET }),
+            ),
+            (
+                "saveIssueTrackerAccount",
+                json!({ "tracker": "jira", "site": "x.atlassian.net", "email": "a@b.c", "token": SECRET, "also": 1 }),
+            ),
+        ];
+
+        for (name, request) in requests {
+            let reply = call(name, request.clone());
+
+            assert!(
+                matches!(
+                    &reply,
+                    Reply::Rejected {
+                        rejection: Rejection::InvalidRequest { .. }
+                    }
+                ),
+                "{name} {request}: {reply:?}"
+            );
+            let sent = serde_json::to_string(&reply).unwrap();
+            assert!(!sent.contains(SECRET), "{name} {request}: {sent}");
+            let logged = logs::outcome_line(name, &reply).map(|(_, line)| line);
+            assert!(
+                logged.as_ref().is_some_and(|line| !line.contains(SECRET)),
+                "{name}: {logged:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn every_credential_store_entry_is_under_a_service_of_lanewises_own_by_a_name_no_other_shares()
+    {
+        // Every `keyring` entry in the tree, by the file it's in and the
+        // service it names (ADR 0020, ADR 0035, ADR 0038), and every file
+        // that uses `keyring` at all. Spelt in two, so this file isn't one.
+        let made = concat!("Entry", "::new(");
+        let used = concat!("keyring", "::");
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("..");
+        let mut entries = Vec::new();
+        let mut users = Vec::new();
+        for folder in [
+            "core/src",
+            "graph/src",
+            "commands/src",
+            "desktop/src",
+            "serve/src",
+        ] {
+            let mut files = vec![root.join(folder)];
+            while let Some(path) = files.pop() {
+                if path.is_dir() {
+                    files.extend(std::fs::read_dir(&path).unwrap().map(|e| e.unwrap().path()));
+                } else if path.extension().is_some_and(|extension| extension == "rs") {
+                    let text = std::fs::read_to_string(&path).unwrap();
+                    let file = path
+                        .strip_prefix(&root)
+                        .unwrap()
+                        .to_string_lossy()
+                        .replace('\\', "/");
+                    if text.contains(used) {
+                        users.push(file.clone());
+                    }
+                    for (at, _) in text.match_indices(made) {
+                        let service = text[at + made.len()..].split(',').next().unwrap();
+                        entries.push((file.clone(), service.trim().to_owned()));
+                    }
+                }
+            }
+        }
+        users.sort();
+        assert_eq!(
+            users,
+            [
+                "commands/src/gateway.rs",
+                "commands/src/issues/mod.rs",
+                "commands/src/model_provider.rs",
+            ]
+        );
+        entries.sort();
+        assert_eq!(
+            entries,
+            [
+                ("commands/src/gateway.rs", "GATEWAY_SERVICE"),
+                ("commands/src/gateway.rs", "GATEWAY_SERVICE"),
+                ("commands/src/gateway.rs", "GATEWAY_SERVICE"),
+                ("commands/src/issues/mod.rs", "ACCOUNT_SERVICE"),
+                ("commands/src/issues/mod.rs", "ACCOUNT_SERVICE"),
+                ("commands/src/issues/mod.rs", "ACCOUNT_SERVICE"),
+                ("commands/src/model_provider.rs", "KEY_SERVICE"),
+            ]
+            .map(|(file, service)| (file.to_owned(), service.to_owned()))
+        );
+        let services = [KEY_SERVICE, gateway::GATEWAY_SERVICE, ACCOUNT_SERVICE];
+        assert_eq!(
+            services,
+            [
+                "com.adrianeyre.lanewise.model-provider",
+                "com.adrianeyre.lanewise.gateway",
+                "com.adrianeyre.lanewise.issue-tracker",
+            ]
+        );
+
+        // An entry's name is never empty, which Keychain reads as any
+        // account, and has no dot, so Credential Manager's `{name}.{service}`
+        // names one entry alone.
+        for refused in [
+            "",
+            "x.ai",
+            "anthropic.com.adrianeyre.lanewise",
+            "a b",
+            "../x",
+        ] {
+            assert!(
+                ModelProviderId::try_from(refused.to_owned()).is_err(),
+                "{refused:?}"
+            );
+        }
+        let names = [
+            "anthropic",
+            "gemini",
+            "openai",
+            "xai",
+            "meta",
+            "local",
+            "typesafe-jev",
+        ]
+        .map(|id| {
+            ModelProviderId::try_from(id.to_owned())
+                .unwrap()
+                .as_str()
+                .to_owned()
+        })
+        .into_iter()
+        .chain([IssueTracker::Jira, IssueTracker::Trello].map(|t| t.as_str().to_owned()));
+        let mut targets = std::collections::HashSet::new();
+        for name in names {
+            assert!(!name.is_empty() && !name.contains('.'), "{name}");
+            for service in services {
+                assert!(targets.insert(format!("{name}.{service}")), "{name}");
+            }
+        }
+    }
 }

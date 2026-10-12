@@ -19,9 +19,10 @@ function unavailable(): Promise<never> {
 }
 
 // TODO(#50): Web Mode (PRD §7.12, P1) supplies a platform that carries commands over
-// `serve`'s WebSocket, chooses folders in the app and makes Model Providers'
-// requests through `serve`'s forwarding endpoint. Until then, the UI outside
-// the Desktop App (`pnpm dev`) has no core to talk to.
+// `serve`'s WebSocket, chooses folders in the app and has the core make Model
+// Providers' requests, with their keys, as a command over the same WebSocket
+// (ADR 0055). Until then, the UI outside the Desktop App (`pnpm dev`) has no
+// core to talk to.
 /**
  * The platform when the UI isn't in the Desktop App: everything that needs
  * the core fails, saying why. Links open in a new tab, as in any browser,

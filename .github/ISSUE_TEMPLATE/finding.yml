@@ -1,0 +1,85 @@
+name: Pen-test Finding
+description: A critical or high Finding goes through private vulnerability reporting instead. This form is for one that's safe to say in public.
+title: "[finding] <ID> — <what it does>"
+labels: ["prd:pen-test"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Stop here if the Finding is critical or high.** Report it through [private vulnerability reporting](https://github.com/adrianeyre/lanewise/security/advisories/new) instead, as `SECURITY.md` says. It stays a private security advisory until its fix is in a Release, and only then is it filed here.
+
+        The same goes for any Finding, whatever its severity, that holds a concrete way to do harm whose fix isn't released yet: something a user only opened, cloned, fetched or resolved that makes Lanewise run code, lets a credential, API key, file's contents or prompt leave, writes or deletes outside the working tree, applies a Suggestion without the user, or installs an Update the Update key didn't sign. When in doubt, it's private (`docs/product-requirements-document/pen-testing-rules-of-engagement.md`, §6).
+  - type: markdown
+    attributes:
+      value: |
+        This form files one Finding of a Pen-test round, as the pen-testing PRD's §7 says (`docs/product-requirements-document/pen-testing.md`). Title it `[finding] <ID> — <what it does>`, where `<ID>` is its scope issue's with a number, such as `G3-1`. The owner adds its severity label, `severity:critical`, `severity:high`, `severity:medium` or `severity:low`, when they triage it (`docs/processes/triaging-a-finding.md`).
+
+        Targets, in days after the Finding is confirmed on a Release (PRD §7):
+
+        | Severity | Target | What it means here |
+        |---|---|---|
+        | critical | 7, as a Release and an advisory | Code runs, a credential or API key leaves, or a file outside the working tree is written, from something the user only opened, cloned or fetched; or an Update not signed by the Update key installs. |
+        | high | 30 | The same, but it needs the user to do one more ordinary thing, such as resolve a conflict; or a promise is kept in one layer only, with nothing behind it. |
+        | medium | 90 | A control is weaker than its documentation says, or a boundary has nothing behind it if the one in front fails. |
+        | low | best effort | Hygiene, disclosure, or a documented decision with no date it has to stop being true. |
+  - type: checkboxes
+    id: disclosure
+    attributes:
+      label: Safe to file in public
+      description: Every box must be true. If one isn't, use private vulnerability reporting instead.
+      options:
+        - label: It's medium or low, or its fix is already in a Release.
+          required: true
+        - label: It holds no concrete way to do harm that isn't fixed in a Release yet.
+          required: true
+        - label: It holds no real credential, API key or anyone's repository, only throwaway ones and synthetic data.
+          required: true
+  - type: input
+    id: scope-issue
+    attributes:
+      label: Scope issue
+      description: The scope issue of the pen-testing PRD's §6 it was found under, such as `#18` for G1.
+      placeholder: "#18"
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: By the table above. The target counts from the day it was confirmed on a Release, and the owner checks it as they triage.
+      options:
+        - "critical: target 7 days, as a Release and an advisory"
+        - "high: target 30 days"
+        - "medium: target 90 days"
+        - "low: target best effort"
+    validations:
+      required: true
+  - type: textarea
+    id: promise
+    attributes:
+      label: The promise it breaks
+      description: Quote it, and say where it's made, from the PRD, an ADR or `SECURITY.md`, such as "ADR 0028" or "`SECURITY.md`, How Lanewise protects what it holds".
+    validations:
+      required: true
+  - type: input
+    id: release
+    attributes:
+      label: The Release it was shown on
+      description: The version from the footer, and the operating system. A Finding is a hypothesis until it's shown on a Release.
+      placeholder: 1.1.1 on Windows 11
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to show it
+      description: One at a time, from a fresh install, with only throwaway accounts and synthetic data, such as a Hostile repository from `pnpm pen-test:fixtures`.
+    validations:
+      required: true
+  - type: textarea
+    id: test
+    attributes:
+      label: The test that would have caught it
+      description: Where it would go, such as a file under `core/tests/` or beside the UI code, and what it would check.
+    validations:
+      required: true

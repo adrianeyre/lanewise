@@ -460,7 +460,7 @@ impl Answer {
 mod tests {
     use serde_json::{Value, json};
 
-    use super::super::stand_in::{Asked, Helper, Reply, parameter, reply, serve};
+    use super::super::stand_in::{Asked, Helper, Reply, keeps_no_token, parameter, reply, serve};
     use super::*;
     use crate::page::Cursor;
 
@@ -519,6 +519,14 @@ mod tests {
             [("/user".to_owned(), Some("Bearer gho_from_gcm".to_owned()))]
         );
         assert_eq!(helper.told(), ["fill github.com", "approve gho_from_gcm"]);
+    }
+
+    #[test]
+    fn keeps_no_token_between_calls_and_asks_the_helper_for_each() {
+        let (api, asked) = github(octocat(Some("repo")));
+        let helper = Helper::holding("gho_from_gcm");
+
+        keeps_no_token(&integration(&helper, &api), &helper, "github.com", &asked);
     }
 
     #[test]

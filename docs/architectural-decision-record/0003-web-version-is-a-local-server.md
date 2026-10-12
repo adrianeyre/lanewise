@@ -5,5 +5,5 @@ Lanewise's web version is `lanewise serve`: the same Rust core, running as a loc
 ## Consequences
 
 - Every UI↔core command goes through one transport-agnostic API, carried by Tauri IPC in the desktop app and a WebSocket in `serve`. This is designed in M0 even though `serve` ships at P1.
-- The server binds to `127.0.0.1` only and requires a random per-start access token in the URL. Without it, any website the user visits could send it Git commands.
+- The server binds to `127.0.0.1` only and requires a random per-start access token in the URL. Without it, any website the user visits could send it Git commands. How the token is made and checked, the WebSocket's `Origin` and `Host` checks, and which commands cross it are ADR 0055.
 - There is no zero-install "try it in the browser" link.

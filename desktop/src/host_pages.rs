@@ -297,6 +297,33 @@ mod tests {
     }
 
     #[test]
+    fn a_host_page_goes_to_https_pages_and_to_none_of_lanewises_own() {
+        let app = tauri::test::mock_app();
+        let goes = |url: &str| allowed(app.handle(), 1, &Url::parse(url).expect("a URL"));
+        assert!(goes("https://github.com/adrianeyre/lanewise"));
+        // Where a page's own frames start.
+        assert!(goes("about:blank"));
+        // Lanewise's own origins, as each platform has them, and the frames
+        // that would take the page's origin or none: on macOS and Linux every
+        // frame's navigation is asked about too.
+        for url in [
+            "tauri://localhost/",
+            "http://tauri.localhost/",
+            "ipc://localhost/call",
+            "http://ipc.localhost/call",
+            "asset://localhost/etc/passwd",
+            "about:srcdoc",
+            "data:text/html,<p>page</p>",
+            "blob:https://github.com/0",
+            "file:///etc/passwd",
+            "javascript:alert(1)",
+            "http://github.com/adrianeyre/lanewise",
+        ] {
+            assert!(!goes(url), "a Host page went to {url}");
+        }
+    }
+
+    #[test]
     fn bounds_are_in_the_uis_css_pixels_times_how_zoomed_it_is() {
         let bounds: Bounds = serde_json::from_value(
             json!({ "x": 10.0, "y": 20.0, "width": 300.0, "height": 0.0, "viewport": 800.0 }),

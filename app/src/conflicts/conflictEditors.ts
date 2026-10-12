@@ -12,6 +12,7 @@ import {
   lineNumbers,
 } from "@codemirror/view";
 
+import { editorStyleNonce } from "../ui/styleNonce";
 import { type ConflictHunk, conflictHunks, type HunkChoice, hasConflictMarkers, resolvedText } from "./conflictHunks";
 
 /**
@@ -139,6 +140,7 @@ export function sideEditor(
         // always moves focus on.
         EditorState.readOnly.of(true),
         EditorView.contentAttributes.of({ "aria-label": label, "aria-describedby": describedBy }),
+        editorStyleNonce(),
         keymap.of(standardKeymap),
         lineNumbers(),
         gutter({
@@ -228,6 +230,7 @@ export function resolutionEditor(
       doc: text,
       extensions: [
         EditorView.contentAttributes.of({ "aria-label": label, "aria-describedby": describedBy }),
+        editorStyleNonce(),
         history(),
         // Tab is never bound, so it always moves focus on.
         keymap.of([...defaultKeymap, ...historyKeymap]),

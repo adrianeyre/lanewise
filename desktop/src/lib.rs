@@ -105,6 +105,33 @@ mod tests {
         assert_eq!(windows[0].title, "Lanewise");
     }
 
+    #[test]
+    fn the_main_webview_has_a_content_security_policy() {
+        // ADR 0050: Lanewise's own scripts and stylesheet, the theme script by
+        // its hash and CodeMirror's styles by a nonce, both of which Tauri
+        // adds, and no request but over IPC.
+        let context = context();
+        let security = &context.config().app.security;
+        let csp = security
+            .csp
+            .as_ref()
+            .expect("the main webview has a Content-Security-Policy")
+            .to_string();
+
+        for directive in [
+            "default-src 'self'",
+            "script-src 'self'",
+            "style-src 'self'",
+            "connect-src ipc: http://ipc.localhost",
+            "object-src 'none'",
+        ] {
+            assert!(csp.contains(directive), "{directive} isn't in {csp}");
+        }
+        assert!(!csp.contains("unsafe-"), "{csp}");
+        let modified = &security.dangerous_disable_asset_csp_modification;
+        assert!(modified.can_modify("script-src") && modified.can_modify("style-src"));
+    }
+
     /// What the UI gets back for invoking `cmd` with `body`, through the IPC
     /// of a mock window, with the app's own plugin config, which the updater
     /// won't start without.
@@ -126,6 +153,19 @@ mod tests {
     fn mock_window() -> tauri::WebviewWindow<tauri::test::MockRuntime> {
         let mut mock = mock_context(noop_assets());
         mock.config_mut().plugins = context().config().plugins.clone();
+        let app = app(mock_builder()).build(mock).expect("the app builds");
+        tauri::WebviewWindowBuilder::new(&app, "main", Default::default())
+            .build()
+            .expect("the window opens")
+    }
+
+    /// A mock app's main window, as `mock_window`'s, held to the app's own
+    /// capability, so its plugins' scopes are the Desktop App's.
+    fn mock_window_with_its_capability() -> tauri::WebviewWindow<tauri::test::MockRuntime> {
+        let mut own = context();
+        let mut mock = mock_context(noop_assets());
+        mock.config_mut().plugins = own.config().plugins.clone();
+        std::mem::swap(mock.runtime_authority_mut(), own.runtime_authority_mut());
         let app = app(mock_builder()).build(mock).expect("the app builds");
         tauri::WebviewWindowBuilder::new(&app, "main", Default::default())
             .build()
@@ -215,18 +255,103 @@ mod tests {
 
     #[test]
     fn a_remote_page_such_as_a_host_page_reaches_no_command() {
-        for cmd in ["call", "host_page_close", "update_status"] {
+        for cmd in [
+            "call",
+            "host_page_close",
+            "update_status",
+            "update_check",
+            "update_install",
+            "update_progress",
+        ] {
             let refused = invoke_from("https://github.com", cmd, json!({ "page": 1 }));
             assert!(
                 refused.is_err(),
                 "{cmd} answered a remote page: {refused:?}"
             );
         }
+        // Nor from a frame in one, which has the page's origin, a blob's or none.
+        for url in [
+            "about:srcdoc",
+            "about:blank",
+            "blob:https://github.com/0",
+            "data:text/html,<p>page</p>",
+        ] {
+            let refused = invoke_from(url, "call", json!({ "name": "recentRepositories" }));
+            assert!(refused.is_err(), "call answered {url}: {refused:?}");
+        }
         // Closing a Host page that isn't open does nothing, from Lanewise's own page.
         assert_eq!(
             invoke("host_page_close", json!({ "page": 1 })),
             Ok(Value::Null)
         );
+    }
+
+    #[test]
+    fn the_windows_http_requests_reach_only_its_allow_list() {
+        // The HTTP plugin's own check of each URL against the capability's
+        // scope. It answers before anything is sent, so this sends nothing.
+        let window = mock_window_with_its_capability();
+        let local = if cfg!(windows) {
+            "http://tauri.localhost"
+        } else {
+            "tauri://localhost"
+        };
+        let allowed = |url: &str| {
+            let request = json!({ "clientConfig": {
+                "method": "GET", "url": url, "headers": [], "data": null,
+                "maxRedirections": 0, "connectTimeout": null, "proxy": null, "danger": null
+            } });
+            match ask(&window, local, "plugin:http|fetch", request) {
+                Ok(_) => true,
+                Err(said)
+                    if said
+                        .as_str()
+                        .is_some_and(|said| said.starts_with("url not allowed")) =>
+                {
+                    false
+                }
+                Err(said) => panic!("{url}: {said}"),
+            }
+        };
+
+        // A pattern with no path is its host's every path, at its own port and scheme alone.
+        for url in [
+            "https://api.anthropic.com/v1/messages",
+            "https://api.openai.com/v1/models",
+            "https://generativelanguage.googleapis.com/v1beta/models?pageSize=100",
+            "https://api.typesafe.ai/v1/decisions",
+            "https://raw.githubusercontent.com/adrianeyre/lanewise/main/catalog/models.json",
+            "https://raw.githubusercontent.com/adrianeyre/lanewise/main/package.json",
+            // ADR 0051: a Model Provider on this computer, at its API's two paths, under any base URL.
+            "http://localhost:11434/v1/models",
+            "http://localhost:11434/v1/chat/completions",
+            "http://127.0.0.1:1234/models",
+            "http://127.0.0.1:8080/api/openai/v1/chat/completions",
+        ] {
+            assert!(allowed(url), "{url} is refused");
+        }
+        for url in [
+            "http://api.anthropic.com/v1/messages",
+            "https://api.anthropic.com:8443/v1/messages",
+            "https://api.anthropic.com.example.test/v1/messages",
+            "https://example.test/v1/messages",
+            "https://raw.githubusercontent.com/adrianeyre/lanewise/main/README.md",
+            "https://raw.githubusercontent.com/adrianeyre/lanewise/a-branch/package.json",
+            "https://avatars.githubusercontent.com/u/1?s=64",
+            // No other server on this computer, at any other path, name or address.
+            "http://localhost:11434/",
+            "http://localhost:11434/api/pull",
+            "http://localhost:11434/v1/models/a-model",
+            "http://localhost:11434/v1/models/../../api/pull",
+            "http://127.0.0.1:2375/containers/json?at=/models",
+            "http://127.0.0.2:11434/v1/models",
+            "http://[::1]:11434/v1/models",
+            "http://0.0.0.0:11434/v1/models",
+            "https://localhost:11434/v1/models",
+            "http://10.0.0.1:11434/v1/models",
+        ] {
+            assert!(!allowed(url), "{url} is allowed");
+        }
     }
 
     #[test]
@@ -255,5 +380,58 @@ mod tests {
                 .is_some_and(|said| said.contains("update itself")),
             "{said}"
         );
+    }
+
+    #[test]
+    fn the_apps_own_updater_offers_no_older_release() {
+        // The updater as `app` builds it, with the committed config and a
+        // throwaway key, asked by copies at three versions about a Release
+        // at 1.2.3 served from this machine. `desktop/tests/updater.rs` holds
+        // what it then downloads to the package's signature.
+        use std::io::{BufRead, BufReader, Write};
+        use tauri_plugin_updater::UpdaterExt;
+
+        const LATEST: &str = include_str!("../../app/scripts/release/fixtures/updater/latest.json");
+        let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+        let address = format!("http://{}/latest.json", listener.local_addr().unwrap());
+        std::thread::spawn(move || {
+            for mut stream in listener.incoming().flatten() {
+                let mut line = String::new();
+                let mut reader = BufReader::new(&stream);
+                while reader.read_line(&mut line).is_ok_and(|read| read > 2) {
+                    line.clear();
+                }
+                let head = format!(
+                    "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
+                    LATEST.len()
+                );
+                let _ = stream.write_all(head.as_bytes());
+                let _ = stream.write_all(LATEST.as_bytes());
+            }
+        });
+
+        for (running, found) in [("1.0.0", Some("1.2.3")), ("1.2.4", None), ("2.0.0", None)] {
+            let mut mock = mock_context(noop_assets());
+            let mut plugins = context().config().plugins.clone();
+            plugins.0.get_mut("updater").expect("the updater's config")["pubkey"] = json!(
+                include_str!("../../app/scripts/release/fixtures/updater/throwaway.pub")
+            );
+            mock.config_mut().plugins = plugins;
+            mock.package_info_mut().version = running.parse().unwrap();
+            let app = app(mock_builder()).build(mock).expect("the app builds");
+            let updater = app
+                .updater_builder()
+                .target("windows-x86_64-nsis")
+                .endpoints(vec![address.parse().unwrap()])
+                .unwrap()
+                .build()
+                .unwrap();
+            let update = tauri::async_runtime::block_on(updater.check()).expect("it checks");
+            assert_eq!(
+                update.map(|update| update.version).as_deref(),
+                found,
+                "{running}"
+            );
+        }
     }
 }

@@ -42,7 +42,7 @@ Three reasons it should be now:
 - **Type: grey-box.** The tester has the whole source, which is public anyway; release builds; throwaway Host accounts on GitHub.com, GitLab, Bitbucket and Azure DevOps; throwaway Model Provider, Jira and Trello keys; and the Hostile repositories of E1. They **don't** have the Update key, the Windows signing secrets, the release workflow's tokens, or write access to `adrianeyre/lanewise`. Black-box would spend the round finding out what the source already says; the line that matters is the maintainer's secrets.
 - **Target: the latest Release** on Windows and macOS, each in a disposable virtual machine or user account whose credential store holds only throwaway credentials. A source build on Linux is fine for exploring, but **a Finding is confirmed on a Release**. Never the tester's own machine account, credential store or repositories.
 - **Data: synthetic.** No real project's repository, no real person's credentials, no real organization on a Host. Hostile repositories are made by a script that ships with the round's fixtures (E1).
-- **Rules of engagement** (E3) are written before the window opens: the window's dates, the throwaway accounts every request may use, nothing done to a Host, Model Provider or Issue Tracker beyond what a normal user's account does, no pushing to any repository but the round's own, and a private channel for a critical Finding.
+- **Rules of engagement** (E3) are written before the window opens: the window's dates, the throwaway accounts every request may use, nothing done to a Host, Model Provider or Issue Tracker beyond what a normal user's account does, no pushing to any repository but the round's own, and a private channel for a critical Finding. They are in [`pen-testing-rules-of-engagement.md`](./pen-testing-rules-of-engagement.md), with the window's dates.
 
 ### 3.1 Out of scope
 
@@ -138,7 +138,7 @@ The round's scope issues, each labelled `prd:pen-test` and titled `pen-test [<ID
 - **Enablement (E1 to E4).**
   - E1: the fixtures, a script that makes Hostile repositories: crafted refs and paths, configuration and attributes, symlinks, case collisions, and merges left in conflict.
   - E2: the throwaway accounts and keys, and the disposable machines.
-  - E3: the rules of engagement (§3).
+  - E3: the rules of engagement (§3), in [`pen-testing-rules-of-engagement.md`](./pen-testing-rules-of-engagement.md).
   - E4: the Findings workflow, its labels and its issue form (§7).
 - **Webview and IPC (W1 to W4).**
   - W1: the main webview's CSP and the blast radius of the command API (H1).

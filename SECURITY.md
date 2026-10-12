@@ -36,7 +36,7 @@ Anything in `adrianeyre/lanewise`: the Desktop App, Web Mode once it's built, th
 - a way to have the Desktop App install an Update not signed by the Update key;
 - a way into the release workflow, its secrets or the packages on a Release.
 
-The [pen-testing PRD](docs/product-requirements-document/pen-testing.md) sets out the surface in more detail, with what a tester should try first.
+The [pen-testing PRD](docs/product-requirements-document/pen-testing.md) sets out the surface in more detail, with what a tester should try first. If you test Lanewise to find something, keep to its [rules of engagement](docs/product-requirements-document/pen-testing-rules-of-engagement.md): your own throwaway accounts and synthetic data, nothing done to a Host, Model Provider or Issue Tracker beyond what a normal user's account does, no pushing to any repository but your own, and anything with a way to do harm reported here privately first.
 
 These are out of scope here:
 

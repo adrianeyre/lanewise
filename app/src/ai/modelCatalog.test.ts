@@ -134,6 +134,8 @@ describe("parseCatalog", () => {
     ["with a model without versions", (catalog) => (catalog.providers.anthropic.families[0].versions = [])],
     ["with a model named Other versions", (catalog) => (catalog.providers.anthropic.families[0].id = OTHER_VERSIONS)],
     ["with a pattern that isn't one", (catalog) => (catalog.providers.anthropic.families[0].versions[0].match = "claude-(")],
+    // Only a pattern once it's inside the anchors, where it would match every model ID.
+    ["with a pattern that's one only inside the anchors", (catalog) => (catalog.providers.anthropic.families[0].versions[0].match = "claude-opus-5-5)|(?:")],
     ["with an exclusion that isn't a pattern", (catalog) => (catalog.providers.gemini.exclude = ["(veo"])],
     ["with a version without examples", (catalog) => (catalog.providers.anthropic.families[0].versions[0].examples = [])],
     ["with an effort Lanewise doesn't name", (catalog) => (catalog.providers.anthropic.families[0].versions[0].efforts = ["xhigh"])],

@@ -388,12 +388,19 @@ describe("signing a Release's update packages", () => {
   });
 
   test("only packages named for the version are signed, since the name goes into the trusted comment", () => {
+    // Windows allows neither a tab nor a colon in a file name, so the name
+    // that would add a field to the trusted comment can only be made elsewhere.
+    const misnamed = [
+      "Lanewise_1.2.3-9.9.9_x64-setup.exe",
+      ...(process.platform === "win32" ? [] : ["Lanewise_1.2.3\tversion:9.9.9_x64-setup.exe"]),
+    ];
+    for (const name of misnamed) {
+      const { at, env, pubkey } = made();
+      copyFileSync(join(at, EXE), join(at, name));
+      expect(signRelease(at, "1.2.3", env, pubkey, NOW)).toEqual({ ok: false, said: `${JSON.stringify(name)} isn't named for 1.2.3.` });
+      expect(readdirSync(at).filter((file) => file.endsWith(".sig"))).toEqual([]);
+    }
     const { at, env, pubkey } = made();
-    copyFileSync(join(at, EXE), join(at, "Lanewise_1.2.3\tversion:9.9.9_x64-setup.exe"));
-    expect(signRelease(at, "1.2.3", env, pubkey, NOW)).toEqual({
-      ok: false,
-      said: '"Lanewise_1.2.3\\tversion:9.9.9_x64-setup.exe" isn\'t named for 1.2.3.',
-    });
     expect(signRelease(at, "1.2.3\tversion:9.9.9", env, pubkey, NOW)).toEqual({ ok: false, said: '"1.2.3\\tversion:9.9.9" isn\'t a version.' });
     expect(signRelease(at, "1.2.4", env, pubkey, NOW).said).toMatch(/isn't named for 1\.2\.4/);
     expect(readdirSync(at).filter((file) => file.endsWith(".sig"))).toEqual([]);

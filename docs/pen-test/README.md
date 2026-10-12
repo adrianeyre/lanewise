@@ -9,5 +9,6 @@ Each scope file has the trust boundary; each probe from its brief with what was 
 | ID | Issue | Surface | Record |
 | --- | --- | --- | --- |
 | E1 | #10 | The fixtures: a script that makes Hostile repositories | [E1.md](E1.md) |
+| E2 | #11 | Throwaway accounts, keys and disposable machines | [E2.md](E2.md) |
 
-The round's other scope issues (E2–E4, W1–W4, G1–G4, S1–S3, M1–M2, R1–R5, P1, and the code-scanning issue) are listed in the PRD's §6, and add their rows here as they are worked.
+The round's other scope issues (E3–E4, W1–W4, G1–G4, S1–S3, M1–M2, R1–R5, P1, and the code-scanning issue) are listed in the PRD's §6, and add their rows here as they are worked.

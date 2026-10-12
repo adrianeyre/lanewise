@@ -17,6 +17,7 @@ Each scope file has the trust boundary; each probe from its brief with what was 
 | W1 | #14 | The main webview's CSP and the blast radius of the command API | [W1.md](W1.md) |
 | W2 | #15 | Host pages' isolation: frames, Lanewise's own origins, the page's signals and where its Tab says it is | [W2.md](W2.md) |
 | W3 | #16 | The HTTP allow-list and every request outside it: this computer's servers, the webview's own requests, redirects and `SECURITY.md`'s wording | [W3.md](W3.md) |
+| W4 | #17 | Gateways: that their headers go only to the address they were saved for, and what `gatewayRequest` can be made to do | [W4.md](W4.md) |
 | H15 | #33 | Code scanning for the tree, with a named owner for its alerts | [H15.md](H15.md) |
 
 The round's other scope issues (W1–W4, G1–G4, S1–S3, M1–M2, R1–R5, P1, and the code-scanning issue) are listed in the PRD's §6, and add their rows here as they are worked.

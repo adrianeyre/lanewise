@@ -34,6 +34,7 @@
     "try:local": "tsx app/scripts/trySuggestion.ts local",
     "eval:corpus": "tsx app/scripts/eval/buildCorpus.ts",
     "eval:suggestions": "tsx app/scripts/eval/evaluate.ts",
+    "pen-test:fixtures": "tsx app/scripts/pen-test/buildFixtures.ts",
     "sandcastle": "tsx .sandcastle/main.ts"
   },
   "engines": {

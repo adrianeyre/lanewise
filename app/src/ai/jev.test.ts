@@ -124,3 +124,36 @@ test("a Hostile repository's text reaches Jev only as values in its state, and e
   expect(triage.sent[0]!.body.questions).toEqual(plainTriage.sent[0]!.body.questions);
   expect(Object.keys(verdict.sent[0]!.body)).toEqual(["model", "state", "questions"]);
 });
+
+test("through a Gateway, Jev's answers to each of its three questions are only read, and the core is asked only to send them", async () => {
+  // Pen-test round 1, M2 (#26, `docs/pen-test/M2.md`): Jev's answers change nothing, wherever they come from.
+  const answers = {
+    keeps_both: { type: "noul", noul: 0.9 },
+    resolution: { type: "choice", choice: "ours", probabilities: { ours: 0.8 }, confidence: 0.8 },
+    secret: { type: "noul", noul: 0.1 },
+    leftover: { type: "noul", noul: 0.2 },
+    type: { type: "choice", choice: "fix", probabilities: { fix: 0.7 }, confidence: 0.7 },
+  };
+  const fake = fakePlatform({
+    commands: {
+      ...fakeKeyStore({ [JEV_ID]: "ts-key" }).commands,
+      gatewayOf: () => ({ ok: true, value: { baseUrl: "https://gateway.example.com/typesafe", headerNames: ["Authorization"] } }),
+      gatewayRequest: () => ({
+        ok: true,
+        value: { status: 200, headers: [{ name: "content-type", value: "application/json" }], body: JSON.stringify({ answers }) },
+      }),
+    },
+  });
+
+  expect(await checkWithJev(fake.platform, request, { explanation: "", resolution: "let count = 2;", confidence: "high" })).toEqual({
+    keepsBoth: 0.9,
+  });
+  expect(await triageWithJev(fake.platform, request)).toEqual({ triage: "ours", probability: 0.8 });
+  expect(await checkCommitWithJev(fake.platform, "+let count = 2;", "Rename n")).toEqual({ secret: 0.1, leftover: 0.2, type: "fix" });
+
+  expect(new Set(fake.calls.map(({ name }) => name))).toEqual(new Set(["modelProviderKey", "gatewayOf", "gatewayRequest"]));
+  expect(fake.calls.filter(({ name }) => name === "gatewayRequest").map(({ request: sent }) => sent)).toEqual(
+    Array.from({ length: 3 }, () => expect.objectContaining({ provider: JEV_ID, path: "/v1/systemone", method: "POST" })),
+  );
+  expect(fake.fetches).toEqual([]);
+});

@@ -57,7 +57,7 @@ The UI reaches the network only through the Platform's `fetch`, which in the Des
 
 - each cloud Model Provider's API, from the adapters' own hosts;
 - the model catalog's URL (ADR 0021);
-- `localhost` and `127.0.0.1`, for a Model Provider on this computer (ADR 0020).
+- `localhost` and `127.0.0.1`, for a Model Provider on this computer (ADR 0020), at its API's two paths alone (ADR 0051).
 
 The test also checks that the window has no other HTTP, WebSocket, upload, updater, log or analytics permission. The Cookie Policy says there is no telemetry of any kind, and what the Logs hold.
 

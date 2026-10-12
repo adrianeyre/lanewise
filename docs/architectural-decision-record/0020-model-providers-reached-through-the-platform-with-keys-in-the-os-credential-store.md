@@ -30,7 +30,7 @@ The commands reach the store through a `KeyStore` trait, so the Rust tests use o
 
 ## Requests go through the platform's `fetch`, so CORS never applies
 
-The `Platform` has a `fetch`. In the Desktop App it's Tauri's HTTP plugin (`tauri-plugin-http`), which makes the request from Rust, so the webview's CORS rules don't apply and no Model Provider has to allow Lanewise's origin. The plugin's scope in `desktop/capabilities/default.json` allows only the Model Providers' APIs (`api.anthropic.com`, `api.openai.com`, `api.x.ai`, `generativelanguage.googleapis.com` and `api.meta.ai`) and `localhost` and `127.0.0.1` on any port, for a Model Provider the user runs on this computer. Redirects are never followed (`maxRedirections: 0`), so a request carrying an API key can't be sent on to a host it wasn't meant for.
+The `Platform` has a `fetch`. In the Desktop App it's Tauri's HTTP plugin (`tauri-plugin-http`), which makes the request from Rust, so the webview's CORS rules don't apply and no Model Provider has to allow Lanewise's origin. The plugin's scope in `desktop/capabilities/default.json` allows only the Model Providers' APIs (`api.anthropic.com`, `api.openai.com`, `api.x.ai`, `generativelanguage.googleapis.com` and `api.meta.ai`) and `localhost` and `127.0.0.1` on any port, for a Model Provider the user runs on this computer. ADR 0051 narrows those two to the two paths the adapter asks a local server for. Redirects are never followed (`maxRedirections: 0`), so a request carrying an API key can't be sent on to a host it wasn't meant for.
 
 In Web Mode, the browser can't make these requests itself, so `serve` will forward them, with the same list of hosts (PRD §7.12, P1). Until then the unavailable platform's `fetch` fails.
 

@@ -170,6 +170,35 @@ pnpm try:local [--base-url http://localhost:11434/v1] [--model <id>] [--effort <
 
 Keep keys out of your shell history: set the variable with your shell's own way of reading a secret, or from a password manager's command line, rather than typing it in the command.
 
+## 9. Code scanning
+
+CodeQL reads the tree's Rust, TypeScript and workflows on every pull request, on every push to `main` and every Monday (`.github/workflows/codeql.yml`, ADR 0049). What it finds are Code scanning alerts. The owner, Adrian Eyre, reads every one and triages it within 7 days, or before the pull request it's on is merged. GitHub keeps them in three places:
+
+| Where | Who can see it | What it shows |
+| --- | --- | --- |
+| A pull request's **Checks**: **CodeQL (rust)**, **CodeQL (javascript-typescript)**, **CodeQL (actions)** and **Code scanning results** | Anyone who can read the pull request | Whether the change brings in an alert. A new error, or a new critical or high security alert, fails the check |
+| A pull request's **Files changed** | Anyone who can read the pull request | Each alert as an annotation on its line, with the rule and what to do |
+| The repository's **Security and quality** tab → **Code scanning**, at `https://github.com/adrianeyre/lanewise/security/code-scanning` | Only people with write access | Every open alert on `main`, filtered by `tool:CodeQL`, `language:rust`, `severity:high` and so on. Each shows the rule, the path the data takes through the code, CodeQL's help for the rule, and **Dismiss alert** |
+
+**Secret scanning** and **Dependabot** are on the same tab. Their alerts are read by the owner within the same week, and a secret is revoked where it came from on the day it's found.
+
+To triage an alert, do one of these, and write which in the alert or the pull request:
+
+- **fix it**, in a pull request that describes the fix as hardening and says nothing of how to exploit what it closes;
+- **dismiss it**, as a false positive, as used in tests, or as won't fix, with a comment saying why;
+- **report it privately**, if it shows a concrete way to do harm in a Release, as `SECURITY.md` says. It becomes a Finding ([Triaging a Finding](processes/triaging-a-finding.md)).
+
+If a pull request of yours fails the check, fix the alert in the pull request, or say in it why the alert is wrong; the owner dismisses it.
+
+**Never re-run a Code scanning run with debug logging.** In debug mode, `github/codeql-action` uploads the run's results as an artifact, and anyone can download a public repository's artifacts. To look into a run, run CodeQL locally instead. The CodeQL CLI is free for open-source code such as Lanewise's. Download the latest `codeql-bundle-linux64.tar.gz`, `codeql-bundle-osx64.tar.gz` or `codeql-bundle-win64.tar.gz` from [`github/codeql-action`'s releases](https://github.com/github/codeql-action/releases), unpack it outside the clone, and put its `codeql` folder on your `PATH`. Then, from the clone, for each of `rust`, `javascript` and `actions`:
+
+```bash
+codeql database create ../codeql-results/rust --language=rust --build-mode=none --overwrite
+codeql database analyze ../codeql-results/rust codeql/rust-queries:codeql-suites/rust-security-extended.qls --format=csv --output=../codeql-results/rust.csv
+```
+
+Keep the results outside the clone and out of anything public.
+
 ## Common setup problems
 
 **`pnpm: command not found`, or `pnpm --version` isn't `packageManager`'s.** Run `npm install -g corepack@latest && corepack enable`, open a new terminal, and run `pnpm --version` inside the clone. If an older pnpm still answers, one installed by npm or Homebrew comes first on your `PATH`: remove it (`npm uninstall -g pnpm`, `brew uninstall pnpm`).

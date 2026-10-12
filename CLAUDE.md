@@ -37,7 +37,7 @@ Run from the repo root:
 - `pnpm eval:corpus`: replays the merges `eval/repositories.json` lists to make `eval/corpus/` again (`eval/README.md`)
 - `pnpm eval:suggestions <model provider> …`: the Suggestion evaluation, run by hand in a terminal with your own API key, after its estimated cost; never in CI or a test (`eval/README.md`)
 
-`pnpm lint`, `pnpm typecheck` and `pnpm test` must all pass before a commit, and CI (`.github/workflows/ci.yml`) runs all three on Ubuntu, Windows and macOS for every pull request. A push to `main` runs them again through `.github/workflows/release.yml`, where semantic-release makes a Release from the Conventional Commits merged (ADR 0029). Everything runs headless; a UI check that needs a real window (`xvfb-run -a` on Linux) or macOS or Windows is recorded as a hand check, not faked.
+`pnpm lint`, `pnpm typecheck` and `pnpm test` must all pass before a commit, and CI (`.github/workflows/ci.yml`) runs all three on Ubuntu, Windows and macOS for every pull request. A push to `main` runs them again through `.github/workflows/release.yml`, where semantic-release makes a Release from the Conventional Commits merged (ADR 0029). `.github/workflows/codeql.yml` runs CodeQL's code scanning on the Rust, TypeScript and workflows of every pull request, each push to `main` and every week, and the owner triages its Code scanning alerts (ADR 0049, `docs/development.md`). Everything runs headless; a UI check that needs a real window (`xvfb-run -a` on Linux) or macOS or Windows is recorded as a hand check, not faked.
 
 ## Rules
 

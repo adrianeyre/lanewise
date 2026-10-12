@@ -206,6 +206,10 @@ _Avoid_: Vulnerability, bug, issue, defect
 A repository made to attack whoever opens, clones, fetches or resolves conflicts in it: crafted refs, paths, configuration, attributes, history or conflicts. Every Pen-test round's fixtures include some, and none is ever a real project's.
 _Avoid_: Malicious repo, evil repo, poisoned repository
 
+**Code scanning alert**:
+What CodeQL reports when it reads the tree's Rust, TypeScript or workflows (`.github/workflows/codeql.yml`) and finds a pattern its security queries know. GitHub keeps it until it's fixed or dismissed, and the owner triages each within a week (ADR 0049). It is a lead, not a Finding: CodeQL shows the pattern, not that a Release can be made to reach it.
+_Avoid_: Vulnerability, warning, finding, issue
+
 ### Releases
 
 **Release**:

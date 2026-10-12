@@ -51,6 +51,7 @@ pnpm test        # the Rust tests, then Vitest in app/, bench/ and website/
 
 - **Rust.** Unit tests sit beside the code in `#[cfg(test)]` modules, and integration tests in each crate's `tests/`. A test that needs Git takes its `git` from `core/tests/support/`, which fails clearly if the one on `PATH` is older than 2.40. `cargo fmt --all` fixes formatting.
 - **The UI.** Vitest with Testing Library. A test that draws the UI starts with a `// @vitest-environment jsdom` line, and checks what it drew with `expectNoAxeViolations` from `app/src/test/axe.ts`. Test what the user sees and does, by role and name, rather than a component's insides.
+- **Code scanning.** CodeQL reads every pull request too (`.github/workflows/codeql.yml`, ADR 0049). If it raises a Code scanning alert in your change, fix it, or say in the pull request why it's wrong. [Code scanning](docs/development.md#9-code-scanning) says how to read the alerts and run CodeQL yourself.
 - **Everything runs headless.** A check that needs a real window, macOS or Windows can't be faked in jsdom: say in the pull request what you checked by hand, and on what.
 - **Never weaken a check to get green.** No skipped or loosened tests, no disabled lint rules, no `#[allow]`, `oxlint-disable` or `@ts-ignore` to hide a real problem. Fix the problem, or say in the pull request why you couldn't.
 

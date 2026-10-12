@@ -13,5 +13,6 @@ Each scope file has the trust boundary; each probe from its brief with what was 
 | E1 | #10 | The fixtures: a script that makes Hostile repositories | [E1.md](E1.md) |
 | E2 | #11 | Throwaway accounts, keys and disposable machines | [E2.md](E2.md) |
 | E3 | #12 | The rules of engagement, and round 1's window | [E3.md](E3.md) |
+| E4 | #13 | The Findings workflow: labels, an issue form and how a Finding is triaged | [E4.md](E4.md) |
 
-The round's other scope issues (E4, W1–W4, G1–G4, S1–S3, M1–M2, R1–R5, P1, and the code-scanning issue) are listed in the PRD's §6, and add their rows here as they are worked.
+The round's other scope issues (W1–W4, G1–G4, S1–S3, M1–M2, R1–R5, P1, and the code-scanning issue) are listed in the PRD's §6, and add their rows here as they are worked.

@@ -10,8 +10,11 @@
 //! first free column to its right, or joins a lane already heading there.
 //!
 //! `HEAD`'s first-parent line is pinned to column 0, which nothing else takes,
-//! and is never cut. Any other edge to a parent more than `cut` rows down gets
-//! no lane, as gitk does: it is a [`Stub`] at each end, drawn as a short arrow.
+//! and is never cut. A graph that is narrower than [`WIDE`] columns with
+//! every edge given a lane is laid out that way, so each branch joins the line
+//! it came from however far down that is. A wider one is laid out again with
+//! any other edge to a parent more than `cut` rows down given no lane, as gitk
+//! does: it is a [`Stub`] at each end, drawn as a short arrow (ADR 0048).
 
 use std::collections::HashSet;
 
@@ -23,6 +26,10 @@ pub const COLOURS: u8 = 8;
 /// [`Stub`] at each end instead of a lane.
 // TODO: the cut becomes a Setting (ADR 0005); 50 reads well too.
 pub const CUT: u32 = 100;
+
+/// ADR 0048's width: a graph that would be this many columns wide on any row
+/// with no edge cut is laid out with long edges cut instead.
+pub const WIDE: u32 = 16;
 
 /// Rows per block of the segment index.
 const BLOCK: u32 = 256;
@@ -229,12 +236,14 @@ struct Join {
 /// Lays out `rows` rows, top down. `parents(row)` are the rows of `row`'s
 /// commit's parents, first parent first, each below it: a parent that isn't
 /// is left out. `head` is the row of the commit `HEAD` points at, if any;
-/// `cut` is how many rows down a parent can be and still get a lane.
+/// `cut` is how many rows down a parent can be and still get a lane when the
+/// graph is cut, which it is when, uncut, it would be `wide` columns wide.
 pub fn lay_out<'a>(
     rows: usize,
     parents: impl Fn(u32) -> &'a [u32],
     head: Option<u32>,
     cut: u32,
+    wide: u32,
 ) -> Layout {
     let mut pinned = HashSet::new();
     let mut on_line = head;
@@ -243,27 +252,36 @@ pub fn lay_out<'a>(
         on_line = parents(row).first().copied().filter(|&parent| parent > row);
     }
 
-    let mut layouter = Layouter {
-        reserved: !pinned.is_empty(),
-        lanes: Vec::new(),
-        joins: Vec::new(),
-        next_colour: 0,
-        layout: Layout {
-            nodes: Vec::with_capacity(rows),
-            colours: Vec::with_capacity(rows),
-            continues: vec![NONE; rows],
-            ..Layout::default()
-        },
+    let lay_out_with = |cut: Option<u32>| {
+        let mut layouter = Layouter {
+            reserved: !pinned.is_empty(),
+            lanes: Vec::new(),
+            joins: Vec::new(),
+            next_colour: 0,
+            layout: Layout {
+                nodes: Vec::with_capacity(rows),
+                colours: Vec::with_capacity(rows),
+                continues: vec![NONE; rows],
+                ..Layout::default()
+            },
+        };
+        for row in 0..rows as u32 {
+            let these: Vec<u32> = parents(row)
+                .iter()
+                .copied()
+                .filter(|&parent| parent > row && (parent as usize) < rows)
+                .collect();
+            layouter.step(row, &these, pinned.contains(&row), cut.unwrap_or(u32::MAX));
+            // Uncut, it gives up as soon as it is too wide.
+            if cut.is_none() && layouter.width() >= wide as usize {
+                return None;
+            }
+        }
+        Some(layouter.finish())
     };
-    for row in 0..rows as u32 {
-        let these: Vec<u32> = parents(row)
-            .iter()
-            .copied()
-            .filter(|&parent| parent > row && (parent as usize) < rows)
-            .collect();
-        layouter.step(row, &these, pinned.contains(&row), cut);
-    }
-    layouter.finish()
+    lay_out_with(None)
+        .or_else(|| lay_out_with(Some(cut)))
+        .expect("a cut layout is always finished")
 }
 
 struct Layouter {
@@ -443,6 +461,16 @@ impl Layouter {
         self.layout
     }
 
+    /// How many columns the last row laid out and the lanes leaving it take.
+    fn width(&self) -> usize {
+        let node = self
+            .layout
+            .nodes
+            .last()
+            .map_or(0, |&column| column as usize + 1);
+        self.lanes.len().max(node)
+    }
+
     fn put(&mut self, column: usize, lane: Lane) {
         if column >= self.lanes.len() {
             self.lanes.resize(column + 1, None);
@@ -488,7 +516,12 @@ mod tests {
 
     /// Lays out a history given as each row's parents' rows.
     fn lay(parents: &[&[u32]], head: Option<u32>, cut: u32) -> Layout {
-        lay_out(parents.len(), |row| parents[row as usize], head, cut)
+        lay_wide(parents, head, cut, 0)
+    }
+
+    /// As [`lay`], cutting only a history that would be `wide` columns wide.
+    fn lay_wide(parents: &[&[u32]], head: Option<u32>, cut: u32, wide: u32) -> Layout {
+        lay_out(parents.len(), |row| parents[row as usize], head, cut, wide)
     }
 
     fn nodes(layout: &Layout) -> Vec<u32> {
@@ -704,6 +737,28 @@ mod tests {
         assert_eq!(window.rows[5].far_children, [1]);
         // 5 is on HEAD's line, reached by its lane, not the branch's cut edge.
         assert_eq!(layout.continues(5), Some(0));
+    }
+
+    #[test]
+    fn a_history_narrower_than_wide_cuts_nothing_so_a_branch_joins_its_line() {
+        // As above, but three columns are fewer than the four that are wide.
+        let parents: &[&[u32]] = &[&[5], &[5], &[3], &[4], &[], &[]];
+        let layout = lay_wide(parents, Some(0), 3, 4);
+
+        assert_eq!(segments(&layout)[..2], [(0, 5, 0, 0, 0), (1, 4, 1, 1, 0)]);
+        let window = layout.window(0, 6);
+        assert!(window.rows.iter().all(|row| row.far_parents.is_empty()));
+        assert!(window.rows.iter().all(|row| row.far_children.is_empty()));
+        assert_eq!(layout.forks(5).collect::<Vec<_>>(), [1]);
+    }
+
+    #[test]
+    fn a_history_as_wide_as_wide_uncut_is_cut() {
+        let parents: &[&[u32]] = &[&[5], &[5], &[3], &[4], &[], &[]];
+        let layout = lay_wide(parents, Some(0), 3, 3);
+
+        assert_eq!(layout, lay(parents, Some(0), 3));
+        assert_eq!(layout.window(0, 6).rows[1].far_parents, [5]);
     }
 
     #[test]

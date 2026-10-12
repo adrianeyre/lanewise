@@ -28,6 +28,7 @@ Each scope file has the trust boundary; each probe from its brief with what was 
 | M1 | #25 | Prompt injection from a Hostile repository: a Conflict Hunk, path or Commit Message steering a Suggestion, a harmful Suggestion at high Confidence, what the AI Suggestion Widget says about Confidence, and Jev asked about the same Conflict Hunk | [M1.md](M1.md) |
 | M2 | #26 | Nothing applied without the user: every path by which a Resolution changes, Suggestions for every Conflict Hunk, Jev's answers to each question Lanewise asks it, and every Model Provider, on this computer and through a Gateway | [M2.md](M2.md) |
 | R1 | #27 | Updates: whether an older, genuinely signed Update is refused, whether the page reaches the updater plugin's own commands, who can edit a Release's assets and so `latest.json`, and how the Update key would be rotated | [R1.md](R1.md) |
+| R2 | #28 | The release workflow's secrets and tokens: what runs beside the Update key, what semantic-release can do with its token, each job's permissions, and signing in a job that runs no third-party code | [R2.md](R2.md) |
 | H15 | #33 | Code scanning for the tree, with a named owner for its alerts | [H15.md](H15.md) |
 
 The round's other scope issues (W1–W4, G1–G4, S1–S3, M1–M2, R1–R5, P1, and the code-scanning issue) are listed in the PRD's §6, and add their rows here as they are worked.

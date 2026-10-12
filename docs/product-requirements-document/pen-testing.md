@@ -136,36 +136,36 @@ Dependabot keeps dependencies current (`.github/dependabot.yml`) and every actio
 The round's scope issues, each labelled `prd:pen-test` and titled `pen-test [<ID>]: <surface>`, split the surface along Lanewise's own boundaries. Each names its trust boundary, links the `CONTEXT.md` terms and ADRs that govern it, points at the code, and lists the hypotheses of §5 it starts from.
 
 - **Enablement (E1 to E4).**
-  - E1: the fixtures, a script that makes Hostile repositories: crafted refs and paths, configuration and attributes, symlinks, case collisions, and merges left in conflict.
-  - E2: the throwaway accounts and keys, and the disposable machines.
-  - E3: the rules of engagement (§3).
-  - E4: the Findings workflow, its labels and its issue form (§7).
+  - E1 (#10): the fixtures, a script that makes Hostile repositories: crafted refs and paths, configuration and attributes, symlinks, case collisions, and merges left in conflict.
+  - E2 (#11): the throwaway accounts and keys, and the disposable machines.
+  - E3 (#12): the rules of engagement (§3).
+  - E4 (#13): the Findings workflow, its labels and its issue form (§7).
 - **Webview and IPC (W1 to W4).**
-  - W1: the main webview's CSP and the blast radius of the command API (H1).
-  - W2: Host pages' isolation (H2, H3).
-  - W3: the HTTP allow-list and every request outside it (H4, H5).
-  - W4: Gateways: that the headers the UI never sees go only where they were saved for, and that `gatewayRequest` stays under its address.
+  - W1 (#14): the main webview's CSP and the blast radius of the command API (H1).
+  - W2 (#15): Host pages' isolation (H2, H3).
+  - W3 (#16): the HTTP allow-list and every request outside it (H4, H5).
+  - W4 (#17): Gateways: that the headers the UI never sees go only where they were saved for, and that `gatewayRequest` stays under its address.
 - **Hostile repository (G1 to G4).**
-  - G1: what opening, fetching and diffing runs (H6).
-  - G2: arguments chosen by refs, URLs and paths (H7).
-  - G3: Lanewise's own writes and deletes: every place it writes or removes a file by a path a Hostile repository chose.
-  - G4: clone URLs, transports and submodules.
+  - G1 (#18): what opening, fetching and diffing runs (H6).
+  - G2 (#19): arguments chosen by refs, URLs and paths (H7).
+  - G3 (#20): Lanewise's own writes and deletes: every place it writes or removes a file by a path a Hostile repository chose.
+  - G4 (#21): clone URLs, transports and submodules.
 - **Secrets and the Logs (S1 to S3).**
-  - S1: keys and tokens crossing IPC (H8).
-  - S2: the OS credential store entries and who else can read them.
-  - S3: the Logs and Diagnostics (H9).
+  - S1 (#22): keys and tokens crossing IPC (H8).
+  - S2 (#23): the OS credential store entries and who else can read them.
+  - S3 (#24): the Logs and Diagnostics (H9).
 - **Suggestions (M1, M2).**
-  - M1: prompt injection from a Hostile repository (H10).
-  - M2: proving that nothing is applied without the user, across every Model Provider and Jev.
+  - M1 (#25): prompt injection from a Hostile repository (H10).
+  - M2 (#26): proving that nothing is applied without the user, across every Model Provider and Jev.
 - **Releases and delivery (R1 to R5).**
-  - R1: Updates, their signature and downgrades (H11).
-  - R2: the release workflow's secrets and tokens (H12).
-  - R3: caches, branch protection and the Model catalog (H13).
-  - R4: the Project website's content and build.
-  - R5: Sandcastle (H14).
-- **Web Mode (P1).** The design review of §9, before any of it is built.
+  - R1 (#27): Updates, their signature and downgrades (H11).
+  - R2 (#28): the release workflow's secrets and tokens (H12).
+  - R3 (#29): caches, branch protection and the Model catalog (H13).
+  - R4 (#30): the Project website's content and build.
+  - R5 (#31): Sandcastle (H14).
+- **Web Mode (P1, #32).** The design review of §9, before any of it is built.
 
-One more issue builds rather than probes: code scanning for the tree, with a named owner for its alerts (H15).
+One more issue builds rather than probes: code scanning for the tree, with a named owner for its alerts (H15, #33).
 
 ## 7. Findings workflow
 

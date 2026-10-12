@@ -171,6 +171,8 @@ LANEWISE_META_API_KEY=… pnpm try:meta [--model <id>] [--effort <level>]
 pnpm try:local [--base-url http://localhost:11434/v1] [--model <id>] [--effort <level>]
 ```
 
+In the Desktop App, a Model Provider on this computer is reached only at its base URL's `/models` and `/chat/completions`, which are all the adapter asks for (ADR 0051). A change that asks a local server for anything else adds it to the HTTP allow-list in `desktop/capabilities/default.json` first.
+
 Keep keys out of your shell history: set the variable with your shell's own way of reading a secret, or from a password manager's command line, rather than typing it in the command.
 
 ## 9. Code scanning

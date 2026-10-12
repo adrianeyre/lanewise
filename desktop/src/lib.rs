@@ -159,6 +159,19 @@ mod tests {
             .expect("the window opens")
     }
 
+    /// A mock app's main window, as `mock_window`'s, held to the app's own
+    /// capability, so its plugins' scopes are the Desktop App's.
+    fn mock_window_with_its_capability() -> tauri::WebviewWindow<tauri::test::MockRuntime> {
+        let mut own = context();
+        let mut mock = mock_context(noop_assets());
+        mock.config_mut().plugins = own.config().plugins.clone();
+        std::mem::swap(mock.runtime_authority_mut(), own.runtime_authority_mut());
+        let app = app(mock_builder()).build(mock).expect("the app builds");
+        tauri::WebviewWindowBuilder::new(&app, "main", Default::default())
+            .build()
+            .expect("the window opens")
+    }
+
     /// What a page at `url` in `window` gets back for invoking `cmd` with `body`.
     fn ask(
         window: &tauri::WebviewWindow<tauri::test::MockRuntime>,
@@ -264,6 +277,74 @@ mod tests {
             invoke("host_page_close", json!({ "page": 1 })),
             Ok(Value::Null)
         );
+    }
+
+    #[test]
+    fn the_windows_http_requests_reach_only_its_allow_list() {
+        // The HTTP plugin's own check of each URL against the capability's
+        // scope. It answers before anything is sent, so this sends nothing.
+        let window = mock_window_with_its_capability();
+        let local = if cfg!(windows) {
+            "http://tauri.localhost"
+        } else {
+            "tauri://localhost"
+        };
+        let allowed = |url: &str| {
+            let request = json!({ "clientConfig": {
+                "method": "GET", "url": url, "headers": [], "data": null,
+                "maxRedirections": 0, "connectTimeout": null, "proxy": null, "danger": null
+            } });
+            match ask(&window, local, "plugin:http|fetch", request) {
+                Ok(_) => true,
+                Err(said)
+                    if said
+                        .as_str()
+                        .is_some_and(|said| said.starts_with("url not allowed")) =>
+                {
+                    false
+                }
+                Err(said) => panic!("{url}: {said}"),
+            }
+        };
+
+        // A pattern with no path is its host's every path, at its own port and scheme alone.
+        for url in [
+            "https://api.anthropic.com/v1/messages",
+            "https://api.openai.com/v1/models",
+            "https://generativelanguage.googleapis.com/v1beta/models?pageSize=100",
+            "https://api.typesafe.ai/v1/decisions",
+            "https://raw.githubusercontent.com/adrianeyre/lanewise/main/catalog/models.json",
+            "https://raw.githubusercontent.com/adrianeyre/lanewise/main/package.json",
+            // ADR 0051: a Model Provider on this computer, at its API's two paths, under any base URL.
+            "http://localhost:11434/v1/models",
+            "http://localhost:11434/v1/chat/completions",
+            "http://127.0.0.1:1234/models",
+            "http://127.0.0.1:8080/api/openai/v1/chat/completions",
+        ] {
+            assert!(allowed(url), "{url} is refused");
+        }
+        for url in [
+            "http://api.anthropic.com/v1/messages",
+            "https://api.anthropic.com:8443/v1/messages",
+            "https://api.anthropic.com.example.test/v1/messages",
+            "https://example.test/v1/messages",
+            "https://raw.githubusercontent.com/adrianeyre/lanewise/main/README.md",
+            "https://raw.githubusercontent.com/adrianeyre/lanewise/a-branch/package.json",
+            "https://avatars.githubusercontent.com/u/1?s=64",
+            // No other server on this computer, at any other path, name or address.
+            "http://localhost:11434/",
+            "http://localhost:11434/api/pull",
+            "http://localhost:11434/v1/models/a-model",
+            "http://localhost:11434/v1/models/../../api/pull",
+            "http://127.0.0.1:2375/containers/json?at=/models",
+            "http://127.0.0.2:11434/v1/models",
+            "http://[::1]:11434/v1/models",
+            "http://0.0.0.0:11434/v1/models",
+            "https://localhost:11434/v1/models",
+            "http://10.0.0.1:11434/v1/models",
+        ] {
+            assert!(!allowed(url), "{url} is allowed");
+        }
     }
 
     #[test]

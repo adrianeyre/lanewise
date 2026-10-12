@@ -154,6 +154,7 @@ Without the Update key's secrets it makes no update packages, and says so ([the 
 | `pnpm eval:corpus` | Replays the merges in `eval/repositories.json` to make `eval/corpus/` again (`eval/README.md`) |
 | `pnpm eval:suggestions <model provider> …` | Measures Suggestions on the Evaluation corpus with your own key, showing its estimated cost and waiting for `yes` first. Run by hand, never in CI (`eval/README.md`) |
 | `pnpm pen-test:fixtures` | Makes the first Pen-test round's Hostile repository fixtures (`app/scripts/pen-test/buildFixtures.ts`), synthetic and built from nothing, into a folder under the OS temp directory. Run by hand, never in CI against a real project (`docs/pen-test/E1.md`) |
+| `pnpm pen-test:host-page-probe --cert <pem> --key <pem>` | Serves the first Pen-test round's Host page probe (`app/scripts/pen-test/hostPageProbe.ts`) on `127.0.0.1:8443`, as `https://lanewise-probe.test:8443/`, for a Host page in a disposable Release to be sent on to. It checks, on the page itself, that the page and its frames reach none of Lanewise's commands or origins, and sends nothing anywhere. Run by hand on a disposable machine, with a certificate only it trusts and the name in its hosts file (`docs/pen-test/W2.md`) |
 | `pnpm try:<model provider>` | Sends one real Suggestion request ([below](#trying-a-model-provider)) |
 | `pnpm sandcastle <issue>` | Runs a coding agent on one issue in a container (`docs/processes/running-sandcastle.md`) |
 

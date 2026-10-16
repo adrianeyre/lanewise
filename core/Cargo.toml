@@ -8,7 +8,7 @@ authors.workspace = true
 repository.workspace = true
 
 [dependencies]
-gix = { version = "0.88.0", default-features = false, features = ["max-performance-safe", "sha1", "status"] }
+gix = { version = "0.89.0", default-features = false, features = ["max-performance-safe", "sha1", "status"] }
 notify = "8.2.0"
 thiserror = "2.0.21"
 

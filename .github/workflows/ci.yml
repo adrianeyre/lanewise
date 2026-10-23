@@ -68,7 +68,7 @@ jobs:
       # Caches ~/.cargo's registry and git checkouts and the dependencies built
       # in target/, keyed on the OS, the Rust version and Cargo.lock. After the
       # toolchain, so its key has the version that was installed.
-      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
 
       # Tests that need Git run the runner's own `git` and fail, naming it, if
       # it is older than the 2.40 Lanewise requires (ADR 0002). Printed here
@@ -108,7 +108,7 @@ jobs:
           node-version: 26
           cache: pnpm
       - run: rustup toolchain install stable --profile minimal && rustup default stable
-      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
 
       # The latest release of tauri-driver, which carries WebDriver to the app.
       - run: cargo install tauri-driver --locked

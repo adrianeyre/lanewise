@@ -73,7 +73,12 @@ afterEach(() => {
   rmSync(dir, { recursive: true, force: true });
 });
 
-test("replays a merge to find its Conflict Hunk, Base and all, with what the merge committed", () => {
+// Each test makes a repository and replays its merge with `git`, many times
+// over, and starting a process is slow on Windows: it ran past Vitest's 5
+// seconds there, as building the Hostile repositories did.
+const GIT_HEAVY = 60_000;
+
+test("replays a merge to find its Conflict Hunk, Base and all, with what the merge committed", { timeout: GIT_HEAVY }, () => {
   const merge = mergedRepository();
   const gitDir = join(dir, ".git");
   expect(merges(gitDir, "HEAD", 10)).toEqual([merge]);
@@ -106,7 +111,7 @@ test("replays a merge to find its Conflict Hunk, Base and all, with what the mer
   ]);
 });
 
-test("keeps a Conflict Hunk met again once, and no more than it's allowed", () => {
+test("keeps a Conflict Hunk met again once, and no more than it's allowed", { timeout: GIT_HEAVY }, () => {
   const merge = mergedRepository();
   const gitDir = join(dir, ".git");
   const seen = new Set<string>();
@@ -115,7 +120,7 @@ test("keeps a Conflict Hunk met again once, and no more than it's allowed", () =
   expect(replayMerge(gitDir, merge, new Set(), 0)).toEqual([]);
 });
 
-test("finds nothing in a merge Git replays cleanly", () => {
+test("finds nothing in a merge Git replays cleanly", { timeout: GIT_HEAVY }, () => {
   git("init", "-q", "-b", "main");
   write("a.txt", ["a"]);
   git("add", ".");

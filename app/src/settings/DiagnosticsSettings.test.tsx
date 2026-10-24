@@ -24,7 +24,9 @@ const diagnostics: Diagnostics = {
   recentLogLines: ["2026-09-29T14:00:00Z INFO  lanewise_desktop: Lanewise 0.1.0 started on windows (x86_64)"],
 };
 
-test("Copy diagnostics, in Settings, copies them and opens a bug report with them filled in", async () => {
+// The whole App is drawn and checked by axe twice, so with the rest of the
+// suite running beside it, it's given longer than Vitest's 5s default.
+test("Copy diagnostics, in Settings, copies them and opens a bug report with them filled in", { timeout: 20_000 }, async () => {
   const user = userEvent.setup();
   const fake = fakePlatform({ commands: { diagnostics: () => ({ ok: true, value: diagnostics }) } });
   const { container } = render(<App platform={fake.platform} />);

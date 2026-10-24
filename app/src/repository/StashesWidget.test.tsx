@@ -166,7 +166,8 @@ test("the Widget lists the stashes, newest first, with each one's message, branc
   expect(second).toHaveTextContent("On a detached HEAD, 3 hours ago, with untracked files");
   const time = first!.querySelector("time");
   expect(time).toHaveAttribute("dateTime", new Date((now - 2 * 60 * 60) * 1000).toISOString());
-  expect(told.counts.at(-1)).toBe(2);
+  // The count is reported by an effect after the list is drawn.
+  await waitFor(() => expect(told.counts.at(-1)).toBe(2));
 
   await user.click(screen.getByRole("button", { name: "Actions for Stash 1" }));
   expect(screen.getAllByRole("menuitem").map((item) => item.textContent)).toEqual(["Apply", "Pop", "Drop…"]);
@@ -216,7 +217,8 @@ test("a stash is made from the keyboard, with a message and the untracked files 
   expect(button).toHaveFocus();
   expect(await within(widget()).findByText(/with untracked files/)).toBeVisible();
   expect(titles()).toEqual(["Half-done parser", "Stash 1"]);
-  expect(told.counts.at(-1)).toBe(2);
+  // The count is reported by an effect after the list is drawn.
+  await waitFor(() => expect(told.counts.at(-1)).toBe(2));
 
   // Without a message, and without the untracked files.
   await user.click(button);
@@ -293,7 +295,8 @@ test("dropping the last stash hands focus to New stash, and the Widget says ther
 
   expect(await within(widget()).findByText("No stashes.")).toBeVisible();
   expect(screen.getByRole("button", { name: "New stash…" })).toHaveFocus();
-  expect(told.counts.at(-1)).toBe(0);
+  // The count is reported by an effect after the list is drawn.
+  await waitFor(() => expect(told.counts.at(-1)).toBe(0));
 });
 
 test("selecting a stash lists the files it changed, each of which shows its diff", async () => {

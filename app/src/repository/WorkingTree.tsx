@@ -3,6 +3,7 @@ import { useId, useState } from "react";
 
 import type { CommandClient, FileStatusEntry, OpenedRepository } from "../commands/api";
 import type { CommitCheck } from "../ai/jevDecisions";
+import type { ChangeTally } from "./changeTally";
 import { CommitForm } from "./CommitForm";
 import { FileStatusList } from "./FileStatusList";
 import { NewStashDialog } from "./NewStashDialog";
@@ -22,6 +23,8 @@ interface Props {
   onChanged: () => void;
   /** Called once a commit is made or amended. */
   onCommitted: () => void;
+  /** Called with how many changes are staged, unstaged and conflicted, as they're read. */
+  onTally?: (tally: ChangeTally | null) => void;
   /** Jev's check of the staged changes before a commit, where it's on (ADR 0036). */
   checkWithJev?: ((message: string) => Promise<CommitCheck>) | null;
 }
@@ -43,6 +46,7 @@ export function WorkingTree({
   onSelect,
   onChanged,
   onCommitted,
+  onTally,
   checkWithJev = null,
 }: Props) {
   const headingId = useId();
@@ -77,6 +81,7 @@ export function WorkingTree({
         selected={selected}
         onSelect={onSelect}
         onChanged={onChanged}
+        onTally={onTally}
       />
       <CommitForm
         commands={commands}

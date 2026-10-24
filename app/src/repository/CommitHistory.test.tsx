@@ -642,6 +642,38 @@ test("the Working tree row above the history shows the working tree's changes, p
   await expectNoAxeViolations(container);
 });
 
+test("the Working tree row stands out with how many changes are staged, unstaged and conflicted while any wait", async () => {
+  const fake = fakePlatform({ commands: { graphWindow: straight(3) } });
+  const props = {
+    commands: fake.platform.commands,
+    repository: lanewise,
+    selected: "commit-0",
+    onSelect: () => {},
+    refreshes: 0,
+    onChanged: () => {},
+    onShowWorkingTree: () => {},
+  };
+  const { container, rerender } = render(
+    <CommitHistory {...props} changes={{ staged: 2, unstaged: 5, conflicted: 1, more: false }} />,
+  );
+  await grid();
+
+  const wip = screen.getByRole("button", { name: "Uncommitted changes: 1 conflicted, 2 staged, 5 unstaged" });
+  expect(wip).toHaveAttribute("data-changed");
+  expect(wip).toHaveTextContent(/^Uncommitted changes1 conflicted2 staged5 unstaged$/);
+  await expectNoAxeViolations(container);
+
+  // Only the counts that aren't nought, at least as many where there are more than were read.
+  rerender(<CommitHistory {...props} changes={{ staged: 0, unstaged: 1000, conflicted: 0, more: true }} />);
+  expect(screen.getByRole("button", { name: "Uncommitted changes: 1000+ unstaged" })).toHaveAttribute("data-changed");
+
+  // None waiting, it's as plain as it was.
+  rerender(<CommitHistory {...props} changes={{ staged: 0, unstaged: 0, conflicted: 0, more: false }} />);
+  expect(screen.getByRole("button", { name: "No uncommitted changes" })).not.toHaveAttribute("data-changed");
+  rerender(<CommitHistory {...props} changes={null} />);
+  expect(screen.getByRole("button", { name: "Working tree changes" })).not.toHaveAttribute("data-changed");
+});
+
 test("as the refs may have moved, a window is read again, and the history too if they did", async () => {
   const before = graphWindows(straightHistory(3).rows);
   const after = graphWindows(

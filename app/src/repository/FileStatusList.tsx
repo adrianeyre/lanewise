@@ -20,6 +20,7 @@ import type {
   Path,
   StagedFiles,
 } from "../commands/api";
+import { type ChangeTally, tallyOf } from "./changeTally";
 import { type PageRead, readPage } from "./paging";
 import { describeFailure, describeRepositoryError } from "./problems";
 import { describeGitRunError } from "./workingTreeProblems";
@@ -38,6 +39,8 @@ interface Props {
   onSelect: (entry: FileStatusEntry | null) => void;
   /** Called once files are staged or unstaged. */
   onChanged: () => void;
+  /** Called with how many changes are staged, unstaged and conflicted as each read is shown, or `null` if none could be. */
+  onTally?: (tally: ChangeTally | null) => void;
 }
 
 interface Section {
@@ -66,7 +69,7 @@ const MOST_READ = 1000;
  * new `key` for each repository opened, so it starts again from the first
  * page and drops whatever the last one was still reading.
  */
-export function FileStatusList({ commands, repository, refreshes, selected, onSelect, onChanged }: Props) {
+export function FileStatusList({ commands, repository, refreshes, selected, onSelect, onChanged, onTally }: Props) {
   const [entries, setEntries] = useState<FileStatusEntry[]>([]);
   const [nextCursor, setNextCursor] = useState<Cursor | null>(null);
   const [loading, setLoading] = useState(true);
@@ -112,6 +115,12 @@ export function FileStatusList({ commands, repository, refreshes, selected, onSe
   useEffect(() => {
     shown.current = entries.length;
   }, [entries]);
+
+  // Told once each read is shown, so a refresh doesn't tell nought while it reads.
+  useEffect(() => {
+    if (loading) return;
+    onTally?.(problem !== null && entries.length === 0 ? null : tallyOf(entries, nextCursor !== null));
+  }, [entries, nextCursor, loading, problem, onTally]);
 
   // A chosen change that has gone, staged or unstaged, is followed to the
   // file's other entry, if it has one, so its diff stays in view. Before

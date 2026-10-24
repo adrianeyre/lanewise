@@ -50,6 +50,9 @@ const PAIRS: [string, string, number][] = [
   ...["--text", "--muted", "--problem"].flatMap((text) =>
     HIGHLIGHTS.map((on): [string, string, number] => [text, on, TEXT]),
   ),
+  // The Working tree row's counts while changes wait: a conflicted count's words and border, and the row's filled icon.
+  ...HIGHLIGHTS.map((on): [string, string, number] => ["--conflicted", on, TEXT]),
+  ["--surface", "--focus", NON_TEXT],
   // A Grid menu item and a Tab's close button, hovered.
   ["--text", "--text 8% --surface", TEXT],
   ["--muted", "--text 8% --surface", TEXT],

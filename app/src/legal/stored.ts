@@ -3,6 +3,7 @@ import {
   COLUMN_WIDTHS_KEY,
   SIDEBAR_SECTIONS_KEY,
   HISTORY_COLUMNS_KEY,
+  ACTIVITY_PLACE_KEY,
   DIFF_LIMIT_KEY,
   FETCH_ON_SHOW_KEY,
   AVATARS_KEY,
@@ -66,6 +67,10 @@ export const STORED_ITEMS: readonly StoredItem[] = [
   {
     name: HISTORY_COLUMNS_KEY,
     purpose: "Remembers how wide you made the Commit graph's columns, for those you didn't leave to size to fit.",
+  },
+  {
+    name: ACTIVITY_PLACE_KEY,
+    purpose: "Remembers where you moved the progress shown while Lanewise is busy, so it stays there.",
   },
   {
     name: RECENT_REPOSITORIES_KEY,

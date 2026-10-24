@@ -52,7 +52,13 @@ test("with pictures from GitHub shown, the picture is asked for from GitHub's av
 test("with them off, nothing is asked for", () => {
   const asked: string[] = [];
   const original = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, "src")!;
-  Object.defineProperty(HTMLImageElement.prototype, "src", { configurable: true, set: (url: string) => asked.push(url), get: () => "" });
+  Object.defineProperty(HTMLImageElement.prototype, "src", {
+    configurable: true,
+    set(url: string) {
+      asked.push(url);
+    },
+    get: () => "",
+  });
   try {
     render(<Avatar name="Ada Lovelace" email="ada@example.com" />);
     expect(asked).toEqual([]);

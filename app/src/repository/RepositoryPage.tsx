@@ -44,6 +44,7 @@ import { IssuesWidget } from "../issues/IssuesWidget";
 import { SelectedStash, StashesWidget } from "./StashesWidget";
 import { Toolbar } from "./Toolbar";
 import { useWorkingTreeChanges } from "./useWorkingTreeChanges";
+import type { ChangeTally } from "./changeTally";
 import { WorkingTree } from "./WorkingTree";
 
 // The Conflicts page, with CodeMirror's merge view and the AI Suggestion
@@ -152,6 +153,8 @@ export function RepositoryPage({
     historyLatch.resolve();
   }, [opening, historyLatch]);
   const refreshes = watched.changes + changed;
+  // How many changes are waiting to be committed, as the Working tree Widget reads them, for the Commit graph to show.
+  const [tally, setTally] = useState<ChangeTally | null>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   // The columns' widths, which their edges resize, kept for every repository.
   const columns = useColumnWidths();
@@ -406,6 +409,7 @@ export function RepositoryPage({
                 setShowingStash(false);
                 onSelectCommit(null);
               }}
+              changes={tally}
               reveal={reveal}
               onReworded={(from, to) => {
                 if (from === selectedCommit) onSelectCommit(to);
@@ -479,6 +483,7 @@ export function RepositoryPage({
               selected={chosenFile?.kind === "workingTree" ? chosenFile.entry : null}
               onSelect={onSelectChange}
               onChanged={() => setChanged((n) => n + 1)}
+              onTally={setTally}
               onCommitted={() => {
                 setChanged((n) => n + 1);
                 setCommits((n) => n + 1);

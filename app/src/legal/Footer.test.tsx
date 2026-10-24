@@ -5,13 +5,21 @@ import { join } from "node:path";
 
 import { cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, expect, test } from "vitest";
+import { afterEach, beforeAll, expect, test } from "vitest";
 
 import { expectNoAxeViolations } from "../test/axe";
 import { Footer } from "./Footer";
 import { REPOSITORY_URL } from "./links";
 
 afterEach(cleanup);
+
+// The bundled credits are collected from every installed npm package and
+// crate the first time anything imports them, which takes seconds; a build
+// has them already. Collected once here, so the Credits dialog's own lazy
+// load is what's tested, not the collecting, as `Credits.test.tsx` does.
+beforeAll(async () => {
+  await import("./BundledCredits");
+}, 60_000);
 
 const { version } = JSON.parse(readFileSync(join(import.meta.dirname, "../../../package.json"), "utf8")) as {
   version: string;
@@ -33,8 +41,10 @@ const MODALS = [
     close: "Close accessibility statement",
     last: "If something does not work for you",
   },
-  // The bundled credits load when the dialog opens.
-  { button: "Credits", title: "Credits", close: "Close credits", last: "Crates" },
+  // The bundled credits load when the dialog opens. axe over its hundreds of
+  // packages takes seconds, so with the rest of the suite running beside it,
+  // it's given longer than Vitest's 5s default, as `Credits.test.tsx` does.
+  { button: "Credits", title: "Credits", close: "Close credits", last: "Crates", timeout: 20_000 },
 ] as const;
 
 test("the footer has Site design, the version, then Privacy Policy, Terms and Conditions, Cookie Policy, Accessibility and Credits, in order", () => {
@@ -111,7 +121,8 @@ test("the version opens the Changelog from the keyboard, which says the version 
 });
 
 for (const modal of MODALS) {
-  test(`${modal.button} opens an accessible modal from the keyboard, which keeps focus and hands it back`, async () => {
+  const timeout = "timeout" in modal ? modal.timeout : undefined;
+  test(`${modal.button} opens an accessible modal from the keyboard, which keeps focus and hands it back`, { timeout }, async () => {
     const user = userEvent.setup();
     const { container } = render(<Footer />);
     const opener = screen.getByRole("button", { name: modal.button });

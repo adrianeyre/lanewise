@@ -334,7 +334,7 @@ test("selecting a commit in the Commit graph shows it in Commit details, kept fo
   // Its close button shows the working tree again.
   await user.click(within(again).getByRole("button", { name: "Close commit details, showing the working tree" }));
   expect(await screen.findByRole("heading", { level: 3, name: "Working tree" })).toBeVisible();
-  expect(screen.getByRole("button", { name: "Working tree changes" })).toHaveAttribute("aria-pressed", "true");
+  expect(screen.getByRole("button", { name: "No uncommitted changes" })).toHaveAttribute("aria-pressed", "true");
 });
 
 test("choosing a changed file in Commit details shows its diff, side by side, in the Commit graph's place until it's closed", async () => {

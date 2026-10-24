@@ -23,7 +23,10 @@ function setUp(trackers = fakeIssueTrackers()) {
   return { ...trackers, fake, view, opened, user: userEvent.setup() };
 }
 
-test("Jira Cloud is signed in to once its site, email and API token check out, and forgotten", async () => {
+// It types a site, an email and a token a key at a time, and axe checks it,
+// so with the rest of the suite running beside it, it's given longer than
+// Vitest's 5s default.
+test("Jira Cloud is signed in to once its site, email and API token check out, and forgotten", { timeout: 20_000 }, async () => {
   const changed = vi.fn<() => void>();
   window.addEventListener("lanewise:issue-trackers-changed", changed);
   const { user, view, saved, opened, accounts, fake } = setUp();

@@ -31,7 +31,10 @@ import { SUGGESTION_INSTRUCTIONS, SUGGESTION_SCHEMA, jsonIn, readSuggestion, sug
 /**
  * The only headers a request to Anthropic carries. The SDK adds others, about
  * the OS, its runtime and its retries, and any `ANTHROPIC_CUSTOM_HEADERS`
- * where there's an environment to read; none of those are sent.
+ * where there's an environment to read; none of those are sent. From its 1.0
+ * the SDK puts the API key in `authorization`, as a bearer token; it's moved
+ * to `x-api-key`, where it always went, so a Gateway's own `authorization`
+ * never takes its place (ADR 0035).
  */
 export const ANTHROPIC_HEADERS: readonly string[] = ["accept", "content-type", "anthropic-version", "x-api-key"];
 
@@ -49,6 +52,8 @@ const API_EFFORTS: ReadonlyMap<Effort, AnthropicEffort> = new Map(ANTHROPIC_EFFO
 function connectionFetch(connection: Connection): (url: string | URL | Request, init?: RequestInit) => Promise<Response> {
   return (url, init = {}) => {
     const given = new Headers(init.headers);
+    const bearer = given.get("authorization")?.match(/^Bearer (.+)$/)?.[1];
+    if (bearer !== undefined && !given.has("x-api-key")) given.set("x-api-key", bearer);
     const headers = new Headers();
     for (const name of ANTHROPIC_HEADERS) {
       const value = given.get(name);

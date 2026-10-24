@@ -13,7 +13,7 @@ import {
 } from "react";
 import { PullRequestIcon, pullRequestName } from "../pullRequests/PullRequestsWidget";
 import { flushSync } from "react-dom";
-import { PencilLine } from "lucide-react";
+import { FileCheck, FileExclamationPoint, FilePenLine, type LucideIcon, PencilLine } from "lucide-react";
 
 import type {
   BranchesAndRemotes,
@@ -42,6 +42,7 @@ import {
   type Scene,
 } from "./graphDrawing";
 import { titleOf } from "./stashWords";
+import { type ChangeTally, countsOf, describeTally, hasChanges } from "./changeTally";
 import { describePlace } from "./graphWords";
 import {
   clampHistoryWidth,
@@ -78,6 +79,8 @@ interface Props {
   onSelectStash?: (stash: string) => void;
   /** Called by the Working tree row at the top, to show the working tree's changes instead of a commit's. */
   onShowWorkingTree?: () => void;
+  /** How many changes are staged, unstaged and conflicted, for the Working tree row to show, or `null` while that isn't known. */
+  changes?: ChangeTally | null;
   /**
    * A commit to scroll to and select, such as a branch's tip chosen in the
    * Branches Widget, counted so choosing the same one again shows it again.
@@ -152,7 +155,8 @@ function remPixels(): number {
  * row, opens the same actions beside it. Each commit is drawn with its
  * author's avatar, their initials, and each stash as a dotted square beside
  * the commit it was made on, which selects the stash when clicked. The row
- * above the history shows the working tree's changes. A click on a Label
+ * above the history shows the working tree's changes, and stands out with
+ * how many are staged, unstaged and conflicted while any are waiting. A click on a Label
  * or a commit's ID copies it, and a double click on a branch's Label checks
  * it out, as a local branch: a remote-tracking branch's moves the local
  * branch to it if it's elsewhere. A right click on a Label, in its row or
@@ -175,6 +179,7 @@ export function CommitHistory({
   selectedStash = null,
   onSelectStash = () => {},
   onShowWorkingTree,
+  changes = null,
   reveal = null,
   made = null,
   copyText,
@@ -602,16 +607,12 @@ export function CommitHistory({
         {more.said}
       </p>
       {onShowWorkingTree && (
-        <button
-          type="button"
-          className="history-wip"
-          aria-pressed={selected === null}
+        <WorkingTreeRow
+          changes={changes}
+          pressed={selected === null}
           onClick={onShowWorkingTree}
-          style={{ paddingInlineStart: columnX(0, lane) - lane / 2 }}
-        >
-          <PencilLine aria-hidden="true" className="history-wip-icon" />
-          <span>Working tree changes</span>
-        </button>
+          inset={columnX(0, lane) - lane / 2}
+        />
       )}
       {graph.problem !== null && (
         <p role="alert" className="problem">
@@ -1101,4 +1102,61 @@ function summarise(total: number | null, failed: boolean): string {
   if (total === null) return "Reading the history…";
   if (total === 0) return "No commits yet.";
   return total === 1 ? "1 commit." : `${total} commits.`;
+}
+
+const COUNT_ICONS: Record<"conflicted" | "staged" | "unstaged", LucideIcon> = {
+  conflicted: FileExclamationPoint,
+  staged: FileCheck,
+  unstaged: FilePenLine,
+};
+
+/**
+ * The row above the history that shows the working tree's changes: plain
+ * while there are none, or while how many isn't known yet, and marked out
+ * in the accent while any are waiting to be committed, with how many are
+ * staged, unstaged and conflicted, so they're seen from the Commit graph.
+ */
+function WorkingTreeRow({
+  changes,
+  pressed,
+  onClick,
+  inset,
+}: {
+  changes: ChangeTally | null;
+  pressed: boolean;
+  onClick: () => void;
+  inset: number;
+}) {
+  const waiting = changes !== null && hasChanges(changes);
+  const name = describeTally(changes);
+  return (
+    <button
+      type="button"
+      className="history-wip"
+      data-changed={waiting || undefined}
+      aria-pressed={pressed}
+      // The words shown, with commas between the counts, so they're read as the row says them.
+      aria-label={name}
+      onClick={onClick}
+      style={{ paddingInlineStart: inset }}
+    >
+      <PencilLine aria-hidden="true" className="history-wip-icon" />
+      {waiting ? (
+        <>
+          <span className="history-wip-title">Uncommitted changes</span>
+          {countsOf(changes).map(({ kind, words }) => {
+            const Icon = COUNT_ICONS[kind];
+            return (
+              <span key={kind} className={`history-wip-count history-wip-${kind}`}>
+                <Icon aria-hidden="true" className="history-wip-count-icon" />
+                {words}
+              </span>
+            );
+          })}
+        </>
+      ) : (
+        <span>{name}</span>
+      )}
+    </button>
+  );
 }

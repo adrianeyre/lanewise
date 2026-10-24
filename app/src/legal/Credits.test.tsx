@@ -3,13 +3,19 @@ import "@testing-library/jest-dom/vitest";
 import { cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import credits from "virtual:credits";
-import { afterEach, expect, test } from "vitest";
+import { afterEach, beforeAll, expect, test } from "vitest";
 
 import { expectNoAxeViolations } from "../test/axe";
 import { Credits } from "./Credits";
 import { REPOSITORY_URL } from "./links";
 
 afterEach(cleanup);
+
+// The dialog loads its list lazily; loaded once here, so each test waits on
+// drawing it, not on the module being compiled first.
+beforeAll(async () => {
+  await import("./BundledCredits");
+}, 60_000);
 
 test("the credits open with Lanewise's author, its source and its licence", async () => {
   render(<Credits />);

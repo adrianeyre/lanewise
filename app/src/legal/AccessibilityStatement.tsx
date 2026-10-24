@@ -32,7 +32,9 @@ export function AccessibilityStatement({ onOpenLink }: LinkOpener) {
         </li>
         <li>
           <strong>No dragging required</strong>: every Widget has a grip button, where the arrow keys move it a
-          cell and Shift and the arrow keys resize it, and buttons to Pin and hide it. Each move is announced.
+          cell and Shift and the arrow keys resize it, and buttons to Pin and hide it. Each move is announced. The
+          progress shown while Lanewise is busy can be dragged anywhere, or moved by the arrow keys from its grip, or
+          sent to a corner of the window from the grip&apos;s menu.
         </li>
         <li>
           <strong>Screen readers</strong>: one main heading, labelled landmarks and regions, a label for every

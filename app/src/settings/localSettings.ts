@@ -59,6 +59,9 @@ export const COLUMN_WIDTHS_KEY = "lanewise.column-widths";
 /** How wide the Commit graph's columns were made, by hand, as JSON: those not in it size to fit (`repository/historyColumns.ts`). */
 export const HISTORY_COLUMNS_KEY = "lanewise.history-columns";
 
+/** Where the Activity indicator was moved to, from the window's right and bottom edges, as JSON (`ui/activityPlace.ts`). */
+export const ACTIVITY_PLACE_KEY = "lanewise.activity-place";
+
 /** The Recent Repositories, most recent first (`welcome/recent.ts`). */
 /** Which of the Repository page's left column's sections are open, as `{ name: open }`: its accordion. */
 export const SIDEBAR_SECTIONS_KEY = "lanewise.sidebar-sections";

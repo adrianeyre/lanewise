@@ -15,7 +15,7 @@ function storedNames(): string[] {
   return rows.map((row) => within(row).getAllByRole("cell")[0]!.textContent ?? "");
 }
 
-test("the Cookie Policy lists the theme, the base folder, fetching on switching tabs, the left column's open sections, the columns' widths, recent and open repositories, GitHub Enterprise Servers, the diff size limit and view, Model Provider choices and the check for Updates", async () => {
+test("the Cookie Policy lists the theme, the base folder, fetching on switching tabs, the left column's open sections, the columns' widths, where the Activity indicator was moved, recent and open repositories, GitHub Enterprise Servers, the diff size limit and view, Model Provider choices and the check for Updates", async () => {
   const { container } = render(<CookiePolicy />);
 
   expect(storedNames()).toEqual([
@@ -28,6 +28,7 @@ test("the Cookie Policy lists the theme, the base folder, fetching on switching 
     "lanewise.sidebar-sections",
     "lanewise.column-widths",
     "lanewise.history-columns",
+    "lanewise.activity-place",
     "lanewise.recent-repositories",
     "lanewise.open-repositories",
     "lanewise.github-enterprise-hosts",
@@ -46,6 +47,7 @@ test("the Cookie Policy lists the theme, the base folder, fetching on switching 
   expect(within(table).getByRole("row", { name: /lanewise\.sidebar-sections/ })).toHaveTextContent(/closed or opened/);
   expect(within(table).getByRole("row", { name: /lanewise\.column-widths/ })).toHaveTextContent(/how wide/);
   expect(within(table).getByRole("row", { name: /lanewise\.history-columns/ })).toHaveTextContent(/size to fit/);
+  expect(within(table).getByRole("row", { name: /lanewise\.activity-place/ })).toHaveTextContent(/where you moved/);
   expect(within(table).getByRole("row", { name: /lanewise\.recent-repositories/ })).toHaveTextContent(
     /repositories you opened recently/,
   );

@@ -275,7 +275,7 @@ Something Lanewise is doing that takes time, such as a command running, a Sugges
 _Avoid_: Task, job, loading state, busy state
 
 **Activity indicator**:
-Where the newest Activity running shows, once it has run a moment: a spinner, its words, its step, a bar of how far it has got and how long it has run, in its fixed place at the bottom right of the window, above the footer.
+Where the newest Activity running shows, once it has run a moment: a spinner, its words, its step, a bar of how far it has got and how long it has run, at the bottom right of the window, above the footer, until the user moves it: dragged, moved by the arrow keys from its grip, or sent to a corner from the grip's menu. Where it was moved is kept on this machine (ADR 0056).
 _Avoid_: Spinner, loader, progress toast, status bar
 
 **Avatar**:

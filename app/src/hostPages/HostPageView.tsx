@@ -24,12 +24,26 @@ const OVER = "dialog[open], .menu-list";
 /** The Activity indicator, which the Host page makes room for below it. */
 const ACTIVITY = ".activity";
 
-/** Where the Host page goes: `view`'s place, less room for the Activity indicator while it shows. */
-function boundsOf(view: HTMLElement): HostPageBounds {
+/**
+ * Where the Host page goes: `view`'s place, less room for the Activity
+ * indicator while it shows over it, above the indicator where that's in the
+ * place's lower half, and below it where it's been moved to the upper half.
+ */
+export function boundsOf(view: HTMLElement): HostPageBounds {
   const box = view.getBoundingClientRect();
   const activity = document.querySelector(ACTIVITY)?.getBoundingClientRect();
-  const bottom = activity === undefined ? box.bottom : Math.min(box.bottom, Math.max(box.top, activity.top - 8));
-  return { x: box.left, y: box.top, width: box.width, height: bottom - box.top, viewport: window.innerWidth };
+  let { top, bottom } = box;
+  const over =
+    activity !== undefined &&
+    activity.left < box.right &&
+    activity.right > box.left &&
+    activity.top < box.bottom &&
+    activity.bottom > box.top;
+  if (over) {
+    if (activity.top + activity.bottom > box.top + box.bottom) bottom = Math.max(top, activity.top - 8);
+    else top = Math.min(bottom, activity.bottom + 8);
+  }
+  return { x: box.left, y: top, width: box.width, height: bottom - top, viewport: window.innerWidth };
 }
 
 function same(a: HostPageBounds | null, b: HostPageBounds): boolean {

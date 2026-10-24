@@ -32,8 +32,8 @@ export function PrivacyPolicy({ onOpenLink }: LinkOpener) {
           your own Git, and never uploads them or keeps a copy.
         </li>
         <li>
-          <strong>Your settings</strong>, such as the Theme and your Recent Repositories, are kept in local storage,
-          as the Cookie Policy lists.
+          <strong>Your settings</strong>, such as the Theme, your Recent Repositories and where you moved the
+          progress shown while Lanewise is busy, are kept in local storage, as the Cookie Policy lists.
         </li>
         <li>
           <strong>Your API keys and tokens</strong>, for a Model Provider, Jev or an Issue Tracker, are kept in your

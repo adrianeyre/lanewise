@@ -2880,10 +2880,11 @@ span.tab-icon {
 
 /* ---------- The Activity indicator: whatever takes time, at the bottom of the window ---------- */
 
+/* At the bottom right until it's moved: where to, from the right and bottom, is set on it (`ui/activityPlace.ts`). */
 .activity-layer {
   position: fixed;
-  inset-inline-end: 1rem;
-  inset-block-end: 2.25rem;
+  right: 1rem;
+  bottom: 2.25rem;
   z-index: 30;
   pointer-events: none;
 }
@@ -2900,6 +2901,23 @@ span.tab-icon {
   background: var(--surface);
   box-shadow: 0 0.25rem 1rem color-mix(in srgb, var(--text) 18%, transparent);
   pointer-events: auto;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.activity:active {
+  cursor: grabbing;
+}
+
+/* Its grip: dragged with the rest, and moved from the keyboard or its menu. */
+.activity-grip {
+  flex: none;
+  align-self: center;
+  margin-block: -0.25rem;
+  margin-inline-end: -0.375rem;
+  color: var(--muted);
+  cursor: inherit;
 }
 
 .activity-spinner {
@@ -3830,6 +3848,74 @@ span.tab-icon {
   padding: 0.125rem;
   border: 1px dashed currentColor;
   border-radius: 50%;
+}
+
+/* Changes waiting: in the accent, with how many are staged, unstaged and conflicted, so they're seen. */
+.history-wip[data-changed] {
+  color: var(--text);
+  font-style: normal;
+  background: color-mix(in srgb, var(--focus) 6%, var(--surface));
+  box-shadow: inset 0.25rem 0 0 var(--focus);
+}
+
+.history-wip[data-changed]:hover {
+  background: color-mix(in srgb, var(--focus) 14%, var(--surface));
+}
+
+.history-wip[data-changed] .history-wip-icon {
+  border: 1px solid var(--focus);
+  color: var(--surface);
+  background: var(--focus);
+}
+
+.history-wip-title {
+  font-weight: 700;
+}
+
+.history-wip-count {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0 0.375rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.25rem;
+  white-space: nowrap;
+  background: var(--surface);
+}
+
+.history-wip-count-icon {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.history-wip-staged .history-wip-count-icon {
+  color: var(--added);
+}
+
+.history-wip-unstaged .history-wip-count-icon {
+  color: var(--modified);
+}
+
+.history-wip-conflicted {
+  border-color: var(--conflicted);
+  color: var(--conflicted);
+  font-weight: 700;
+}
+
+@media (forced-colors: active) {
+  .history-wip[data-changed] {
+    border-inline-start: 0.25rem solid Highlight;
+  }
+
+  .history-wip[data-changed] .history-wip-icon {
+    forced-color-adjust: none;
+    color: Canvas;
+    background: Highlight;
+  }
 }
 
 /* ---------- The split diff (ADR 0033) ---------- */

@@ -8,6 +8,7 @@ import { afterEach, expect, test } from "vitest";
 import type { CommandClient, FileStatusEntry, Outcome, StagedFiles } from "../commands/api";
 import { expectNoAxeViolations } from "../test/axe";
 import { changingWorkingTree, fakePlatform, type FakeCommands } from "../test/fakePlatform";
+import type { ChangeTally } from "./changeTally";
 import { useWorkingTreeChanges } from "./useWorkingTreeChanges";
 import { WorkingTree } from "./WorkingTree";
 
@@ -16,7 +17,15 @@ afterEach(cleanup);
 const lanewise = { root: "/work/lanewise", name: "lanewise" };
 
 /** The Working tree Widget as the Repository page draws it: refreshed on a change on disk or a stage. */
-function Page({ commands, chosen }: { commands: CommandClient; chosen: (FileStatusEntry | null)[] }) {
+function Page({
+  commands,
+  chosen,
+  tallies,
+}: {
+  commands: CommandClient;
+  chosen: (FileStatusEntry | null)[];
+  tallies: (ChangeTally | null)[];
+}) {
   const watched = useWorkingTreeChanges(commands, lanewise.root);
   const [changed, setChanged] = useState(0);
   const [selected, setSelected] = useState<FileStatusEntry | null>(null);
@@ -33,6 +42,7 @@ function Page({ commands, chosen }: { commands: CommandClient; chosen: (FileStat
       }}
       onChanged={() => setChanged((count) => count + 1)}
       onCommitted={() => setChanged((count) => count + 1)}
+      onTally={(tally) => tallies.push(tally)}
     />
   );
 }
@@ -40,8 +50,9 @@ function Page({ commands, chosen }: { commands: CommandClient; chosen: (FileStat
 function renderWorkingTree(commands: FakeCommands) {
   const fake = fakePlatform({ commands });
   const chosen: (FileStatusEntry | null)[] = [];
-  const view = render(<Page commands={fake.platform.commands} chosen={chosen} />);
-  return { fake, chosen, ...view };
+  const tallies: (ChangeTally | null)[] = [];
+  const view = render(<Page commands={fake.platform.commands} chosen={chosen} tallies={tallies} />);
+  return { fake, chosen, tallies, ...view };
 }
 
 /**
@@ -138,6 +149,19 @@ test("a file stages and unstages from the keyboard, and the list reads again to 
     },
   ]);
   await expectNoAxeViolations(container);
+});
+
+test("it tells the page how many changes are staged, unstaged and conflicted, for the Commit graph to show", async () => {
+  const user = userEvent.setup();
+  const { tallies } = renderWorkingTree(workingTree(changed));
+  await screen.findByText("4 changes.");
+  expect(tallies.at(-1)).toEqual({ staged: 1, unstaged: 2, conflicted: 1, more: false });
+
+  await user.click(within(section("Unstaged")).getByRole("button", { name: "Stage all" }));
+  await screen.findByRole("button", { name: "notes.md Added" });
+  expect(tallies.at(-1)).toEqual({ staged: 3, unstaged: 0, conflicted: 1, more: false });
+  // Never nought while it reads again.
+  expect(tallies).not.toContainEqual({ staged: 0, unstaged: 0, conflicted: 0, more: false });
 });
 
 test("Stage all and Unstage all move a whole section", async () => {

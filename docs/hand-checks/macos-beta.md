@@ -455,6 +455,11 @@ trackpad and a mouse in WKWebView, which jsdom can't. Keep the window at least
    layout is as it was.
 7. **The window.** Try full screen (the green window button), Split View
    and, if you use it, Stage Manager. The layout fills the space it's given.
+   In full screen the title bar stays, with its close, minimise and zoom
+   buttons, without moving the pointer to the top of the screen; the menu
+   bar and the Dock still hide until it does (`desktop/src/full_screen.rs`).
+   Switch to another app's Space and back: the title bar is still there.
+   Leave full screen with the green button: the window is as it was.
 
 ## 8. Look and feel on WKWebView
 

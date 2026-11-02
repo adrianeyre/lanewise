@@ -19,6 +19,14 @@ gh api repos/adrianeyre/lanewise/releases/latest > /tmp/latest-release.json
 LANEWISE_LATEST_RELEASE=/tmp/latest-release.json pnpm website:build
 ```
 
+## Scenes
+
+The page's pictures of Lanewise are Scenes (`src/scenes/`), made to the rules of stageshow, the `stageshow` skill in [`benjitaylor/skills`](https://github.com/benjitaylor/skills): one thing each, framed and cropped with intent, real words only where the story is, and every move with a cause. The hero's tells the PRD's own story (§8): a Suggestion asked for, accepted and the file marked resolved. The feature grid's (`tiles.tsx`) show the Commit graph, a stash's menu, the Model Providers and a split diff, beside a measured number and two sentences.
+
+They are the website's own components, not stageshow's kit, so they're held to the repository's lint, types and tests like the rest. `Stage.tsx` draws each at its design size, scaled to its box, with a narrower design for a phone, and plays its story once, as it's half in view. A story longer than five seconds has a button to stop it and play it again (WCAG 2.2.2), and with reduced motion each Scene is its still. Each is named in words, for screen readers, and drawn in the browser alone: the built page's Content-Security-Policy allows no `style` attribute, and a Scene is placed by them, so the prerendered page has each one's box, at its size, and its words. `scenes.css` draws them from the Theme's tokens, which `scenes.test.ts` holds it to.
+
+Check a change to one in a browser, at the page's width and a phone's, in both themes and with reduced motion, through the whole story: nothing labelled is cut by its edge, and the pointer clicks only what is in view.
+
 ## Screenshots
 
 `public/screenshots/` has Lanewise at 1680 × 1050, as lossless WebP: the Repository page and a file's split diff in the light Theme, and the Conflicts page in the dark Theme. They were taken of the Desktop App, over WebDriver under Xvfb as `bench/` drives it, of a demo repository: a small weather-station project with a branch merged and two open, tags, a remote, a stash and changes in the working tree, and a clone of it partway through merging `origin/feature/units`, conflicted in `src/format.ts`. Its authors are made up, with `example.com` emails, so no one's picture is fetched. `src/screenshots.ts` describes each in words. A new one goes in both, with its size, and `head.test.ts` checks the file is that size.

@@ -236,6 +236,10 @@ _Avoid_: Updater key, signing key, code signing certificate
 Lanewise's page on GitHub Pages, `https://lanewise.adrianeyre.co.uk/`: what Lanewise is, screenshots, download buttons for the latest Release, a link to the documentation and the footer. It is not the app and not Web Mode, stores nothing on your device, and follows the OS's light or dark setting.
 _Avoid_: Homepage, marketing site, web app
 
+**Scene**:
+A picture of Lanewise on the Project website, drawn in the browser from the Theme's tokens as stageshow draws a product: a still, or a short story told with a pointer, such as a Suggestion accepted. It is named in words for screen readers, and shows its still for reduced motion. Not a screenshot, which is the app itself.
+_Avoid_: Mockup, illustration, demo, animation
+
 ### Layout
 
 **Tab**:

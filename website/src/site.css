@@ -121,8 +121,15 @@
   font-size: 1.375rem;
 }
 
-.site-intro {
-  padding-bottom: 2rem;
+/* The hero: the words, then Lanewise resolving a conflict, as wide as the page. */
+.site-hero {
+  display: grid;
+  gap: 1.5rem;
+  padding-bottom: 3rem;
+}
+
+.site-hero-copy .site-downloads {
+  margin-bottom: 0;
 }
 
 .site-section {
@@ -165,24 +172,96 @@
   color: var(--muted);
 }
 
-.site-features {
+/*
+ * What it does, as a grid of tiles (stageshow's bento): the Commit graph
+ * leads, and pictures of the app sit beside a number or a sentence, never
+ * beside each other in a row. Each tile's words sit above its picture.
+ */
+.site-bento {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1rem;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.site-features li {
-  padding: 1rem 1.25rem;
+.site-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
+  padding: 1.25rem;
   border: 1px solid var(--border);
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
   background: var(--surface);
 }
 
-.site-features p {
+.site-tile h3 {
   margin: 0;
+  font-size: 1.25rem;
+}
+
+.site-tile p {
+  margin: 0;
+}
+
+.site-tile .scene {
+  margin-top: auto;
+}
+
+.site-tile-wide {
+  grid-column: span 2;
+}
+
+.site-stat {
+  display: flex;
+  flex-direction: column;
+  margin-block: auto;
+}
+
+.site-stat-lead {
+  color: var(--muted);
+  font-size: 1.125rem;
+}
+
+.site-stat-number {
+  font-size: 4rem;
+  font-weight: 700;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.site-statement {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-block: auto;
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.site-statement-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  color: var(--link);
+}
+
+@media (width < 60rem) {
+  .site-bento {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (width < 40rem) {
+  .site-bento {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .site-tile-wide {
+    grid-column: auto;
+  }
 }
 
 .site-screenshots {

@@ -374,7 +374,8 @@ test("a stash is applied, popped or dropped as its menu in the Commit graph asks
   expect(
     await within(widget()).findByText("Popped “Stash 1”: its changes are back in the working tree, and it's no longer stashed."),
   ).toBeVisible();
-  expect(titles()).toEqual(["Stash 2"]);
+  // The list is read again after the pop.
+  await waitFor(() => expect(titles()).toEqual(["Stash 2"]));
   // Asked from the graph, focus isn't taken to this list.
   expect(screen.getByRole("button", { name: /^Stash 2/ })).not.toHaveFocus();
 

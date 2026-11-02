@@ -76,7 +76,10 @@ mod tests {
         let shown = FULL_SCREEN | AUTO_HIDE_MENU_BAR | AUTO_HIDE_DOCK;
 
         assert_eq!(without_hidden_title_bar(shown), None);
-        assert_eq!(without_hidden_title_bar(AUTO_HIDE_MENU_BAR | AUTO_HIDE_DOCK), None);
+        assert_eq!(
+            without_hidden_title_bar(AUTO_HIDE_MENU_BAR | AUTO_HIDE_DOCK),
+            None
+        );
         assert_eq!(without_hidden_title_bar(0), None);
     }
 }

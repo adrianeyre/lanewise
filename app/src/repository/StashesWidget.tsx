@@ -192,9 +192,9 @@ export function StashesWidget({
     handled.current = request.count;
     const stash = list.find((each) => each.id === request.stash);
     if (stash === undefined) return;
-    const { apply: run, busy: running } = latestActions.current;
+    const { apply: run, busy: occupied } = latestActions.current;
     if (request.action === "drop") {
-      if (!running) {
+      if (!occupied) {
         fromGraph.current = true;
         setAsking({ kind: "drop", stash });
       }

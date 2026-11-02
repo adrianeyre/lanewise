@@ -8,6 +8,7 @@ import { afterEach, beforeAll, expect, test } from "vitest";
 import type { CommandClient, CommitFile, CreateStashRequest, Stash, StashApplied, StashRequest } from "../commands/api";
 import { expectNoAxeViolations } from "../test/axe";
 import { fakePlatform, type FakeCommands, historyCommit } from "../test/fakePlatform";
+import type { StashAsked } from "./stashMenu";
 import { StashesWidget } from "./StashesWidget";
 
 // The Diff Widget's editor loads when first shown. Loading it once here keeps
@@ -42,7 +43,7 @@ interface Told {
 }
 
 /** The Widget as the Repository page draws it: read again after each change it makes, with what's selected kept. */
-function Page({ commands, told }: { commands: CommandClient; told: Told }) {
+function Page({ commands, told, request = null }: { commands: CommandClient; told: Told; request?: StashAsked | null }) {
   const [changed, setChanged] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [chosen, setChosen] = useState<{ stash: string; file: CommitFile } | null>(null);
@@ -63,6 +64,7 @@ function Page({ commands, told }: { commands: CommandClient; told: Told }) {
       }}
       onStashes={(stashes) => told.counts.push(stashes.length)}
       onChanged={() => setChanged((count) => count + 1)}
+      request={request}
     />
   );
 }
@@ -353,4 +355,37 @@ test("a pop that stops with conflicts keeps the stash and says so, and one that 
   );
   // Each change is read again after: the stashes, once for each action that changed something.
   expect(fake.calls.filter(({ name }) => name === "stashes").length).toBe(2);
+});
+
+test("a stash is applied, popped or dropped as its menu in the Commit graph asks, and announced, with drop confirmed first", async () => {
+  const user = userEvent.setup();
+  const [newer, older] = [stashOf(1), stashOf(2)];
+  const repository = stashRepository([newer!, older!]);
+  const fake = fakePlatform({ commands: repository.commands });
+  const told: Told = { counts: [], chosen: [] };
+  const { rerender } = render(<Page commands={fake.platform.commands} told={told} />);
+  await screen.findByRole("button", { name: "Actions for Stash 1" });
+  const ask = (stash: Stash, action: StashAsked["action"], count: number) =>
+    rerender(<Page commands={fake.platform.commands} told={told} request={{ stash: stash.id, action, count }} />);
+
+  ask(newer!, "apply", 1);
+  expect(await within(widget()).findByText("Applied “Stash 1”: its changes are back in the working tree, and it's still stashed.")).toBeVisible();
+  ask(newer!, "pop", 2);
+  expect(
+    await within(widget()).findByText("Popped “Stash 1”: its changes are back in the working tree, and it's no longer stashed."),
+  ).toBeVisible();
+  expect(titles()).toEqual(["Stash 2"]);
+  // Asked from the graph, focus isn't taken to this list.
+  expect(screen.getByRole("button", { name: /^Stash 2/ })).not.toHaveFocus();
+
+  ask(older!, "drop", 3);
+  const dialog = await screen.findByRole("dialog", { name: "Drop “Stash 2”?" });
+  expect(repository.calls.map(({ name }) => name)).toEqual(["applyStash", "popStash"]);
+  await user.click(within(dialog).getByRole("button", { name: "Drop stash" }));
+  expect(await within(widget()).findByText("Dropped “Stash 2”.")).toBeVisible();
+  expect(repository.calls.map(({ name }) => name)).toEqual(["applyStash", "popStash", "dropStash"]);
+
+  // The same request again, as the page is drawn again, does nothing more.
+  ask(older!, "drop", 3);
+  expect(screen.queryByRole("dialog")).toBeNull();
 });

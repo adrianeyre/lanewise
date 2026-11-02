@@ -41,6 +41,7 @@ import {
   paint,
   type Scene,
 } from "./graphDrawing";
+import { type StashAction, stashItems, stashSubmenus } from "./stashMenu";
 import { titleOf } from "./stashWords";
 import { type ChangeTally, countsOf, describeTally, hasChanges } from "./changeTally";
 import { describePlace } from "./graphWords";
@@ -77,6 +78,12 @@ interface Props {
   selectedStash?: string | null;
   /** Called with the stash whose square was clicked. */
   onSelectStash?: (stash: string) => void;
+  /**
+   * Called with a stash and what its menu, opened by a right click on its
+   * square or from its commit's menu, was asked to do but show it: apply,
+   * pop or drop it. Without it, the menus offer no stash actions.
+   */
+  onStashAction?: (stash: string, action: Exclude<StashAction, "show">) => void;
   /** Called by the Working tree row at the top, to show the working tree's changes instead of a commit's. */
   onShowWorkingTree?: () => void;
   /** How many changes are staged, unstaged and conflicted, for the Working tree row to show, or `null` while that isn't known. */
@@ -154,7 +161,9 @@ function remPixels(): number {
  * carries, and a right click on a commit, or Shift+F10 or the Menu key on its
  * row, opens the same actions beside it. Each commit is drawn with its
  * author's avatar, their initials, and each stash as a dotted square beside
- * the commit it was made on, which selects the stash when clicked. The row
+ * the commit it was made on, which selects the stash when clicked, and
+ * opens its menu, to show, apply, pop or drop it, when right-clicked; the
+ * commit's own menu has the same for each of its stashes. The row
  * above the history shows the working tree's changes, and stands out with
  * how many are staged, unstaged and conflicted while any are waiting. A click on a Label
  * or a commit's ID copies it, and a double click on a branch's Label checks
@@ -178,6 +187,7 @@ export function CommitHistory({
   stashes = [],
   selectedStash = null,
   onSelectStash = () => {},
+  onStashAction,
   onShowWorkingTree,
   changes = null,
   reveal = null,
@@ -255,13 +265,16 @@ export function CommitHistory({
   if (selectedNow !== undefined && selectedNow !== lastSelected) setLastSelected(selectedNow);
   const selectedRow = selectedNow ?? (lastSelected?.id === selected ? lastSelected : undefined);
   // The menu a right click, Shift+F10 or the Menu key opened on a row, and where.
-  // A right click on a Label opens that Label's menu.
+  // A right click on a Label opens that Label's menu, and on a stash's square, that stash's.
   const [contextMenu, setContextMenu] = useState<{
     index: number;
     at: { x: number; y: number };
     label?: CommitLabel;
+    stash?: string;
   } | null>(null);
   const contextRow = contextMenu === null ? undefined : rowAt(contextMenu.index);
+  const contextStash =
+    contextMenu?.stash === undefined ? undefined : stashes.find((stash) => stash.id === contextMenu.stash);
   // The branch checked out, as the rows read so far have its Label, for the menus to name.
   const [currentBranch, setCurrentBranch] = useState<string | null>(null);
 
@@ -553,11 +566,30 @@ export function CommitHistory({
     else if (index >= 0 && index < count) moveTo(index);
   }
 
+  /** Opens the menu of the commit beside a right click on the graph, or of the stash whose square it's on. */
   function onGraphMenu(event: MouseEvent<HTMLCanvasElement>) {
-    const { index } = graphPoint(event);
+    const { index, stash } = graphPoint(event);
     if (index < 0 || index >= count) return;
     event.preventDefault();
-    openMenu(index, { x: event.clientX, y: event.clientY });
+    const at = { x: event.clientX, y: event.clientY };
+    if (stash !== null && onStashAction) setContextMenu({ index, at, stash });
+    else openMenu(index, at);
+  }
+
+  /** Carries out what a stash's menu was asked to do. */
+  function onStashMenu(stash: string, action: StashAction) {
+    if (action === "show") onSelectStash(stash);
+    else onStashAction?.(stash, action);
+  }
+
+  /** What the menu opened on `commit` offers: its own actions, or its Label's, then its stashes'. */
+  function menuItems(commit: GraphRow, label: CommitLabel | undefined) {
+    const own =
+      label === undefined
+        ? commitActions(commit, actions, currentBranch, more, refs)
+        : labelActions(commit, label, actions, currentBranch, more, refs);
+    if (!onStashAction) return own;
+    return [...own, ...stashSubmenus(stashes.filter((stash) => stash.base.id === commit.id), onStashMenu)];
   }
 
   // The current branch, from whichever row drawn has its Label, kept once it scrolls away.
@@ -737,18 +769,26 @@ export function CommitHistory({
           </div>
         </div>
       )}
-      {contextMenu !== null && contextRow !== undefined && (
+      {contextMenu !== null && contextStash !== undefined && (
+        <ContextMenu
+          ariaLabel={`Actions for stash “${titleOf(contextStash)}”`}
+          items={stashItems(contextStash, onStashMenu)}
+          at={contextMenu.at}
+          onClose={(returnFocus) => {
+            const index = contextMenu.index;
+            setContextMenu(null);
+            if (returnFocus) rows.current.get(index)?.focus();
+          }}
+        />
+      )}
+      {contextMenu !== null && contextMenu.stash === undefined && contextRow !== undefined && (
         <ContextMenu
           ariaLabel={
             contextMenu.label === undefined
               ? `Actions for commit ${contextRow.shortId}`
               : `Actions for ${contextMenu.label.name}`
           }
-          items={
-            contextMenu.label === undefined
-              ? commitActions(contextRow, actions, currentBranch, more, refs)
-              : labelActions(contextRow, contextMenu.label, actions, currentBranch, more, refs)
-          }
+          items={menuItems(contextRow, contextMenu.label)}
           at={contextMenu.at}
           onClose={(returnFocus) => {
             const index = contextMenu.index;

@@ -41,6 +41,7 @@ import { CommitDetails } from "./CommitDetails";
 import { CommitHistory } from "./CommitHistory";
 import type { TabPage } from "../tabs/tabs";
 import { IssuesWidget } from "../issues/IssuesWidget";
+import type { StashAsked } from "./stashMenu";
 import { SelectedStash, StashesWidget } from "./StashesWidget";
 import { Toolbar } from "./Toolbar";
 import { useWorkingTreeChanges } from "./useWorkingTreeChanges";
@@ -218,6 +219,8 @@ export function RepositoryPage({
   const [made, setMade] = useState<{ name: string; count: number } | null>(null);
   // Whether the right shows the stash chosen in the Commit graph, in the Working tree's or Commit details' place.
   const [showingStash, setShowingStash] = useState(false);
+  // A stash to apply, pop or drop, asked for from its menu in the Commit graph, for the Stashes Widget to carry out.
+  const [stashRequest, setStashRequest] = useState<StashAsked | null>(null);
   const stashHeading = useId();
   const shownStash = showingStash ? (stashList.find((stash) => stash.id === selectedStash) ?? null) : null;
   // What last had focus beside the middle, such as the file chosen, for focus to go back to as a diff closes.
@@ -364,6 +367,7 @@ export function RepositoryPage({
             selectedFile={chosenFile?.kind === "stash" ? chosenFile.file.path : null}
             onSelectFile={onSelectStashFile}
             onStashes={setStashList}
+            request={stashRequest}
             onChanged={() => setChanged((n) => n + 1)}
           />
           <IssuesWidget
@@ -405,6 +409,9 @@ export function RepositoryPage({
                 setShowingStash(true);
                 onSelectStash(stash);
               }}
+              onStashAction={(stash, action) =>
+                setStashRequest((last) => ({ stash, action, count: (last?.count ?? 0) + 1 }))
+              }
               onShowWorkingTree={() => {
                 setShowingStash(false);
                 onSelectCommit(null);

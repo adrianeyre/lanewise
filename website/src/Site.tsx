@@ -1,9 +1,11 @@
-import { BookOpen, Download } from "lucide-react";
+import { BookOpen, Download, KeyRound, ShieldCheck } from "lucide-react";
 
 import { ExternalLink } from "../../app/src/legal/ExternalLink";
 import { Footer } from "../../app/src/legal/Footer";
 import { REPOSITORY_URL } from "../../app/src/legal/links";
 import { type Downloads, RELEASES_URL } from "./downloads";
+import { HeroScene } from "./scenes/HeroScene";
+import { DiffTile, GraphTile, ProvidersTile, StashTile } from "./scenes/tiles";
 import { SCREENSHOTS } from "./screenshots";
 
 /** The documentation: the README, which says how to install, build and release Lanewise, and links the rest. */
@@ -16,7 +18,9 @@ interface Props {
 
 /**
  * The project website (PRD §12.1): a landing and download page, not the app
- * (ADR 0003). It isn't on a Grid, and has the footer every page has.
+ * (ADR 0003). It isn't on a Grid, and has the footer every page has. Its
+ * pictures of Lanewise are scenes, drawn as stageshow draws a product
+ * (`scenes/`), beside screenshots of the app itself.
  */
 export function Site({ downloads }: Props) {
   return (
@@ -37,61 +41,83 @@ export function Site({ downloads }: Props) {
       </header>
 
       <main id="main" className="site-main">
-        <section className="site-intro" aria-labelledby="site-title">
-          <h1 id="site-title">Lanewise</h1>
-          <p className="site-tagline">A free Git client with a visual commit graph.</p>
-          <p>
-            Lanewise is a free, open-source desktop Git client for Windows and macOS. It draws your history as a
-            Commit graph, one lane per line of history, and walks you through merge conflicts with a three-way view
-            and, if you want them, AI Suggestions from the Model Provider you choose, with your own API key.
-          </p>
-          <DownloadButtons downloads={downloads} />
+        <section className="site-hero" aria-labelledby="site-title">
+          <div className="site-hero-copy">
+            <h1 id="site-title">Lanewise</h1>
+            <p className="site-tagline">A free Git client with a visual commit graph.</p>
+            <p>
+              Lanewise is a free, open-source desktop Git client for Windows and macOS. It draws your history as a
+              Commit graph, one lane per line of history, and walks you through merge conflicts with a three-way view
+              and, if you want them, AI Suggestions from the Model Provider you choose, with your own API key.
+            </p>
+            <DownloadButtons downloads={downloads} />
+          </div>
+          <HeroScene />
         </section>
 
         <section className="site-section" aria-labelledby="site-features">
           <h2 id="site-features">What it does</h2>
-          <ul className="site-features">
-            <li>
+          <ul className="site-bento">
+            <li className="site-tile site-tile-wide">
               <h3>A Commit graph that keeps up</h3>
               <p>
                 Branches, tags and remotes are labelled on the commits they point at, and lanes never move sideways,
                 even on a repository of more than 100,000 commits.
               </p>
+              <GraphTile />
             </li>
-            <li>
+            <li className="site-tile site-tile-stat">
+              <h3>Quick on a large history</h3>
+              <p className="site-stat">
+                <span className="site-stat-lead">git/git&apos;s first screen in</span>
+                <span className="site-stat-number">168 ms</span>
+              </p>
+              <p>Its Commit graph, drawn from a commit-graph file, as Lanewise&apos;s benchmark measured it.</p>
+            </li>
+            <li className="site-tile">
               <h3>Your daily Git</h3>
               <p>
-                Stage files or single hunks, commit and amend, and manage branches, stashes and remotes. Clone,
-                fetch, pull and push through the Git you already have.
+                Stage files or single hunks, commit and amend, and right-click a stash in the graph to apply, pop or
+                drop it. Clone, fetch, pull and push through the Git you already have.
               </p>
+              <StashTile />
             </li>
-            <li>
-              <h3>Sign-in that works</h3>
+            <li className="site-tile site-tile-statement">
+              <h3>Yours, and nobody else&apos;s</h3>
+              <p className="site-statement">
+                <ShieldCheck aria-hidden="true" className="site-statement-icon" />
+                No account, no telemetry and no subscription.
+              </p>
               <p>
-                GitHub.com and GitHub Enterprise Server, including organizations with SAML SSO, through Git
-                Credential Manager. When a sign-in fails, Lanewise says why and how to fix it.
+                Your API keys stay in your operating system&apos;s credential store, and Lanewise is MIT licensed.
               </p>
             </li>
-            <li>
-              <h3>Conflicts, side by side</h3>
-              <p>
-                See the Base, Ours and Theirs of each conflicted file together, and edit the Resolution one Conflict
-                Hunk at a time.
-              </p>
-            </li>
-            <li>
+            <li className="site-tile">
               <h3>AI Suggestions, never applied for you</h3>
               <p>
                 Ask Claude, Gemini, OpenAI, xAI, Meta or a local model for a Suggestion, with its explanation and a
                 Confidence. Nothing goes into your file until you accept it.
               </p>
+              <ProvidersTile />
             </li>
-            <li>
-              <h3>Yours, and nobody else&apos;s</h3>
-              <p>
-                No account, no telemetry and no subscription. Your API keys stay in your operating system&apos;s
-                credential store, and Lanewise is MIT licensed.
+            <li className="site-tile site-tile-statement">
+              <h3>Sign-in that works</h3>
+              <p className="site-statement">
+                <KeyRound aria-hidden="true" className="site-statement-icon" />
+                Through Git Credential Manager.
               </p>
+              <p>
+                GitHub.com and GitHub Enterprise Server, including organizations with SAML SSO. When a sign-in fails,
+                Lanewise says why and how to fix it.
+              </p>
+            </li>
+            <li className="site-tile site-tile-wide">
+              <h3>Diffs and conflicts, side by side</h3>
+              <p>
+                See a file as it was beside the file as it is, and a conflict&apos;s Base, Ours and Theirs together,
+                editing the Resolution one Conflict Hunk at a time.
+              </p>
+              <DiffTile />
             </li>
           </ul>
         </section>

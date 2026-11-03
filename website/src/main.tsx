@@ -1,5 +1,6 @@
 import "../../app/src/styles.css";
 import "./site.css";
+import "./scenes/scenes.css";
 
 import { StrictMode } from "react";
 import { createRoot, hydrateRoot } from "react-dom/client";

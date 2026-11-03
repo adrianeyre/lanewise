@@ -618,6 +618,68 @@ test("a stash is drawn as a dotted square beside the commit it was made on, name
   expect(chosen).toEqual([stash.id]);
 });
 
+test("a right click on a stash's square opens its menu, to show, apply, pop or drop it, and its commit's menu has the same", async () => {
+  measureAndRecord();
+  const user = userEvent.setup();
+  const { rows, segments } = straightHistory(4);
+  const stash: Stash = {
+    id: "5".repeat(40),
+    index: 0,
+    message: "Half done",
+    branch: "main",
+    base: { id: rows[2]!.id, shortId: rows[2]!.shortId, summary: rows[2]!.summary },
+    time: 1_790_000_000,
+    untracked: false,
+  };
+  const shown: string[] = [];
+  const asked: { stash: string; action: string }[] = [];
+  const fake = fakePlatform({ commands: { graphWindow: graphWindows(rows, segments) } });
+  const { container } = render(
+    <CommitHistory
+      commands={fake.platform.commands}
+      repository={lanewise}
+      selected={null}
+      onSelect={() => {}}
+      refreshes={0}
+      onChanged={() => {}}
+      stashes={[stash]}
+      onSelectStash={(id) => shown.push(id)}
+      onStashAction={(id, action) => asked.push({ stash: id, action })}
+    />,
+  );
+  await grid();
+
+  const canvas = container.querySelector("canvas")!;
+  fireEvent.contextMenu(canvas, { clientX: 2 * LANE, clientY: 2 * ROW + ROW / 2 });
+  const menu = await screen.findByRole("menu", { name: "Actions for stash “Half done”" });
+  expect(within(menu).getAllByRole("menuitem").map((item) => item.textContent)).toEqual([
+    "Show stash",
+    "Apply",
+    "Pop",
+    "Drop…",
+  ]);
+  expect(within(menu).getAllByRole("menuitem")[0]).toHaveFocus();
+  await expectNoAxeViolations(container);
+  await user.click(within(menu).getByRole("menuitem", { name: "Pop" }));
+  expect(screen.queryByRole("menu")).toBeNull();
+  expect(asked).toEqual([{ stash: stash.id, action: "pop" }]);
+
+  fireEvent.contextMenu(canvas, { clientX: 2 * LANE, clientY: 2 * ROW + ROW / 2 });
+  await user.click(await screen.findByRole("menuitem", { name: "Show stash" }));
+  expect(shown).toEqual([stash.id]);
+
+  // Off the square, the commit's own menu, which names its stash's actions too, for the keyboard.
+  row("Commit 2").focus();
+  await user.keyboard("{Shift>}{F10}{/Shift}");
+  const commitMenu = await screen.findByRole("menu", { name: `Actions for commit ${rows[2]!.shortId}` });
+  await user.click(within(commitMenu).getByRole("menuitem", { name: "Stash “Half done”" }));
+  await user.click(await screen.findByRole("menuitem", { name: "Drop…" }));
+  expect(asked).toEqual([
+    { stash: stash.id, action: "pop" },
+    { stash: stash.id, action: "drop" },
+  ]);
+});
+
 test("the Working tree row above the history shows the working tree's changes, pressed while no commit is selected", async () => {
   const user = userEvent.setup();
   let shown = 0;

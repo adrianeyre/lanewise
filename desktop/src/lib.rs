@@ -3,8 +3,9 @@
 
 use lanewise_commands::{Reply, logs};
 use serde_json::Value;
-use tauri::{App, Builder, Manager, Runtime};
+use tauri::{App, Builder, Manager, Runtime, WindowEvent};
 
+pub mod full_screen;
 pub mod host_pages;
 pub mod update;
 
@@ -81,6 +82,12 @@ pub fn run() {
         .setup(|app| {
             start_logs(app);
             Ok(())
+        })
+        // On macOS, the title bar's buttons stay shown in full screen.
+        .on_window_event(|window, event| {
+            if let WindowEvent::Resized(_) = event {
+                full_screen::keep_title_bar(window);
+            }
         })
         .run(context())
         .expect("the Lanewise window failed to start");

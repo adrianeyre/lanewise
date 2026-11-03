@@ -32,7 +32,7 @@ export const SCREENSHOTS: readonly Screenshot[] = [
     src: "screenshots/conflicts.webp",
     width: 1680,
     height: 1050,
-    alt: "Lanewise's Conflicts page in the dark Theme, during a merge of origin/feature/units into main. A bar along the top says the merge is in progress with one file still conflicted, with Continue and Abort merge. On the left, Conflicted files lists src/format.ts, conflicted, with Mark resolved. In the middle, the Three-way view shows that file's Base, Ours and Theirs side by side, coloured as a diff is: the Base's line they changed in red, marked with a minus, and the lines Ours and Theirs changed in green, each marked with a plus, and under it the Resolution, at its one Conflict Hunk, with Accept Ours, Accept Theirs and Accept both. On the right, the AI Suggestion Widget says AI is off until it is turned on in Settings.'",
+    alt: "Lanewise's Conflicts page in the dark Theme, during a merge of origin/feature/units into main. A bar along the top says the merge is in progress with one file still conflicted, with Continue and Abort merge. On the left, Conflicted files lists src/format.ts, conflicted, with Mark resolved. In the middle, the Three-way view shows that file's Base, Ours and Theirs side by side, coloured as a diff is: the Base's line they changed in red, marked with a minus, and the lines Ours and Theirs changed in green, each marked with a plus, and under it the Resolution, at its one Conflict Hunk, with Accept Ours, Accept Theirs, and Accept both, Ours first or Theirs first. On the right, the AI Suggestion Widget says AI is off until it is turned on in Settings.",
     caption: "The Conflicts page: a merge's Base, Ours and Theirs side by side, and the Resolution.",
   },
 ];

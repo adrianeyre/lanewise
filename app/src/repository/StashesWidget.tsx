@@ -10,6 +10,7 @@ import { NewStashDialog } from "./NewStashDialog";
 import { readPage } from "./paging";
 import { describeFailure } from "./problems";
 import { describeStashError } from "./stashProblems";
+import type { StashAsked } from "./stashMenu";
 import { titleOf } from "./stashWords";
 import { absoluteTime, machineTime, relativeTime, useNow } from "./time";
 import { recordUndo } from "./undo";
@@ -31,6 +32,8 @@ interface Props {
   onStashes: (stashes: readonly Stash[]) => void;
   /** Called once a stash is made, applied, popped or dropped. */
   onChanged: () => void;
+  /** A stash to apply, pop or drop, asked for from its menu in the Commit graph: carried out as its menu here would. */
+  request?: StashAsked | null;
 }
 
 type Asking = { kind: "create" } | { kind: "drop"; stash: Stash };
@@ -43,7 +46,8 @@ type Refocus = { index: number };
  * message, the branch it was made on and when. "New stash" stashes the
  * uncommitted changes, with a message or not and the untracked files or
  * not. Each stash's menu applies it, keeping it, pops it, or drops it once
- * the user confirms. Selecting one lists the files it changed, each of
+ * the user confirms, and does the same when asked from the stash's menu in
+ * the Commit graph. Selecting one lists the files it changed, each of
  * which shows its diff in the Diff Widget. An apply or pop that stops with
  * conflicts is left in progress, for the Conflicts page to resolve. What each action did is announced. It reads the list again as the
  * refs change, telling the page, whose Commit graph draws them. Give it a new
@@ -59,6 +63,7 @@ export function StashesWidget({
   onSelectFile,
   onStashes,
   onChanged,
+  request = null,
 }: Props) {
   const [list, setList] = useState<Stash[] | null>(null);
   const [unread, setUnread] = useState<string | null>(null);
@@ -136,7 +141,7 @@ export function StashesWidget({
     }
   }
 
-  const apply = (stash: Stash, pop: boolean) =>
+  const apply = (stash: Stash, pop: boolean, refocusRow = true) =>
     running(async () => {
       const name = titleOf(stash);
       const outcome = await commands.call(pop ? "popStash" : "applyStash", { repository: root, stash: stash.id });
@@ -153,13 +158,13 @@ export function StashesWidget({
         );
       } else if (pop) {
         recordUndo(root, { kind: "popStash", message: stash.message });
-        refocus.current = { index: stash.index };
+        if (refocusRow) refocus.current = { index: stash.index };
         setSaid(`Popped “${name}”: its changes are back in the working tree, and it's no longer stashed.`);
       } else setSaid(`Applied “${name}”: its changes are back in the working tree, and it's still stashed.`);
       onChanged();
     });
 
-  const drop = (stash: Stash) =>
+  const drop = (stash: Stash, refocusRow = true) =>
     running(async () => {
       const outcome = await commands.call("dropStash", { repository: root, stash: stash.id });
       setAsking(null);
@@ -168,10 +173,33 @@ export function StashesWidget({
         if (outcome.error.kind === "stashNotFound") onChanged();
         return;
       }
-      refocus.current = { index: stash.index };
+      if (refocusRow) refocus.current = { index: stash.index };
       setSaid(`Dropped “${titleOf(stash)}”.`);
       onChanged();
     });
+
+  // A request from the Commit graph is carried out once, as the stash it names
+  // is read; focus stays in the graph, not on this list's rows. One asked
+  // before it was drawn, as for another repository, isn't.
+  const handled = useRef<number | null>(request?.count ?? null);
+  const fromGraph = useRef(false);
+  const latestActions = useRef({ apply, busy });
+  useLayoutEffect(() => {
+    latestActions.current = { apply, busy };
+  });
+  useEffect(() => {
+    if (request === null || list === null || handled.current === request.count) return;
+    handled.current = request.count;
+    const stash = list.find((each) => each.id === request.stash);
+    if (stash === undefined) return;
+    const { apply: run, busy: occupied } = latestActions.current;
+    if (request.action === "drop") {
+      if (!occupied) {
+        fromGraph.current = true;
+        setAsking({ kind: "drop", stash });
+      }
+    } else void run(stash, request.action === "pop", false);
+  }, [request, list]);
 
   const shown = list?.find((stash) => stash.id === selected) ?? null;
   return (
@@ -242,7 +270,9 @@ export function StashesWidget({
                       id: "drop",
                       label: "Drop…",
                       onSelect: () => {
-                        if (!busy) setAsking({ kind: "drop", stash });
+                        if (busy) return;
+                        fromGraph.current = false;
+                        setAsking({ kind: "drop", stash });
                       },
                     },
                   ]}
@@ -278,7 +308,7 @@ export function StashesWidget({
       <DropDialog
         stash={asking?.kind === "drop" ? asking.stash : null}
         busy={busy}
-        onDrop={(stash) => void drop(stash)}
+        onDrop={(stash) => void drop(stash, !fromGraph.current)}
         onClose={() => setAsking(null)}
       />
     </section>

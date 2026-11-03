@@ -23,6 +23,11 @@ tauri-plugin-http = "2.8.3"
 tauri-plugin-opener = "2.7.2"
 tauri-plugin-updater = "2.14.0"
 
+# The title bar kept in full screen (`src/full_screen.rs`).
+[target.'cfg(target_os = "macos")'.dependencies]
+objc2 = "0.6.5"
+objc2-app-kit = { version = "0.3.2", default-features = false, features = ["std", "NSApplication", "NSResponder"] }
+
 [build-dependencies]
 tauri-build = { version = "2.7.4", features = [] }
 

@@ -1,0 +1,846 @@
+/*
+ * Lanewise's scenes (`Stage.tsx`): the app drawn small, as stageshow draws a
+ * product (https://github.com/benjitaylor/skills). Every colour is one of the
+ * Theme's tokens, so a scene is drawn in the page's theme, and `scenes.test.ts`
+ * holds it to them. Inside a scene, sizes are the design's pixels, which the
+ * Stage scales to fit; nothing moves for reduced motion, as the app's stylesheet
+ * says, and the Stage shows each scene's still.
+ */
+
+/* ---- The Stage ---- */
+
+/* A box the size of its design, before and after it's drawn, so the page never jumps. */
+.scene {
+  container-type: inline-size;
+}
+
+.scene-frame {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  background: var(--scene-well);
+}
+
+.scene-root {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  transform-origin: 0 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text);
+}
+
+.scene-hero .scene-frame {
+  aspect-ratio: 1040 / 470;
+  border-radius: 0;
+  background: none;
+}
+
+@container (width < 640px) {
+  .scene-hero .scene-frame {
+    aspect-ratio: 358 / 500;
+  }
+}
+
+.scene-graph .scene-frame {
+  aspect-ratio: 660 / 290;
+}
+
+@container (width < 520px) {
+  .scene-graph .scene-frame {
+    aspect-ratio: 358 / 290;
+  }
+}
+
+.scene-stash .scene-frame,
+.scene-providers .scene-frame {
+  aspect-ratio: 340 / 280;
+}
+
+.scene-diff .scene-frame {
+  aspect-ratio: 660 / 250;
+}
+
+@container (width < 520px) {
+  .scene-diff .scene-frame {
+    aspect-ratio: 358 / 330;
+  }
+}
+
+/*
+ * The ground a scene sits on: the page's own background, a step from the
+ * tile around it, and the depth of what sits on it. The hero has no ground
+ * of its own: it sits on the page, which is the ground (stageshow's framing).
+ */
+.scene {
+  --scene-well: var(--background);
+  --scene-gutter: 28px;
+  --scene-hero-shadow: 0 0 0 1px var(--border), 0 24px 48px -20px var(--shadow);
+}
+
+.scene-control {
+  margin-top: 0.75rem;
+}
+
+/* The pointer, its point at its place, which it leaves when the story ends. */
+.scene-pointer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.scene-pointer[data-shown="true"] {
+  opacity: 1;
+}
+
+.scene-pointer-arrow {
+  display: block;
+  margin: -7px 0 0 -10px;
+  transition: transform 120ms ease;
+}
+
+.scene-pointer[data-pressed="true"] .scene-pointer-arrow {
+  transform: scale(0.88);
+}
+
+/* ---- The parts ---- */
+
+.lw-window {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  overflow: hidden;
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: var(--scene-hero-shadow);
+}
+
+.lw-icon {
+  flex: none;
+  width: 14px;
+  height: 14px;
+}
+
+.lw-titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 36px;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.lw-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.lw-logo {
+  width: 16px;
+  height: 16px;
+}
+
+.lw-tabs {
+  display: flex;
+  height: 30px;
+  padding: 0 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.lw-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  font-weight: 600;
+}
+
+.lw-kicker {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.lw-button {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  background: var(--surface);
+  white-space: nowrap;
+  transition:
+    background-color 200ms ease,
+    color 200ms ease,
+    border-color 200ms ease;
+}
+
+.lw-button-small {
+  height: 24px;
+  padding: 0 8px;
+  font-size: 12px;
+}
+
+.lw-button[data-primary] {
+  border-color: var(--link);
+  color: var(--surface);
+  background: var(--link);
+}
+
+.lw-button[data-pressed] {
+  border-color: var(--added);
+  color: var(--added);
+}
+
+.lw-button[data-busy] {
+  color: var(--muted);
+}
+
+/* A height that opens and closes, so what follows moves with it. */
+.lw-collapse {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 600ms cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.lw-collapse[data-open] {
+  grid-template-rows: 1fr;
+}
+
+.lw-collapse-inner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.lw-swap {
+  display: inline-block;
+  animation: lw-swap-in 300ms ease both;
+}
+
+@keyframes lw-swap-in {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+}
+
+/* Code, as CodeMirror draws it in the app: numbered, monospaced, each line coloured as a diff or a Conflict Hunk is. */
+.lw-code {
+  padding: 6px 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  font-family: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
+  font-size: 12.5px;
+}
+
+/* A line that comes or goes opens or closes its height, so the lines below move with it. */
+.lw-line {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition:
+    grid-template-rows 500ms cubic-bezier(0.45, 0, 0.1, 1),
+    opacity 400ms ease;
+}
+
+.lw-line[data-shown="false"] {
+  grid-template-rows: 0fr;
+  opacity: 0;
+}
+
+.lw-line-inner {
+  display: grid;
+  grid-template-columns: 30px 14px 1fr;
+  min-height: 0;
+  overflow: hidden;
+  line-height: 21px;
+  white-space: pre;
+}
+
+.lw-line-number {
+  padding-right: 6px;
+  color: var(--muted);
+  text-align: right;
+}
+
+.lw-line-sign {
+  color: var(--added);
+}
+
+.lw-line[data-kind="marker"] {
+  background: var(--conflict-marker-background);
+}
+
+.lw-line[data-kind="ours"] {
+  background: var(--conflict-ours-background);
+}
+
+.lw-line[data-kind="theirs"] {
+  background: var(--conflict-theirs-background);
+}
+
+.lw-line[data-kind="added"] {
+  background: var(--diff-added-background);
+}
+
+.lw-line[data-kind="removed"] {
+  background: var(--diff-removed-background);
+}
+
+.lw-line[data-kind="removed"] .lw-line-sign {
+  color: var(--deleted);
+}
+
+.lw-bar {
+  display: inline-block;
+  height: 7px;
+  border-radius: 4px;
+  background: var(--conflict-marker-background);
+}
+
+.lw-bar[data-width="4"] {
+  width: 40%;
+}
+
+.lw-bar[data-width="5"] {
+  width: 50%;
+}
+
+.lw-bar[data-width="6"] {
+  width: 60%;
+}
+
+.lw-bar[data-width="7"] {
+  width: 70%;
+}
+
+.lw-bar[data-width="8"] {
+  width: 80%;
+}
+
+/* The Commit graph: lanes and dots in the lane colours, Labels, and subjects. */
+.lw-graph {
+  position: relative;
+}
+
+.lw-graph-lanes {
+  position: absolute;
+  top: 0;
+  left: var(--graph-lanes-at);
+}
+
+.lw-edge {
+  fill: none;
+  stroke-width: 2;
+}
+
+.lw-dot circle {
+  stroke-width: 2;
+  fill: var(--surface);
+}
+
+.lw-dot text {
+  font-size: 7px;
+  font-weight: 700;
+}
+
+.lw-lane-0 {
+  stroke: var(--lane-0);
+  fill: var(--lane-0);
+}
+
+.lw-lane-1 {
+  stroke: var(--lane-1);
+  fill: var(--lane-1);
+}
+
+.lw-lane-2 {
+  stroke: var(--lane-2);
+  fill: var(--lane-2);
+}
+
+.lw-lane-3 {
+  stroke: var(--lane-3);
+  fill: var(--lane-3);
+}
+
+.lw-edge.lw-lane-0,
+.lw-edge.lw-lane-1,
+.lw-edge.lw-lane-2,
+.lw-edge.lw-lane-3 {
+  fill: none;
+}
+
+.lw-dot text {
+  stroke: none;
+}
+
+.lw-graph-row {
+  display: grid;
+  grid-template-columns: var(--graph-labels) var(--graph-lanes) 1fr;
+  align-items: center;
+  height: 30px;
+}
+
+.lw-graph-labels {
+  display: flex;
+  gap: 4px;
+  min-width: 0;
+}
+
+.lw-graph-subject {
+  grid-column: 3;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lw-label {
+  padding: 0 6px;
+  border: 1px solid var(--link);
+  border-radius: 4px;
+  color: var(--link);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.lw-label[data-kind="current"] {
+  border-color: var(--added);
+  color: var(--added);
+  font-weight: 700;
+}
+
+.lw-label[data-kind="tag"] {
+  border-color: var(--modified);
+  color: var(--modified);
+}
+
+/* A stash: a dotted square beside the commit it was made on, joined to it by a dotted line. */
+.lw-stash {
+  fill: var(--surface);
+  stroke: var(--lane-0);
+  stroke-width: 2;
+  stroke-dasharray: 3 2;
+}
+
+.lw-edge-stash {
+  stroke: var(--lane-0);
+  stroke-dasharray: 3 2;
+}
+
+.lw-stash[data-menu] {
+  fill: var(--diff-hunk-background);
+}
+
+/* A menu over the page, as the app opens one: it scales a touch from its corner as it fades in. */
+.lw-menu {
+  position: absolute;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: 0 12px 28px -12px var(--shadow);
+  opacity: 0;
+  transform: scale(0.96);
+  transform-origin: 0 0;
+  transition:
+    opacity 180ms ease,
+    transform 180ms cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.lw-menu[data-open] {
+  opacity: 1;
+  transform: none;
+}
+
+.lw-menu-item {
+  padding: 4px 28px 4px 10px;
+  border-radius: 4px;
+  line-height: 20px;
+}
+
+.lw-menu-item[data-hover] {
+  color: var(--surface);
+  background: var(--link);
+}
+
+/* ---- The hero: the Conflicts page, during a merge ---- */
+
+.hero-window {
+  top: var(--scene-gutter);
+  left: 40px;
+  width: 1060px;
+  height: 480px;
+}
+
+.scene-root[data-layout="compact"] .hero-window {
+  top: 16px;
+  left: 16px;
+  width: 400px;
+  height: 520px;
+}
+
+.hero-merge {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.hero-merge-said {
+  margin-top: 2px;
+  font-weight: 600;
+}
+
+.scene-root[data-layout="compact"] .hero-merge-said {
+  max-width: 330px;
+}
+
+.hero-merge-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.hero-body {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 370px;
+}
+
+.scene-root[data-layout="compact"] .hero-body {
+  display: block;
+  position: relative;
+}
+
+.hero-resolution {
+  padding: 12px 16px;
+}
+
+.scene-root[data-layout="compact"] .hero-resolution {
+  width: 326px;
+}
+
+.hero-resolution-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.hero-file {
+  font-family: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
+}
+
+.hero-hunks {
+  margin: 6px 0 8px;
+  font-weight: 600;
+}
+
+.hero-resolution-foot {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.scene-root[data-layout="compact"] .hero-resolution-foot {
+  justify-content: flex-end;
+}
+
+.scene-root[data-layout="compact"] .lw-code {
+  font-size: 11.5px;
+}
+
+.scene-root[data-layout="compact"] .lw-line-inner {
+  grid-template-columns: 24px 12px 1fr;
+  line-height: 18px;
+}
+
+.scene-root[data-layout="compact"] .hero-resolution-head {
+  margin-bottom: 8px;
+}
+
+.hero-suggestion {
+  padding: 12px 90px 12px 16px;
+  border-left: 1px solid var(--border);
+}
+
+.hero-suggestion .hero-suggest {
+  margin-top: 8px;
+}
+
+/* The Suggestion arrives whole, dropping a touch into place, and stays as the record once it's used. */
+.hero-card {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  opacity: 0;
+  transform: translateY(-6px);
+  transition:
+    opacity 600ms cubic-bezier(0.25, 0.8, 0.25, 1),
+    transform 600ms cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.hero-card[data-open] {
+  opacity: 1;
+  transform: none;
+}
+
+.hero-card-title {
+  margin-top: 6px;
+  font-weight: 600;
+}
+
+.hero-card-label {
+  display: inline-block;
+  padding: 0 5px;
+  border: 1px solid var(--muted);
+  border-radius: 4px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.hero-card-note {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.hero-card-confidence {
+  margin-top: 6px;
+  color: var(--added);
+  font-weight: 600;
+}
+
+.hero-card-why-heading {
+  margin-top: 8px;
+  font-weight: 600;
+}
+
+.hero-card-why {
+  margin: 2px 0 0;
+}
+
+/* Each word of why is in its place from the start, and shows as it comes in. */
+.hero-card-why span {
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+.hero-card-why span[data-in] {
+  opacity: 1;
+}
+
+.hero-card-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.hero-card[data-used] .lw-button[data-primary] {
+  border-color: var(--added);
+  color: var(--surface);
+  background: var(--added);
+}
+
+/* Compact, the Suggestion opens under the Resolution, moving nothing above it, and stays as the record once it's used. */
+.hero-sheet {
+  width: 326px;
+  padding: 0 16px;
+}
+
+.hero-sheet .hero-card {
+  margin: 2px 0 12px;
+}
+
+.hero-sheet:not([data-open]) .hero-card {
+  opacity: 0;
+}
+
+/* ---- The Commit graph ---- */
+
+.graph-panel {
+  position: absolute;
+  top: var(--scene-gutter);
+  left: var(--scene-gutter);
+  width: 700px;
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: var(--scene-hero-shadow);
+  --graph-labels: 130px;
+  --graph-lanes: 76px;
+  --graph-lanes-at: 142px;
+}
+
+.scene-root[data-layout="compact"] .graph-panel {
+  left: 16px;
+  width: 400px;
+  --graph-labels: 104px;
+  --graph-lanes-at: 116px;
+}
+
+.graph-head {
+  display: grid;
+  grid-template-columns: var(--graph-labels) var(--graph-lanes) 1fr;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.graph-panel .lw-graph {
+  padding: 4px 12px;
+}
+
+/* ---- A stash's menu ---- */
+
+.stash-panel {
+  position: absolute;
+  top: var(--scene-gutter);
+  left: var(--scene-gutter);
+  width: 340px;
+  height: 300px;
+  padding: 4px 0 4px 12px;
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: var(--scene-hero-shadow);
+  --graph-labels: 0;
+  --graph-lanes: 76px;
+  --graph-lanes-at: 12px;
+}
+
+.stash-menu {
+  top: 66px;
+  left: 76px;
+  min-width: 150px;
+}
+
+/* ---- The Model Providers ---- */
+
+.providers-panel {
+  position: absolute;
+  top: var(--scene-gutter);
+  right: var(--scene-gutter);
+  left: var(--scene-gutter);
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: var(--scene-hero-shadow);
+}
+
+.providers-list {
+  margin-top: 8px;
+}
+
+.providers-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 26px;
+}
+
+.providers-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.providers-radio {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+}
+
+.providers-item[data-chosen] .providers-radio {
+  border: 4px solid var(--link);
+}
+
+.providers-item[data-chosen] .providers-name {
+  font-weight: 600;
+}
+
+.providers-key {
+  margin-top: 12px;
+}
+
+.providers-key-label {
+  font-weight: 600;
+}
+
+.providers-key-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 30px;
+  margin-top: 4px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.providers-key-saved {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--added);
+  font-weight: 600;
+}
+
+/* ---- A split diff ---- */
+
+.diff-panel {
+  position: absolute;
+  top: var(--scene-gutter);
+  right: var(--scene-gutter);
+  left: var(--scene-gutter);
+  height: 280px;
+  padding: 12px;
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: var(--scene-hero-shadow);
+}
+
+.scene-root[data-layout="compact"] .diff-panel {
+  right: 16px;
+  left: 16px;
+  height: 360px;
+}
+
+.diff-file {
+  margin-bottom: 8px;
+  font-family: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
+  font-weight: 600;
+}
+
+.diff-sides {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.scene-root[data-layout="compact"] .diff-sides {
+  grid-template-columns: 1fr;
+  gap: 8px;
+}

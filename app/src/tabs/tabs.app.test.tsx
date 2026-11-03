@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import "@testing-library/jest-dom/vitest";
-import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, expect, test } from "vitest";
 
@@ -358,10 +358,13 @@ test("a repository that doesn't reopen on launch is left out, saying why, and ma
   expect(screen.getByRole("alert")).toHaveTextContent(
     "Lanewise couldn't reopen every repository you had open. “/gone/old” isn't a folder, or is no longer there.",
   );
-  expect(JSON.parse(localStorage.getItem(OPEN_REPOSITORIES_KEY)!)).toEqual({
-    repositories: ["/work/lanewise"],
-    active: "/work/lanewise",
-  });
+  // Kept by an effect once the Tabs are drawn, which a slow machine runs after the alert shows.
+  await waitFor(() =>
+    expect(JSON.parse(localStorage.getItem(OPEN_REPOSITORIES_KEY)!)).toEqual({
+      repositories: ["/work/lanewise"],
+      active: "/work/lanewise",
+    }),
+  );
   await expectNoAxeViolations(container);
 
   await userEvent.click(screen.getByRole("button", { name: "New tab" }));

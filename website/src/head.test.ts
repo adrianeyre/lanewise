@@ -6,12 +6,10 @@ import { describe, expect, test } from "vitest";
 import { THEMES } from "../../app/src/test/styles";
 import config from "../vite.config";
 import { SCREENSHOTS } from "./screenshots";
+import { OG_IMAGE, SITE } from "./seo";
 
 // The page's head, and the files it names: what search engines, link
 // previews, browsers and devices read of the website (PRD §12.1).
-
-/** Where GitHub Pages serves the website: this repository's custom domain, at its root. */
-const SITE = "https://lanewise.adrianeyre.co.uk/";
 
 const HTML = readFileSync(new URL("../index.html", import.meta.url), "utf8");
 const head = new JSDOM(HTML).window.document;
@@ -75,7 +73,7 @@ test("a shared link previews with Open Graph and a Twitter card, and a 1200 by 6
   expect(meta("og:url")).toBe(SITE);
   expect(meta("og:site_name")).toBe("Lanewise");
   expect(meta("og:title")).toBe(head.title);
-  expect(meta("og:image")).toBe(`${SITE}og-image.png`);
+  expect(meta("og:image")).toBe(`${SITE}${OG_IMAGE}`);
   expect([meta("og:image:width"), meta("og:image:height")]).toEqual(["1200", "630"]);
   expect(pngSize(read(local(meta("og:image")!)))).toEqual([1200, 630]);
   expect(meta("og:image:alt")).toMatch(/^The Lanewise logo and name/);
@@ -151,32 +149,15 @@ test("the browser's own colours follow the theme: theme-color is each theme's ba
   ]);
 });
 
-test("the JSON-LD says Lanewise is a free SoftwareApplication, under the MIT licence, for Windows and macOS", () => {
-  const scripts = head.querySelectorAll('script[type="application/ld+json"]');
-  expect(scripts).toHaveLength(1);
-  const data = JSON.parse(scripts[0]!.textContent!) as Record<string, unknown>;
-  expect(data).toMatchObject({
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    name: "Lanewise",
-    applicationCategory: "DeveloperApplication",
-    url: SITE,
-    downloadUrl: "https://github.com/adrianeyre/lanewise/releases/latest",
-    license: "https://opensource.org/license/mit",
-    isAccessibleForFree: true,
-    codeRepository: "https://github.com/adrianeyre/lanewise",
-    image: meta("og:image"),
-    offers: { "@type": "Offer", price: "0" },
-  });
-  expect(data.operatingSystem).toMatch(/Windows.*macOS/);
-  expect(SCREENSHOTS.map(({ src }) => `${SITE}${src}`)).toContain(data.screenshot);
+test("robots.txt lets every crawler in and names the sitemap the build writes", () => {
+  expect(read("robots.txt").toString("utf8")).toBe(`User-agent: *\nAllow: /\n\nSitemap: ${SITE}sitemap.xml\n`);
+  // `src/seo.ts` draws it when the site is built, so a copy in `public/` would be overwritten.
+  expect(existsSync(publicFile("sitemap.xml"))).toBe(false);
 });
 
-test("robots.txt lets every crawler in and names the sitemap, which lists the page", () => {
-  expect(read("robots.txt").toString("utf8")).toBe(`User-agent: *\nAllow: /\n\nSitemap: ${SITE}sitemap.xml\n`);
-  const sitemap = new JSDOM(read("sitemap.xml"), { contentType: "application/xml" }).window.document;
-  expect(sitemap.documentElement.namespaceURI).toBe("http://www.sitemaps.org/schemas/sitemap/0.9");
-  expect([...sitemap.querySelectorAll("url > loc")].map((loc) => loc.textContent)).toEqual([SITE]);
+test("the JSON-LD is drawn into the head when it is built, once", () => {
+  expect(HTML.match(/<!--structured-data-->/g)).toHaveLength(1);
+  expect(head.querySelectorAll('script[type="application/ld+json"]')).toHaveLength(0);
 });
 
 test("each screenshot is in public/ at the size the page draws it", () => {

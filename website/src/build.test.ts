@@ -10,6 +10,7 @@ import { afterAll, beforeAll, describe, expect, test } from "vitest";
 
 import { CONTENT_SECURITY_POLICY } from "../vite.config";
 import { type GitHubRelease, RELEASES_URL } from "./downloads";
+import { SITE } from "./seo";
 
 // The website as `release.yml` builds it, with the latest Release from
 // GitHub's API: what a visitor's browser runs and loads, and what a Release's
@@ -27,6 +28,9 @@ const RELEASE_WORDS = {
   author: { login: '"><script>alert(1)</script>' },
 };
 
+/** When the Release the build is given was published. */
+const PUBLISHED = "2026-11-03T07:45:16Z";
+
 /** GitHub's `releases/latest` for `tag`, with both installers and its own words. */
 function latest(tag: string): GitHubRelease & typeof RELEASE_WORDS {
   const v = tag.replace(/^v/, "");
@@ -34,6 +38,7 @@ function latest(tag: string): GitHubRelease & typeof RELEASE_WORDS {
   return {
     tag_name: tag,
     html_url: `${RELEASES_URL}/tag/${tag}`,
+    published_at: PUBLISHED,
     assets: [asset(`Lanewise_${v}_universal.dmg`), asset(`Lanewise_${v}_x64-setup.exe`), asset("<b>latest.json</b>")],
     ...RELEASE_WORDS,
   };
@@ -159,6 +164,24 @@ test("a Release's own words never reach the built page, and its downloads are ex
   expect([...page.querySelectorAll(".site-version a")].map((link) => link.getAttribute("href"))).toEqual(
     Array(2).fill(notes),
   );
+});
+
+describe("what search engines read", () => {
+  test("the JSON-LD is drawn into the head, at the version it is built from, with its Release's notes", () => {
+    const scripts = page.head.querySelectorAll('script[type="application/ld+json"]');
+    expect(scripts).toHaveLength(1);
+    expect(html).not.toContain("<!--structured-data-->");
+    const data = JSON.parse(scripts[0]!.textContent!) as { "@graph": Record<string, unknown>[] };
+    const software = data["@graph"].find((node) => node["@type"] === "SoftwareApplication");
+    expect(software).toMatchObject({ softwareVersion: version, releaseNotes: `${RELEASES_URL}/tag/v${version}` });
+  });
+
+  test("sitemap.xml lists the page, dated by the Release it offers", () => {
+    const sitemap = readFileSync(join(out, "sitemap.xml"), "utf8");
+    expect(sitemap).toContain(`<loc>${SITE}</loc>`);
+    expect(sitemap).toContain(`<lastmod>${PUBLISHED}</lastmod>`);
+    expect(readFileSync(join(out, "robots.txt"), "utf8")).toContain(`Sitemap: ${SITE}sitemap.xml`);
+  });
 });
 
 test("the build is refused a Release of any version but the one it is built from", async () => {

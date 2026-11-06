@@ -7,6 +7,7 @@ import { defineConfig, type Plugin } from "vitest/config";
 
 import { credits } from "../app/scripts/credits.ts";
 import { type Downloads, downloadsOf, type GitHubRelease } from "./src/downloads.ts";
+import { sitemap, structuredData, structuredDataScript } from "./src/seo.ts";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
 
@@ -21,10 +22,16 @@ const { version, author } = JSON.parse(readFileSync(new URL("../package.json", i
  * in `LANEWISE_LATEST_RELEASE`. Without one, before the first Release or in
  * development, the page says there's nothing to download yet.
  */
-function latestDownloads(): Downloads | null {
+function latestRelease(): GitHubRelease | null {
   const file = process.env.LANEWISE_LATEST_RELEASE;
   if (file === undefined || file === "") return null;
-  return downloadsOf(JSON.parse(readFileSync(file, "utf8")) as GitHubRelease, version);
+  return JSON.parse(readFileSync(file, "utf8")) as GitHubRelease;
+}
+
+/** The latest Release's downloads, read once per build, or `null` without one. */
+function latestDownloads(): Downloads | null {
+  const release = latestRelease();
+  return release === null ? null : downloadsOf(release, version);
 }
 
 /** Where the page is drawn to HTML when it is built: the `ssr` environment's output, which nothing ships. */
@@ -98,6 +105,33 @@ function contentSecurityPolicy(): Plugin {
   };
 }
 
+/**
+ * What search engines read beyond the head's tags: the JSON-LD, drawn into
+ * `index.html`'s `<!--structured-data-->` with the version it is built from,
+ * and `sitemap.xml`, dated by the Release it offers (`src/seo.ts`).
+ */
+function seo(): Plugin {
+  const release = latestRelease();
+  const downloads = release === null ? null : downloadsOf(release, version);
+  return {
+    name: "lanewise-website-seo",
+    transformIndexHtml: {
+      order: "post",
+      handler(html) {
+        if (!html.includes("<!--structured-data-->")) {
+          throw new Error("index.html has no <!--structured-data--> to draw the JSON-LD into");
+        }
+        const data = structuredData({ version, author, notes: downloads?.notes ?? null });
+        return html.replace("<!--structured-data-->", structuredDataScript(data));
+      },
+    },
+    generateBundle() {
+      if (this.environment.name !== "client") return;
+      this.emitFile({ type: "asset", fileName: "sitemap.xml", source: sitemap(release?.published_at ?? null) });
+    },
+  };
+}
+
 /** The dev server's and preview's port, beside the app's 5150. */
 const PORT = 5160;
 
@@ -110,7 +144,7 @@ export default defineConfig({
     "import.meta.env.VITE_DOWNLOADS": JSON.stringify(latestDownloads()),
   },
   // The footer's Credits are Lanewise's, the same as in the app, whose npm packages include the website's.
-  plugins: [react(), credits(root, fileURLToPath(new URL("../app", import.meta.url))), prerender(), contentSecurityPolicy()],
+  plugins: [react(), credits(root, fileURLToPath(new URL("../app", import.meta.url))), prerender(), seo(), contentSecurityPolicy()],
   // The footer comes from `app/src/legal/`, so React must be the website's one copy.
   resolve: { dedupe: ["react", "react-dom"] },
   environments: {

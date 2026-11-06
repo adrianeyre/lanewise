@@ -62,6 +62,15 @@ chrome --headless --hide-scrollbars --force-device-scale-factor=1 --window-size=
   --screenshot=website/public/og-image.png website/icons/og-image.svg
 ```
 
+## Search engines
+
+The head in `index.html` has what a link preview reads: the title, description, canonical URL, and Open Graph and Twitter card tags with `public/og-image.png`, which `src/head.test.ts` holds. The build draws the rest from `src/seo.ts`, so it follows the page:
+
+- the JSON-LD, into `index.html`'s `<!--structured-data-->`: the website, its author and Lanewise as a SoftwareApplication, at the version it is built from, with the page's screenshots and features. It claims no rating or review.
+- `sitemap.xml`, which `public/robots.txt` names: the page, the pictures on it, and as its `lastmod` when the Release it offers was published. Built without a Release, it has no date.
+
+`src/seo.test.ts` holds both, and `src/build.test.ts` checks them in the built site. Lighthouse's SEO must be 100 (Hand checks). Getting the site indexed, and links to it, takes the owner's own accounts: `docs/processes/search-engines.md` says how.
+
 ## The Content-Security-Policy
 
 The built page has a Content-Security-Policy in its head (ADR 0054): everything from its own origin, and the theme script in `index.html` by its hash. The dev server has none, so check a change that loads something new on the built site, with `preview`, and look in the browser's console for a message naming `Content-Security-Policy`. `src/build.test.ts` builds the site and holds the policy, what the page loads and its download links.

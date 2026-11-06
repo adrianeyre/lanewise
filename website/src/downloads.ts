@@ -12,6 +12,8 @@ export const RELEASES_URL = `${REPOSITORY_URL}/releases`;
 export interface GitHubRelease {
   tag_name: string;
   html_url: string;
+  /** When it was published, which the sitemap gives as the page's last change. */
+  published_at?: string | null;
   assets: { name: string; browser_download_url: string }[];
 }
 

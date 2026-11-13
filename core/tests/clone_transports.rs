@@ -401,12 +401,19 @@ fn the_credential_helper_is_asked_about_the_url_s_own_host_and_never_one_its_use
     match cloned {
         Err(CloneError::SignIn { message, .. }) => {
             assert!(message.contains("helper get"), "{message}");
+            let told = told_to_helper(&message);
             assert_eq!(
-                told_to_helper(&message),
-                [
-                    format!("host=127.0.0.1:{port}").as_str(),
-                    "username=github.com"
-                ],
+                told.iter()
+                    .filter(|line| line.starts_with("host="))
+                    .collect::<Vec<_>>(),
+                [&format!("host=127.0.0.1:{port}").as_str()],
+                "{message}"
+            );
+            // Git 2.56 stopped passing the URL's user part to the helper; older Gits pass it as the username.
+            assert!(
+                told.iter()
+                    .filter(|line| line.starts_with("username="))
+                    .all(|line| *line == "username=github.com"),
                 "{message}"
             );
         }

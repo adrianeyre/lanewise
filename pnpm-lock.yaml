@@ -230,8 +230,8 @@ importers:
         specifier: 6.43.15
         version: 6.43.15
       '@google/genai':
-        specifier: 3.3.0
-        version: 3.3.0(supports-color@7.2.0)
+        specifier: 3.2.0
+        version: 3.2.0(supports-color@7.2.0)
       '@lezer/common':
         specifier: 1.5.5
         version: 1.5.5
@@ -733,8 +733,8 @@ packages:
       '@noble/hashes':
         optional: true
 
-  '@google/genai@3.3.0':
-    resolution: {integrity: sha512-XLjXedj0X8UrULZz1GnlTMSQxBDFdr+NCKZkOBaSVVYqmK30C6FCnKW31Ppn0ItO9DpNspCHFui257kPNpumKQ==}
+  '@google/genai@3.2.0':
+    resolution: {integrity: sha512-AyT5kezsBpxRr8ljz7RmfhrxfjTse0aIDv7DGoNmk6lyta0A13AEOiGpw7VFcrYSmXq8HtkbWYBAeqqdALv6gw==}
     engines: {node: '>=22.0.0'}
     peerDependencies:
       '@modelcontextprotocol/sdk': ^1.25.2
@@ -3636,7 +3636,7 @@ snapshots:
 
   '@exodus/bytes@1.16.0': {}
 
-  '@google/genai@3.3.0(supports-color@7.2.0)':
+  '@google/genai@3.2.0(supports-color@7.2.0)':
     dependencies:
       google-auth-library: 10.9.1(supports-color@7.2.0)
       p-retry: 4.6.2

@@ -23,6 +23,7 @@
     "website:dev": "pnpm --filter @lanewise/website dev",
     "website:build": "pnpm --filter @lanewise/website build",
     "website:screenshots": "node website/scripts/screenshots.ts",
+    "docs:pictures": "node app/scripts/setupGuide/takePictures.ts",
     "desktop:dev": "tauri dev",
     "desktop:build": "node app/scripts/release/updater.ts build",
     "bench:graph": "pnpm --filter @lanewise/bench graph",

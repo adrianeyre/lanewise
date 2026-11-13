@@ -19,7 +19,18 @@ function read(path: string): string {
 }
 
 /** The pages the README links to for the detail it leaves out. */
-const GUIDES = ["docs/installing.md", "docs/ai-suggestions.md", "docs/development.md", "docs/releases.md"];
+const GUIDES = [
+  "docs/README.md",
+  "docs/installing.md",
+  "docs/ai-suggestions.md",
+  "docs/development.md",
+  "docs/releases.md",
+  "docs/setup/README.md",
+  "docs/setup/windows.md",
+  "docs/setup/macos.md",
+  "docs/setup/linux.md",
+  "docs/setup/first-steps.md",
+];
 /** The rules every Pen-test round's tester agrees to, which the security policy points testers at. */
 const RULES_OF_ENGAGEMENT = "docs/product-requirements-document/pen-testing-rules-of-engagement.md";
 /** How the owner triages a Finding, with the pen-testing PRD's targets where the triage sees them. */
@@ -80,6 +91,18 @@ test("every document and issue form is there", () => {
   expect(FORMS.toSorted()).toEqual(
     ["accessibility.yml", "bug-report.yml", "config.yml", "feature-request.yml", "finding.yml"].map((file) => `${FORMS_DIR}/${file}`),
   );
+});
+
+test("the README and the documentation's index link every document in docs/", () => {
+  const documents = spawnSync("git", ["ls-files", "docs/*.md"], { cwd: root, encoding: "utf8" })
+    .stdout.split("\n")
+    .filter((path) => path !== "");
+  expect(documents.length).toBeGreaterThan(0);
+  expect(documents.filter((path) => !read("README.md").includes(`](${path}`))).toEqual([]);
+  const index = read("docs/README.md");
+  expect(
+    documents.filter((path) => path !== "docs/README.md" && !index.includes(`](${path.slice("docs/".length)}`)),
+  ).toEqual([]);
 });
 
 test("the repository is only ever adrianeyre/lanewise", () => {

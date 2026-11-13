@@ -1,0 +1,510 @@
+.drawing-desk {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 960px;
+  height: 600px;
+  padding: 24px;
+  overflow: hidden;
+  font: 15px/1.45 "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  color: #1d2026;
+}
+
+.drawing-desk-windows {
+  background: #1d5fbf;
+  font-family: "Segoe UI", "Inter", Arial, sans-serif;
+}
+
+.drawing-desk-macos {
+  background: #5b3f86;
+}
+
+.drawing-desk-linux {
+  background: #4f1a45;
+  font-family: "Ubuntu", "Cantarell", "Inter", Arial, sans-serif;
+}
+
+.drawing-label {
+  position: absolute;
+  right: 12px;
+  bottom: 8px;
+  margin: 0;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: rgb(0 0 0 / 55%);
+  color: #fff;
+  font-size: 12px;
+}
+
+.drawing-window {
+  max-height: 540px;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 25%);
+}
+
+.drawing-window-windows {
+  border-radius: 8px;
+}
+
+.drawing-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 34px;
+  padding: 0 12px;
+  background: #eceef2;
+  border-bottom: 1px solid #d6d9df;
+  font-size: 13px;
+}
+
+.drawing-window-macos .drawing-titlebar {
+  justify-content: flex-start;
+}
+
+.drawing-window-dark .drawing-titlebar {
+  background: #2b2e35;
+  border-bottom-color: #3a3e46;
+  color: #d8dbe2;
+}
+
+.drawing-title {
+  flex: 1;
+  text-align: center;
+}
+
+.drawing-window-windows .drawing-title {
+  text-align: left;
+}
+
+.drawing-lights {
+  display: flex;
+  gap: 8px;
+}
+
+.drawing-lights i {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ff5f57;
+}
+
+.drawing-lights i:nth-child(2) {
+  background: #febc2e;
+}
+
+.drawing-lights i:nth-child(3) {
+  background: #28c840;
+}
+
+.drawing-controls {
+  display: flex;
+  gap: 18px;
+  font-style: normal;
+}
+
+.drawing-controls i {
+  font-style: normal;
+}
+
+.drawing-body {
+  padding: 0;
+}
+
+.drawing-terminal {
+  margin: 0;
+  padding: 16px 18px;
+  min-height: 240px;
+  background: #16181d;
+  color: #e6e8ee;
+  font: 14px/1.5 "JetBrains Mono", "Cascadia Mono", "Menlo", "DejaVu Sans Mono", monospace;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.drawing-line {
+  display: block;
+}
+
+.drawing-prompt {
+  color: #7ee787;
+}
+
+.drawing-output {
+  display: block;
+  color: #b9bfcc;
+}
+
+.drawing-note {
+  display: block;
+  margin-top: 6px;
+  color: #f0b86e;
+}
+
+.drawing-note::before {
+  content: "# ";
+}
+
+.drawing-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 12px 16px;
+}
+
+.drawing-buttons-stacked {
+  flex-direction: column;
+  align-items: stretch;
+  padding: 12px 0 0;
+}
+
+.drawing-button {
+  padding: 6px 16px;
+  border: 1px solid #c5c9d1;
+  border-radius: 6px;
+  background: #fff;
+  text-align: center;
+}
+
+.drawing-button-primary {
+  border-color: #1f6feb;
+  background: #1f6feb;
+  color: #fff;
+}
+
+.drawing-chosen {
+  outline: 3px solid #ff8a00;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 8px rgb(255 138 0 / 25%);
+}
+
+.drawing-alert {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 300px;
+  padding: 22px 18px 16px;
+  border-radius: 14px;
+  background: rgb(246 246 248 / 97%);
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 25%);
+  text-align: center;
+  font-size: 13px;
+}
+
+.drawing-alert h1 {
+  margin: 12px 0 6px;
+  font-size: 14px;
+}
+
+.drawing-alert p {
+  margin: 4px 0;
+}
+
+.drawing-alert .drawing-buttons {
+  width: 100%;
+}
+
+.drawing-lock {
+  font-size: 44px;
+}
+
+.drawing-settings {
+  display: flex;
+  min-height: 380px;
+}
+
+.drawing-sidebar {
+  width: 210px;
+  margin: 0;
+  padding: 12px 8px;
+  list-style: none;
+  background: #f1f2f5;
+  border-right: 1px solid #dde0e6;
+}
+
+.drawing-sidebar li {
+  padding: 5px 10px;
+  border-radius: 6px;
+}
+
+.drawing-selected {
+  background: #1f6feb;
+  color: #fff;
+}
+
+.drawing-pane {
+  flex: 1;
+  padding: 16px 22px;
+}
+
+.drawing-pane h1 {
+  margin: 0 0 10px;
+  font-size: 20px;
+}
+
+.drawing-pane h2 {
+  margin: 18px 0 6px;
+  font-size: 15px;
+}
+
+.drawing-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #f4f5f8;
+}
+
+.drawing-row p {
+  margin: 0;
+}
+
+.drawing-row .drawing-buttons {
+  padding: 0;
+}
+
+.drawing-muted {
+  display: block;
+  color: #5b616e;
+  font-size: 13px;
+}
+
+.drawing-field {
+  margin: 8px 0;
+  padding: 6px 10px;
+  border: 1px solid #c5c9d1;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.drawing-disk {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 40px 30px 10px;
+}
+
+.drawing-disk figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  padding: 8px;
+  border-radius: 10px;
+}
+
+.drawing-arrow {
+  font-size: 56px;
+  color: #5b616e;
+}
+
+.drawing-folder {
+  display: grid;
+  place-items: center;
+  width: 96px;
+  height: 80px;
+  border-radius: 10px;
+  background: linear-gradient(#6cb6ff, #2f80ed);
+  color: #fff;
+  font-size: 40px;
+  font-weight: 700;
+}
+
+.drawing-hint {
+  margin: 0;
+  padding: 0 0 24px;
+  text-align: center;
+  color: #5b616e;
+}
+
+.drawing-address {
+  margin: 0;
+  padding: 6px 14px;
+  background: #f4f5f8;
+  border-bottom: 1px solid #dde0e6;
+  font-size: 13px;
+}
+
+.drawing-page {
+  padding: 18px 26px 22px;
+}
+
+.drawing-page h1 {
+  margin: 0 0 8px;
+  font-size: 24px;
+}
+
+.drawing-page .drawing-buttons {
+  justify-content: flex-start;
+  padding: 6px 0 12px;
+}
+
+.drawing-download {
+  margin-top: 16px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #eef4ff;
+}
+
+.drawing-smartscreen {
+  width: 620px;
+  padding: 28px 32px 12px;
+  background: #0067b8;
+  color: #fff;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 25%);
+}
+
+.drawing-smartscreen h1 {
+  margin: 0 0 14px;
+  font-size: 26px;
+  font-weight: 400;
+}
+
+.drawing-smartscreen dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 4px 18px;
+}
+
+.drawing-smartscreen dd {
+  margin: 0;
+}
+
+.drawing-smartscreen .drawing-button {
+  border-color: #fff;
+  background: transparent;
+  color: #fff;
+}
+
+.drawing-link {
+  display: inline-block;
+  text-decoration: underline;
+}
+
+.drawing-wizard {
+  display: flex;
+  gap: 18px;
+  padding: 20px 22px;
+  min-height: 200px;
+}
+
+.drawing-wizard h1 {
+  margin: 0 0 8px;
+  font-size: 17px;
+}
+
+.drawing-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.drawing-box {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border: 1px solid #5b616e;
+  border-radius: 3px;
+  background: #fff;
+  font-size: 12px;
+}
+
+.drawing-start {
+  width: 520px;
+  padding: 18px;
+  border-radius: 10px;
+  background: rgb(243 244 247 / 97%);
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 25%);
+}
+
+.drawing-start-linux {
+  background: rgb(40 40 44 / 95%);
+  color: #f2f2f2;
+}
+
+.drawing-start-linux .drawing-field {
+  background: #3a3a40;
+  border-color: #55555c;
+  color: #fff;
+}
+
+.drawing-start-linux .drawing-muted {
+  color: #c8c8d0;
+}
+
+.drawing-start h2 {
+  margin: 12px 0 6px;
+  font-size: 13px;
+}
+
+.drawing-start ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.drawing-start li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 8px;
+}
+
+.drawing-start li span {
+  display: flex;
+  flex-direction: column;
+}
+
+.drawing-tile {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: #2b2e35;
+}
+
+.drawing-app-row {
+  justify-content: flex-start;
+}
+
+.drawing-app-row p {
+  flex: 1;
+}
+
+.drawing-menu {
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  border: 1px solid #dde0e6;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.drawing-menu li {
+  padding: 4px 18px;
+  border-radius: 6px;
+}
+
+.drawing-workloads {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.drawing-workload {
+  padding: 10px 14px;
+  border: 1px solid #dde0e6;
+  border-radius: 8px;
+}
+
+.drawing-workload .drawing-checkbox {
+  margin: 0 0 4px;
+  font-weight: 600;
+}

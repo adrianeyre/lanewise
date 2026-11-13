@@ -8,7 +8,8 @@ import { afterEach, describe, expect, test } from "vitest";
 import { expectNoAxeViolations } from "../../app/src/test/axe";
 import { REPOSITORY_URL } from "../../app/src/legal/links";
 import type { Downloads } from "./downloads";
-import { DOCS_URL, Site } from "./Site";
+import { buildDocUrl, DOCS_INDEX_URL, GUIDES } from "./Setup";
+import { Site } from "./Site";
 import { SCREENSHOTS } from "./screenshots";
 
 const DOWNLOADS: Downloads = {
@@ -41,6 +42,9 @@ test("the page is Lanewise's, with a heading for each section in order", () => {
     "What it does",
     "Screenshots",
     "Download",
+    "What you need",
+    "Install",
+    "Build from source",
     "Documentation",
   ]);
 });
@@ -75,20 +79,93 @@ test("before the first Release, the page says there's nothing to download yet an
   }
 });
 
-test("the documentation and the source are linked from the header, and open in a new tab", () => {
+test("the header links to each section of the page, and to the source in a new tab", () => {
   render(<Site downloads={DOWNLOADS} />);
   const nav = screen.getByRole("navigation", { name: "Lanewise" });
-  expect(within(nav).getByRole("link", { name: "Download" })).toHaveAttribute("href", "#download");
   for (const [name, href] of [
-    [/^Documentation/, DOCS_URL],
-    [/^Source on GitHub/, REPOSITORY_URL],
+    ["Download", "#download"],
+    ["Install", "#install"],
+    ["Build from source", "#build"],
+    ["Documentation", "#docs"],
   ] as const) {
-    const link = within(nav).getByRole("link", { name });
-    expect(link).toHaveAttribute("href", href);
-    expect(link).toHaveAttribute("target", "_blank");
-    expect(link).toHaveAccessibleName(/\(opens in a new tab\)$/);
+    expect(within(nav).getByRole("link", { name })).toHaveAttribute("href", href);
+    expect(document.getElementById(href.slice(1))).toBeInTheDocument();
   }
-  expect(screen.getByRole("link", { name: /^Read the documentation/ })).toHaveAttribute("href", DOCS_URL);
+  const source = within(nav).getByRole("link", { name: /^Source on GitHub/ });
+  expect(source).toHaveAttribute("href", REPOSITORY_URL);
+  expect(source).toHaveAttribute("target", "_blank");
+  expect(source).toHaveAccessibleName(/\(opens in a new tab\)$/);
+});
+
+test("Install has the steps for Windows, macOS and Linux, each linking its Setup guide", () => {
+  render(<Site downloads={DOWNLOADS} />);
+  const install = screen.getByRole("region", { name: "Install" });
+  for (const [system, guide] of [
+    ["Windows", "setup/windows.md"],
+    ["macOS", "setup/macos.md"],
+    ["Linux", "setup/linux.md"],
+  ] as const) {
+    const block = within(install).getByRole("region", { name: system });
+    expect(within(block).getAllByRole("listitem").length).toBeGreaterThan(1);
+    expect(within(block).getByRole("link", { name: new RegExp(`^Every step on ${system}`) })).toHaveAttribute(
+      "href",
+      buildDocUrl(guide),
+    );
+  }
+  const windows = within(install).getByRole("region", { name: "Windows" });
+  expect(windows).toHaveTextContent("winget install --id Git.Git -e --source winget");
+  expect(windows).toHaveTextContent("More info, then Run anyway");
+});
+
+test("Install gives every Terminal command for opening the Mac app, which isn't notarized", () => {
+  render(<Site downloads={DOWNLOADS} />);
+  const macos = within(screen.getByRole("region", { name: "Install" })).getByRole("region", { name: "macOS" });
+  for (const command of [
+    "brew install git",
+    "brew install --cask git-credential-manager",
+    "hdiutil attach ~/Downloads/Lanewise_*_universal.dmg",
+    "xattr -d com.apple.quarantine /Applications/Lanewise.app",
+    "xattr -dr com.apple.quarantine /Applications/Lanewise.app",
+    "xattr -cr /Applications/Lanewise.app",
+    "codesign --force --deep --sign - /Applications/Lanewise.app",
+    "open /Applications/Lanewise.app",
+  ]) {
+    expect(macos).toHaveTextContent(command, { normalizeWhitespace: false });
+  }
+  expect(macos).toHaveTextContent("System Settings → Privacy & Security");
+  expect(macos).toHaveTextContent("Open Anyway");
+});
+
+test("each block of commands can be reached and scrolled from the keyboard, and is named", () => {
+  render(<Site downloads={DOWNLOADS} />);
+  const blocks = document.querySelectorAll("pre");
+  expect(blocks.length).toBeGreaterThan(5);
+  for (const block of blocks) {
+    expect(block).toHaveAttribute("tabindex", "0");
+    expect(block).toHaveAccessibleName(/commands$/);
+  }
+});
+
+test("Build from source gives each system's tools, then the same commands for all", () => {
+  render(<Site downloads={DOWNLOADS} />);
+  const build = screen.getByRole("region", { name: "Build from source" });
+  for (const system of ["Windows", "macOS", "Linux"]) {
+    expect(within(build).getByRole("region", { name: `Tools for ${system}` })).toBeInTheDocument();
+  }
+  for (const command of ["corepack enable", "git clone https://github.com/adrianeyre/lanewise.git", "pnpm desktop:dev", "pnpm test"]) {
+    expect(build).toHaveTextContent(command);
+  }
+});
+
+test("Documentation links every Setup guide and the index of every document, in a new tab", () => {
+  render(<Site downloads={DOWNLOADS} />);
+  const docs = screen.getByRole("region", { name: "Documentation" });
+  for (const guide of GUIDES) {
+    const link = within(docs).getByRole("link", { name: new RegExp(`^${guide.name}`) });
+    expect(link).toHaveAttribute("href", buildDocUrl(guide.path));
+    expect(link).toHaveAttribute("target", "_blank");
+  }
+  expect(within(docs).getByRole("link", { name: /^Every document/ })).toHaveAttribute("href", DOCS_INDEX_URL);
 });
 
 test("each screenshot is drawn at its own size, with what it shows in words", () => {

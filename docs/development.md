@@ -51,7 +51,7 @@ sudo apt-get install -y --no-install-recommends \
 pkg-config --modversion webkit2gtk-4.1   # prints WebKitGTK's version
 ```
 
-On Fedora, Arch and others, install the equivalents from [Tauri's list](https://v2.tauri.app/start/prerequisites/#linux). The benchmark needs `webkit2gtk-driver` and `xvfb` as well ([step 6](#6-the-commit-graph-benchmark)). Saving a Model Provider's API key in the app needs a running Secret Service, such as GNOME Keyring or KWallet.
+On Fedora, Arch and others, install the equivalents from [Tauri's list](https://v2.tauri.app/start/prerequisites/#linux). The benchmark needs WebKitGTK's WebDriver (`webkitgtk-webdriver` from Ubuntu 26.04, `webkit2gtk-driver` before it) and `xvfb` as well ([step 6](#6-the-commit-graph-benchmark)). Saving a Model Provider's API key in the app needs a running Secret Service, such as GNOME Keyring or KWallet.
 
 **macOS.** The Xcode Command Line Tools, which are enough for a desktop app; full Xcode works too:
 
@@ -119,7 +119,7 @@ pnpm test        # cargo test --workspace, then Vitest in app/, bench/ and websi
 `pnpm bench:graph` opens a clone of `git/git` in the release build and measures the Commit graph against PRD §11's targets: the first screen in under 2 seconds, and scrolling at 60 fps. On Linux, with the dependencies of [step 2](#2-tauri-2s-system-dependencies):
 
 ```bash
-sudo apt-get install -y webkit2gtk-driver xvfb
+sudo apt-get install -y webkitgtk-webdriver xvfb   # webkit2gtk-driver before Ubuntu 26.04
 cargo install tauri-driver --locked
 pnpm exec tauri build --no-bundle          # target/release/lanewise-desktop
 git clone https://github.com/git/git ../git

@@ -204,7 +204,7 @@ corepack --version
 
 Don't install pnpm another way as well. Once you've cloned Lanewise in the next step, `pnpm --version` inside the clone prints the version in `packageManager`; corepack downloads it the first time, and may ask first.
 
-![PowerShell running npm install -g corepack@latest, corepack enable and corepack --version, which prints 0.36.0, then pnpm --version inside the clone printing 12.16.1.](pictures/windows-corepack.png)
+![PowerShell running npm install -g corepack@latest, corepack enable and corepack --version, which prints 0.36.0, then pnpm --version inside the clone printing 12.18.0.](pictures/windows-corepack.png)
 
 ### 14. Clone Lanewise and install its packages
 
@@ -215,7 +215,7 @@ cd lanewise
 pnpm install --frozen-lockfile
 ```
 
-![PowerShell cloning github.com/adrianeyre/lanewise.git into the home folder, changing into lanewise, and running pnpm install --frozen-lockfile, which says the lockfile is up to date and Done using pnpm v12.16.1.](pictures/windows-clone.png)
+![PowerShell cloning github.com/adrianeyre/lanewise.git into the home folder, changing into lanewise, and running pnpm install --frozen-lockfile, which says the lockfile is up to date and Done using pnpm v12.18.0.](pictures/windows-clone.png)
 
 ### 15. Run Lanewise from source
 

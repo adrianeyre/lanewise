@@ -108,6 +108,20 @@ test("the window's title bar is drawn in the Theme chosen, or as the OS is set",
   ]);
 });
 
+type Invoke = (command: string, args: unknown, options?: { headers?: Record<string, string> }) => Promise<unknown>;
+
+function recordClientConfigs(): unknown[] {
+  const internals = (window as unknown as { __TAURI_INTERNALS__: { invoke: Invoke } }).__TAURI_INTERNALS__;
+  const mocked = internals.invoke;
+  const configs: unknown[] = [];
+  internals.invoke = (command, args, options) => {
+    const config = options?.headers?.["client-config"];
+    if (config !== undefined) configs.push(JSON.parse(decodeURIComponent(config)));
+    return mocked(command, args, options);
+  };
+  return configs;
+}
+
 test("a Model Provider's request is made by the HTTP plugin, never following a redirect", async () => {
   inTauri();
   const sent: { command: string; args: unknown }[] = [];
@@ -124,24 +138,23 @@ test("a Model Provider's request is made by the HTTP plugin, never following a r
         return chunks.shift();
     }
   });
+  const configs = recordClientConfigs();
   const init: RequestInit = { method: "POST", headers: { "x-api-key": "sk-fake" }, body: "{}" };
 
   const response = await tauriPlatform()?.fetch("https://api.fake.test/models", init);
 
   expect(response?.status).toBe(200);
   expect(await response?.json()).toEqual({ models: [] });
-  expect(sent[0]).toEqual({
-    command: "plugin:http|fetch",
-    args: {
-      clientConfig: expect.objectContaining({
-        method: "POST",
-        url: "https://api.fake.test/models",
-        headers: expect.arrayContaining([["x-api-key", "sk-fake"]]),
-        data: [...new TextEncoder().encode("{}")],
-        maxRedirections: 0,
-      }),
-    },
-  });
+  expect(sent[0]?.command).toBe("plugin:http|fetch");
+  expect([...(sent[0]?.args as Uint8Array)]).toEqual([...new TextEncoder().encode("{}")]);
+  expect(configs).toEqual([
+    expect.objectContaining({
+      method: "POST",
+      url: "https://api.fake.test/models",
+      headers: expect.arrayContaining([["x-api-key", "sk-fake"]]),
+      maxRedirections: 0,
+    }),
+  ]);
   expect(sent.map(({ command }) => command)).toEqual([
     "plugin:http|fetch",
     "plugin:http|fetch_send",

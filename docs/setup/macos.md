@@ -252,7 +252,7 @@ corepack --version
 
 Don't install pnpm with Homebrew or npm as well; if you have, `brew uninstall pnpm` or `npm uninstall -g pnpm`. Once you've cloned Lanewise, `pnpm --version` inside the clone prints the version in `packageManager`.
 
-![Terminal running npm install -g corepack@latest, corepack enable and corepack --version, which prints 0.36.0, then pnpm --version inside the clone printing 12.16.1.](pictures/macos-corepack.png)
+![Terminal running npm install -g corepack@latest, corepack enable and corepack --version, which prints 0.36.0, then pnpm --version inside the clone printing 12.18.0.](pictures/macos-corepack.png)
 
 ### 13. Install Rust
 
@@ -277,7 +277,7 @@ cd lanewise
 pnpm install --frozen-lockfile
 ```
 
-![Terminal cloning github.com/adrianeyre/lanewise.git into the home folder, changing into lanewise, and running pnpm install --frozen-lockfile, which says the lockfile is up to date and Done using pnpm v12.16.1.](pictures/macos-clone.png)
+![Terminal cloning github.com/adrianeyre/lanewise.git into the home folder, changing into lanewise, and running pnpm install --frozen-lockfile, which says the lockfile is up to date and Done using pnpm v12.18.0.](pictures/macos-clone.png)
 
 ### 15. Run Lanewise from source
 

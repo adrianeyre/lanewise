@@ -10,7 +10,7 @@ const CLONE = [
   { output: "Cloning into 'lanewise'...\nResolving deltas: 100% (…), done." },
   { command: "cd lanewise" },
   { command: "pnpm install --frozen-lockfile" },
-  { output: "Lockfile is up to date, resolution step is skipped\nPackages: +…\nDone in 41s using pnpm v12.16.1" },
+  { output: "Lockfile is up to date, resolution step is skipped\nPackages: +…\nDone in 41s using pnpm v12.18.0" },
 ];
 const CHECKS = [
   { command: "pnpm lint" },
@@ -416,7 +416,7 @@ export const DRAWINGS = {
     />
   ),
   "windows-corepack": () => (
-    <Terminal system="windows" lines={[...COREPACK, { command: "cd $HOME\\lanewise; pnpm --version" }, { output: "12.16.1" }]} />
+    <Terminal system="windows" lines={[...COREPACK, { command: "cd $HOME\\lanewise; pnpm --version" }, { output: "12.18.0" }]} />
   ),
   "windows-clone": () => <Terminal system="windows" lines={[{ command: "cd $HOME" }, ...CLONE]} />,
   "windows-dev": () => <Terminal system="windows" prompt="PS C:\Users\you\lanewise>" lines={DEV} />,
@@ -638,7 +638,7 @@ export const DRAWINGS = {
     />
   ),
   "macos-corepack": () => (
-    <Terminal system="macos" lines={[...COREPACK, { command: "cd ~/lanewise && pnpm --version" }, { output: "12.16.1" }]} />
+    <Terminal system="macos" lines={[...COREPACK, { command: "cd ~/lanewise && pnpm --version" }, { output: "12.18.0" }]} />
   ),
   "macos-rust": () => (
     <Terminal

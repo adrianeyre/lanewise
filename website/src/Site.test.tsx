@@ -123,7 +123,7 @@ test("Install gives every Terminal command for opening the Mac app, which isn't 
   for (const command of [
     "brew install git",
     "brew install --cask git-credential-manager",
-    "hdiutil attach ~/Downloads/Lanewise_*_universal.dmg",
+    "hdiutil attach -nobrowse -mountpoint /tmp/lanewise-dmg ~/Downloads/Lanewise_*_universal.dmg",
     "xattr -d com.apple.quarantine /Applications/Lanewise.app",
     "xattr -dr com.apple.quarantine /Applications/Lanewise.app",
     "xattr -cr /Applications/Lanewise.app",

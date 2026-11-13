@@ -508,10 +508,10 @@ export const DRAWINGS = {
     <Terminal
       system="macos"
       lines={[
-        { command: "hdiutil attach ~/Downloads/Lanewise_*_universal.dmg" },
-        { output: "/dev/disk4          \tGUID_partition_scheme\n/dev/disk4s1        \tApple_HFS                      \t/Volumes/Lanewise" },
-        { command: "ditto /Volumes/Lanewise/Lanewise.app /Applications/Lanewise.app" },
-        { command: "hdiutil detach /Volumes/Lanewise" },
+        { command: "hdiutil attach -nobrowse -mountpoint /tmp/lanewise-dmg ~/Downloads/Lanewise_*_universal.dmg" },
+        { output: "/dev/disk4          \tGUID_partition_scheme\n/dev/disk4s1        \tApple_HFS                      \t/private/tmp/lanewise-dmg" },
+        { command: "ditto /tmp/lanewise-dmg/Lanewise.app /Applications/Lanewise.app" },
+        { command: "hdiutil detach /tmp/lanewise-dmg" },
         { output: '"disk4" ejected.' },
       ]}
     />

@@ -118,9 +118,9 @@ const MACOS_INSTALL: Step[] = [
     commands: [
       "cd ~/Downloads",
       "curl -fsSL https://api.github.com/repos/adrianeyre/lanewise/releases/latest | grep -o 'https://[^\"]*_universal\\.dmg' | head -n 1 | xargs curl -fLO",
-      "hdiutil attach ~/Downloads/Lanewise_*_universal.dmg",
-      "ditto /Volumes/Lanewise/Lanewise.app /Applications/Lanewise.app",
-      "hdiutil detach /Volumes/Lanewise",
+      "hdiutil attach -nobrowse -mountpoint /tmp/lanewise-dmg ~/Downloads/Lanewise_*_universal.dmg",
+      "ditto /tmp/lanewise-dmg/Lanewise.app /Applications/Lanewise.app",
+      "hdiutil detach /tmp/lanewise-dmg",
     ],
   },
   {

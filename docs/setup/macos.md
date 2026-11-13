@@ -105,12 +105,14 @@ Double-click the disk image to open it, drag **Lanewise** onto **Applications**,
 Or do it from Terminal:
 
 ```bash
-hdiutil attach ~/Downloads/Lanewise_*_universal.dmg
-ditto /Volumes/Lanewise/Lanewise.app /Applications/Lanewise.app
-hdiutil detach /Volumes/Lanewise
+hdiutil attach -nobrowse -mountpoint /tmp/lanewise-dmg ~/Downloads/Lanewise_*_universal.dmg
+ditto /tmp/lanewise-dmg/Lanewise.app /Applications/Lanewise.app
+hdiutil detach /tmp/lanewise-dmg
 ```
 
-![Terminal running hdiutil attach on the disk image, which mounts it at /Volumes/Lanewise, ditto copying Lanewise.app to Applications, and hdiutil detach, which says the disk was ejected.](pictures/macos-disk-image-terminal.png)
+Mounting it at a folder of its own, rather than under `/Volumes`, means the commands work even when another Lanewise disk image is already open.
+
+![Terminal running hdiutil attach on the disk image with a mount point of its own, which mounts it at /private/tmp/lanewise-dmg, ditto copying Lanewise.app from there to Applications, and hdiutil detach, which says the disk was ejected.](pictures/macos-disk-image-terminal.png)
 
 Open Lanewise from Applications, not from the disk image or Downloads. macOS runs a quarantined app from somewhere else on disk when it hasn't been moved, and it can't update itself there.
 

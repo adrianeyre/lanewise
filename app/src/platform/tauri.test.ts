@@ -111,7 +111,7 @@ test("the window's title bar is drawn in the Theme chosen, or as the OS is set",
 type Invoke = (command: string, args: unknown, options?: { headers?: Record<string, string> }) => Promise<unknown>;
 
 function recordClientConfigs(): unknown[] {
-  const internals = (window as unknown as { __TAURI_INTERNALS__: { invoke: Invoke } }).__TAURI_INTERNALS__;
+  const internals = Reflect.get(window, "__TAURI_INTERNALS__") as { invoke: Invoke };
   const mocked = internals.invoke;
   const configs: unknown[] = [];
   internals.invoke = (command, args, options) => {
@@ -146,7 +146,7 @@ test("a Model Provider's request is made by the HTTP plugin, never following a r
   expect(response?.status).toBe(200);
   expect(await response?.json()).toEqual({ models: [] });
   expect(sent[0]?.command).toBe("plugin:http|fetch");
-  expect([...(sent[0]?.args as Uint8Array)]).toEqual([...new TextEncoder().encode("{}")]);
+  expect(Array.from(sent[0]?.args as Uint8Array)).toEqual(Array.from(new TextEncoder().encode("{}")));
   expect(configs).toEqual([
     expect.objectContaining({
       method: "POST",

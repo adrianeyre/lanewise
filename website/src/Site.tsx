@@ -1,4 +1,4 @@
-import { BookOpen, Download, KeyRound, ShieldCheck } from "lucide-react";
+import { Download, KeyRound, ShieldCheck } from "lucide-react";
 
 import { ExternalLink } from "../../app/src/legal/ExternalLink";
 import { Footer } from "../../app/src/legal/Footer";
@@ -7,9 +7,7 @@ import { type Downloads, RELEASES_URL } from "./downloads";
 import { HeroScene } from "./scenes/HeroScene";
 import { DiffTile, GraphTile, ProvidersTile, StashTile } from "./scenes/tiles";
 import { SCREENSHOTS } from "./screenshots";
-
-/** The documentation: the README, which says how to install, build and release Lanewise, and links the rest. */
-export const DOCS_URL = `${REPOSITORY_URL}#readme`;
+import { SetupSections } from "./Setup";
 
 interface Props {
   /** The latest Release's installers, or none before the first Release. */
@@ -35,7 +33,9 @@ export function Site({ downloads }: Props) {
         </a>
         <nav aria-label="Lanewise" className="site-nav">
           <a href="#download">Download</a>
-          <ExternalLink href={DOCS_URL}>Documentation</ExternalLink>
+          <a href="#install">Install</a>
+          <a href="#build">Build from source</a>
+          <a href="#docs">Documentation</a>
           <ExternalLink href={REPOSITORY_URL}>Source on GitHub</ExternalLink>
         </nav>
       </header>
@@ -161,24 +161,12 @@ export function Site({ downloads }: Props) {
             </li>
           </ul>
           <p>
-            Each Release&apos;s notes say more about installing it.{" "}
+            <a href="#install">Install</a> has every command, and each Release&apos;s notes say more about installing it.{" "}
             <ExternalLink href={RELEASES_URL}>See every Release</ExternalLink>.
           </p>
         </section>
 
-        <section className="site-section" aria-labelledby="site-docs">
-          <h2 id="site-docs">Documentation</h2>
-          <p>
-            The README says how to install Lanewise, build it from source and run its tests, and links to the
-            product requirements and the decisions behind it.
-          </p>
-          <p>
-            <ExternalLink href={DOCS_URL} className="button">
-              <BookOpen aria-hidden="true" className="button-icon" />
-              Read the documentation
-            </ExternalLink>
-          </p>
-        </section>
+        <SetupSections />
       </main>
 
       <Footer />

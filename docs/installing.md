@@ -2,16 +2,16 @@
 
 [Back to the README](../README.md)
 
-Download the latest [Release](https://github.com/adrianeyre/lanewise/releases/latest), or get it from [the project website](https://lanewise.adrianeyre.co.uk/). The installed Desktop App updates itself from then on ([Updates](#updates)).
+Download the latest [Release](https://github.com/adrianeyre/lanewise/releases/latest), or get it from [the project website](https://lanewise.adrianeyre.co.uk/). The installed Desktop App updates itself from then on ([Updates](#updates)). For every step, with a picture of each, see the Setup guides for [Windows](setup/windows.md) and [macOS](setup/macos.md).
 
 **macOS 14 or later**, on Apple Silicon or Intel: open `Lanewise_<version>_universal.dmg` and drag Lanewise to Applications. Lanewise is signed ad hoc and not notarized by Apple, as it has no Apple Developer account, so the first time you open a downloaded copy, macOS says it can't check it and won't open it. To open it anyway, either:
 
 - open **System Settings → Privacy & Security**, scroll to **Security**, choose **Open Anyway** beside the message about Lanewise, and confirm with your password; or
 - in Terminal, run `xattr -d com.apple.quarantine /Applications/Lanewise.app`.
 
-After that it opens as any other app. A copy you build from source opens without a warning.
+After that it opens as any other app. A copy you build from source opens without a warning. If macOS still stops it, or says it's damaged, [the macOS Setup guide](setup/macos.md#8-or-allow-lanewise-from-terminal) has every Terminal command: removing the mark from every file in the app with `xattr -dr com.apple.quarantine /Applications/Lanewise.app`, checking its ad hoc signature with `codesign`, and downloading it with `curl`, which leaves no quarantine mark at all.
 
-**Windows 10 22H2 or later, or Windows 11**, on x64: run `Lanewise_<version>_x64-setup.exe`. It installs Lanewise for you alone, without asking for administrator rights. The installer isn't signed yet, so Microsoft Defender SmartScreen may say **Windows protected your PC**: choose **More info**, then **Run anyway**. It will be signed once SignPath Foundation, which signs open-source projects for free, has approved Lanewise.
+**Windows 10 22H2 or later, or Windows 11**, on x64: run `Lanewise_<version>_x64-setup.exe`. It installs Lanewise for you alone, without asking for administrator rights. The installer isn't signed yet, so Microsoft Defender SmartScreen may say **Windows protected your PC**: choose **More info**, then **Run anyway**, or run `Unblock-File` on the installer first ([the Windows Setup guide](setup/windows.md#6-run-the-installer-past-smartscreen)). It will be signed once SignPath Foundation, which signs open-source projects for free, has approved Lanewise.
 
 ## Git and Git Credential Manager
 

@@ -285,3 +285,68 @@
   margin-top: 0.5rem;
   color: var(--muted);
 }
+
+.site-systems {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.site-systems > section {
+  min-width: 0;
+  padding: 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--surface);
+}
+
+.site-steps {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.site-steps > li {
+  max-width: none;
+  margin-bottom: 1rem;
+}
+
+.site-steps p {
+  margin: 0 0 0.5rem;
+}
+
+.site-commands {
+  max-width: 100%;
+  margin: 0;
+  padding: 0.75rem 1rem;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  color: var(--text);
+  background: var(--background);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.site-main code {
+  font-family: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
+}
+
+.site-table {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.site-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.site-table :is(th, td) {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.site-guides li {
+  margin-bottom: 0.5rem;
+}

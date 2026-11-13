@@ -38,7 +38,7 @@ You need:
 On Debian or Ubuntu:
 
 ```sh
-sudo apt-get install webkit2gtk-driver xvfb
+sudo apt-get install webkitgtk-webdriver xvfb   # webkit2gtk-driver before Ubuntu 26.04
 cargo install tauri-driver --locked
 pnpm exec tauri build --no-bundle          # target/release/lanewise-desktop
 git clone https://github.com/git/git ../git

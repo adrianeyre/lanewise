@@ -2,7 +2,7 @@
 
 [Back to the README](../README.md)
 
-These steps take you from nothing to a running Desktop App built from source, with the tests passing. Lanewise is developed and tested on Linux, and ships for Windows and macOS; every command here runs from the root of your clone.
+These steps take you from nothing to a running Desktop App built from source, with the tests passing. Lanewise is developed and tested on Linux, and ships for Windows and macOS; every command here runs from the root of your clone. For the same steps one at a time, with a picture of each, see the Setup guides for [Windows](setup/windows.md#part-2-build-lanewise-from-source), [macOS](setup/macos.md#part-2-build-lanewise-from-source) and [Linux](setup/linux.md), and [where to get every tool](setup/README.md#where-to-get-everything).
 
 ## 1. What you need, and how to check it
 
@@ -51,7 +51,7 @@ sudo apt-get install -y --no-install-recommends \
 pkg-config --modversion webkit2gtk-4.1   # prints WebKitGTK's version
 ```
 
-On Fedora, Arch and others, install the equivalents from [Tauri's list](https://v2.tauri.app/start/prerequisites/#linux). The benchmark needs `webkit2gtk-driver` and `xvfb` as well ([step 6](#6-the-commit-graph-benchmark)). Saving a Model Provider's API key in the app needs a running Secret Service, such as GNOME Keyring or KWallet.
+On Fedora, Arch and others, install the equivalents from [Tauri's list](https://v2.tauri.app/start/prerequisites/#linux). The benchmark needs WebKitGTK's WebDriver (`webkitgtk-webdriver` from Ubuntu 26.04, `webkit2gtk-driver` before it) and `xvfb` as well ([step 6](#6-the-commit-graph-benchmark)). Saving a Model Provider's API key in the app needs a running Secret Service, such as GNOME Keyring or KWallet.
 
 **macOS.** The Xcode Command Line Tools, which are enough for a desktop app; full Xcode works too:
 
@@ -119,7 +119,7 @@ pnpm test        # cargo test --workspace, then Vitest in app/, bench/ and websi
 `pnpm bench:graph` opens a clone of `git/git` in the release build and measures the Commit graph against PRD §11's targets: the first screen in under 2 seconds, and scrolling at 60 fps. On Linux, with the dependencies of [step 2](#2-tauri-2s-system-dependencies):
 
 ```bash
-sudo apt-get install -y webkit2gtk-driver xvfb
+sudo apt-get install -y webkitgtk-webdriver xvfb   # webkit2gtk-driver before Ubuntu 26.04
 cargo install tauri-driver --locked
 pnpm exec tauri build --no-bundle          # target/release/lanewise-desktop
 git clone https://github.com/git/git ../git
@@ -151,6 +151,7 @@ Without the Update key's secrets it makes no update packages, and says so ([the 
 | `pnpm build` | The UI alone, into `app/dist` |
 | `pnpm website:build` | The project website, into `website/dist`, with the page drawn into its HTML (`website/README.md`) |
 | `pnpm website:screenshots` | The README's and the website's screenshots, taken again of a demo repository in the Desktop App's release build over WebDriver: under `xvfb-run` on Linux (`website/README.md`, "Screenshots") |
+| `pnpm docs:pictures` | The Setup guides' pictures, `docs/setup/pictures/`, taken again: it builds `app/scripts/setupGuide/`, a page that draws each step with the app's own code over the fake core its UI tests use, or as a drawing of what the operating system shows, and photographs each with Chromium in Playwright's container. It needs Docker. A new step's picture goes in `app/scripts/setupGuide/pictures.ts` and in its guide, with what it shows in words, as `app/scripts/setupGuide/pictures.test.ts` checks |
 | `pnpm eval:corpus` | Replays the merges in `eval/repositories.json` to make `eval/corpus/` again (`eval/README.md`) |
 | `pnpm eval:suggestions <model provider> …` | Measures Suggestions on the Evaluation corpus with your own key, showing its estimated cost and waiting for `yes` first. Run by hand, never in CI (`eval/README.md`) |
 | `pnpm pen-test:fixtures` | Makes the first Pen-test round's Hostile repository fixtures (`app/scripts/pen-test/buildFixtures.ts`), synthetic and built from nothing, into a folder under the OS temp directory. Run by hand, never in CI against a real project (`docs/pen-test/E1.md`) |

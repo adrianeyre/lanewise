@@ -186,6 +186,16 @@ mod tests {
         cmd: &str,
         body: Value,
     ) -> Result<Value, Value> {
+        ask_with_headers(window, url, cmd, InvokeBody::Json(body), Default::default())
+    }
+
+    fn ask_with_headers(
+        window: &tauri::WebviewWindow<tauri::test::MockRuntime>,
+        url: &str,
+        cmd: &str,
+        body: InvokeBody,
+        headers: tauri::http::HeaderMap,
+    ) -> Result<Value, Value> {
         tauri::test::get_ipc_response(
             window,
             InvokeRequest {
@@ -193,8 +203,8 @@ mod tests {
                 callback: CallbackFn(0),
                 error: CallbackFn(1),
                 url: url.parse().expect("a URL"),
-                body: InvokeBody::Json(body),
-                headers: Default::default(),
+                body,
+                headers,
                 invoke_key: INVOKE_KEY.into(),
             },
         )
@@ -304,11 +314,25 @@ mod tests {
             "tauri://localhost"
         };
         let allowed = |url: &str| {
-            let request = json!({ "clientConfig": {
-                "method": "GET", "url": url, "headers": [], "data": null,
+            let client_config = json!({
+                "method": "GET", "url": url, "headers": [],
                 "maxRedirections": 0, "connectTimeout": null, "proxy": null, "danger": null
-            } });
-            match ask(&window, local, "plugin:http|fetch", request) {
+            });
+            let mut headers = tauri::http::HeaderMap::new();
+            headers.insert(
+                "client-config",
+                client_config
+                    .to_string()
+                    .parse()
+                    .expect("a client config with no character a header can't carry"),
+            );
+            match ask_with_headers(
+                &window,
+                local,
+                "plugin:http|fetch",
+                InvokeBody::Raw(Vec::new()),
+                headers,
+            ) {
                 Ok(_) => true,
                 Err(said)
                     if said

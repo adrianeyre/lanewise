@@ -240,6 +240,14 @@ _Avoid_: Homepage, marketing site, web app
 A picture of Lanewise on the Project website, drawn in the browser from the Theme's tokens as stageshow draws a product: a still, or a short story told with a pointer, such as a Suggestion accepted. It is named in words for screen readers, and shows its still for reduced motion. Not a screenshot, which is the app itself.
 _Avoid_: Mockup, illustration, demo, animation
 
+**Setup guide**:
+One of the step-by-step guides in `docs/setup/`, for Windows, macOS or Linux, from a computer with nothing installed to Lanewise running, whether installed from a Release or built from source. Each step has a Setup picture.
+_Avoid_: Tutorial, walkthrough, install doc
+
+**Setup picture**:
+A picture of one step of a Setup guide, in `docs/setup/pictures/`, taken by `pnpm docs:pictures`. It is one of three kinds, and says which in its words: a screenshot of Lanewise drawn by the app's own code over a fake core; a drawing of what the operating system shows, which is labelled as one in the picture itself; or a terminal's output, labelled as recorded when it was recorded.
+_Avoid_: Screenshot, for one that is a drawing; illustration, mockup
+
 ### Layout
 
 **Tab**:
